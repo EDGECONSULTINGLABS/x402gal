@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html, body { background: #04070d; color: #d6e2f3; }
+body {
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgba(34,211,238,0.10), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(8,145,178,0.10), transparent 60%);
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(20,32,51,0.55), rgba(10,16,24,0.55));
+  border: 1px solid rgba(34,211,238,0.12);
+  backdrop-filter: blur(8px);
+}
+.glass-hover { transition: border-color .2s ease, box-shadow .2s ease; }
+.glass-hover:hover { border-color: rgba(34,211,238,0.35); box-shadow: 0 0 30px -10px rgba(34,211,238,0.45); }
+
+.tick { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.18), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.4s linear infinite;
+}
+@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
+.drop {
+  filter: drop-shadow(0 0 12px rgba(34,211,238,0.55));
+}
+
+.gridline {
+  background-image: linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}

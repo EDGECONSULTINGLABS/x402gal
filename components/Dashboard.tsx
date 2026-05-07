@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Droplets, Cpu, Zap, ArrowRightLeft, ShieldCheck, Send } from "lucide-react";
+import { Cpu, Zap, ArrowRightLeft, ShieldCheck, Send, Layers, Beaker } from "lucide-react";
 import { Logo } from "./Logo";
 import { Stat } from "./Stat";
 import { ChainBadge } from "./ChainBadge";
@@ -22,6 +22,7 @@ import { DROPS_PER_HYDRO } from "@/lib/constants";
 interface State {
   agents: Agent[];
   settlements: Settlement[];
+  methodologyHash: string;
   amm: {
     priceUSDC: number;
     marketCapUSDC: number;
@@ -29,7 +30,19 @@ interface State {
     retiredHydro: number;
     totalLitersOffset: number;
   };
-  totals: { settlements: number; litersOffset: number };
+  batch: {
+    sizeTarget: number;
+    pendingCalls: number;
+    pendingDrops: number;
+    pendingMl: number;
+    lastFlushAt: number;
+  };
+  totals: {
+    settlements: number;
+    litersOffset: number;
+    mlOffset: number;
+    callsServed: number;
+  };
 }
 
 export function Dashboard() {
@@ -70,24 +83,39 @@ export function Dashboard() {
     // No-op; we read this in render via the previous set.
   }, [state]);
 
-  const runDemo = useCallback(async () => {
+  const runDemo = useCallback(
+    async (count: number) => {
+      setRunning(true);
+      setCompletion("");
+      try {
+        const r = await fetch("/api/demo/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agentId: selected, prompt, count }),
+        });
+        const data = await r.json();
+        const flushed = (data.flushed_settlements ?? []).filter(Boolean);
+        if (flushed.length) setLastSettlement(flushed[flushed.length - 1]);
+        if (data.completion) setCompletion(data.completion);
+        await refresh();
+      } finally {
+        setRunning(false);
+      }
+    },
+    [selected, prompt, refresh],
+  );
+
+  const flushNow = useCallback(async () => {
     setRunning(true);
-    setCompletion("");
-    setLastSettlement(null);
     try {
-      const r = await fetch("/api/demo/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: selected, prompt }),
-      });
+      const r = await fetch("/api/batch/flush", { method: "POST" });
       const data = await r.json();
-      if (data.settlement) setLastSettlement(data.settlement);
-      if (data.completion) setCompletion(data.completion);
+      if (data.flushed) setLastSettlement(data.flushed);
       await refresh();
     } finally {
       setRunning(false);
     }
-  }, [selected, prompt, refresh]);
+  }, [refresh]);
 
   const topUp = useCallback(async () => {
     await fetch("/api/amm/buy", {
@@ -111,6 +139,8 @@ export function Dashboard() {
 
         <Hero
           totalLiters={state?.totals.litersOffset ?? 0}
+          totalMl={state?.totals.mlOffset ?? 0}
+          callsServed={state?.totals.callsServed ?? 0}
           settlements={state?.totals.settlements ?? 0}
           retired={state?.amm.retiredHydro ?? 0}
           price={state?.amm.priceUSDC ?? 0}
@@ -134,6 +164,7 @@ export function Dashboard() {
               running={running}
               selectedAgent={selectedAgent}
             />
+            <BatchPanel batch={state?.batch} onFlush={flushNow} running={running} />
             <AnimatePresence>
               {lastSettlement && (
                 <motion.div
@@ -151,13 +182,22 @@ export function Dashboard() {
                     <Mini label="UTL hash" value={lastSettlement.wireUtlHash} mono />
                     <Mini label="Retirement receipt" value={lastSettlement.retirementReceipt} mono />
                     <Mini
+                      label={`Aggregated calls`}
+                      value={`${lastSettlement.callCount.toLocaleString()} \u00d7 \u22480.07 mL`}
+                    />
+                    <Mini
                       label="Paid"
-                      value={`${(lastSettlement.amountDrops / DROPS_PER_HYDRO).toFixed(4)} HYDRO`}
+                      value={`${(lastSettlement.amountDrops / DROPS_PER_HYDRO).toFixed(6)} HYDRO`}
                     />
                     <Mini
                       label="Water restored"
-                      value={`${lastSettlement.litersOffset.toFixed(3)} L`}
+                      value={`${(lastSettlement.litersOffset * 1000).toFixed(2)} mL`}
                       accent
+                    />
+                    <Mini
+                      label="Methodology hash"
+                      value={lastSettlement.methodologyHash}
+                      mono
                     />
                   </div>
                   {completion && (
@@ -171,7 +211,7 @@ export function Dashboard() {
                 </motion.div>
               )}
             </AnimatePresence>
-            <SpecCard />
+            <SpecCard methodologyHash={state?.methodologyHash} />
           </div>
         </div>
 
@@ -220,17 +260,26 @@ function Header({ price }: { price?: number }) {
 
 function Hero({
   totalLiters,
+  totalMl,
+  callsServed,
   settlements,
   retired,
   price,
   marketCap,
 }: {
   totalLiters: number;
+  totalMl: number;
+  callsServed: number;
   settlements: number;
   retired: number;
   price: number;
   marketCap: number;
 }) {
+  // Headline framing per the v2 spec: a single GPT-4-class call costs ≈0.07 mL.
+  // 1 billion calls/day → ~68,000 L → one swimming pool. We surface mL per
+  // call up front so the scale story reads correctly.
+  const litersDisplay =
+    totalLiters >= 0.01 ? `${totalLiters.toFixed(3)} L` : `${totalMl.toFixed(2)} mL`;
   return (
     <section className="mt-10">
       <motion.h1
@@ -245,27 +294,32 @@ function Hero({
         Meraxis settles it in real time.
       </motion.h1>
       <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-400">
-        Agents discover an HTTP <code className="text-hydro-300">402 Payment Required</code> on
-        every inference, sign an x402 payload, and route HydroCoin through Wire&rsquo;s Universal
-        Transaction Layer to retire a verifiable water-restoration credit — all in under 200ms.
+        Each inference returns HTTP <code className="text-hydro-300">402 Payment Required</code>{" "}
+        with a v2 boundary-aware footprint (Green Grid WUE). The agent signs an x402 payload, micro-payments
+        accrue into a 100-call batch, and Wire&rsquo;s Universal Transaction Layer retires HydroCoin
+        against a verifiable water-restoration credit.
       </p>
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <Stat
-          label="Liters restored"
-          value={totalLiters.toFixed(2)}
+          label="Water restored"
+          value={litersDisplay}
           sub="Audited via Wire UTL"
           accent
         />
-        <Stat label="Settlements" value={settlements} sub="x402 round-trips" />
+        <Stat
+          label="Calls served"
+          value={callsServed.toLocaleString()}
+          sub="≈0.07 mL each (GPT-4 class)"
+        />
         <Stat
           label="HYDRO retired"
-          value={retired.toFixed(3)}
-          sub="Permanently out of supply"
+          value={retired.toFixed(4)}
+          sub={`${settlements} Wire UTL settlement${settlements === 1 ? "" : "s"}`}
         />
         <Stat
           label="Market cap"
           value={`$${(marketCap / 1000).toFixed(1)}k`}
-          sub={`@ $${price.toFixed(4)} per HYDRO`}
+          sub={`@ $${price.toFixed(4)} per HYDRO (1 gal)`}
         />
       </div>
     </section>
@@ -341,9 +395,10 @@ function SettlementsTable({ settlements }: { settlements: Settlement[] }) {
         </span>
       </div>
       <div className="grid grid-cols-12 gap-3 border-b border-edge/60 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-500">
-        <div className="col-span-3">Agent</div>
-        <div className="col-span-2">Source chain</div>
+        <div className="col-span-2">Payer</div>
         <div className="col-span-2">Resource</div>
+        <div className="col-span-1">Chain</div>
+        <div className="col-span-2 text-right">Calls</div>
         <div className="col-span-2 text-right">Paid</div>
         <div className="col-span-2 text-right">Restored</div>
         <div className="col-span-1 text-right">Age</div>
@@ -380,7 +435,7 @@ function DemoPanel({
   onSelect: (id: string) => void;
   prompt: string;
   onPrompt: (s: string) => void;
-  onRun: () => void;
+  onRun: (count: number) => void;
   onTopUp: () => void;
   running: boolean;
   selectedAgent?: Agent;
@@ -424,28 +479,37 @@ function DemoPanel({
           className="w-full resize-none rounded-md border border-edge bg-ink/60 p-3 text-xs text-slate-200 outline-none focus:border-hydro-500/40"
         />
 
-        <div className="flex items-center gap-2 pt-2">
-          <button
-            onClick={onRun}
-            disabled={running}
-            className="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-md border border-hydro-500/40 bg-hydro-500/10 px-3 py-2 text-xs font-medium text-hydro-300 transition hover:bg-hydro-500/20 disabled:opacity-60"
-          >
-            {running ? (
-              <>
-                <Zap size={14} className="animate-pulse" /> Routing through Wire UTL…
-              </>
-            ) : (
-              <>
-                <Send size={14} /> Send 402-paid query
-              </>
-            )}
-            {running && <span className="shimmer absolute inset-0" />}
-          </button>
+        <div className="flex flex-col gap-2 pt-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onRun(1)}
+              disabled={running}
+              className="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-md border border-hydro-500/40 bg-hydro-500/10 px-3 py-2 text-xs font-medium text-hydro-300 transition hover:bg-hydro-500/20 disabled:opacity-60"
+            >
+              {running ? (
+                <>
+                  <Zap size={14} className="animate-pulse" /> Working…
+                </>
+              ) : (
+                <>
+                  <Send size={14} /> Send 1 paid query
+                </>
+              )}
+              {running && <span className="shimmer absolute inset-0" />}
+            </button>
+            <button
+              onClick={() => onRun(100)}
+              disabled={running}
+              className="inline-flex items-center justify-center gap-1 rounded-md border border-hydro-500/40 bg-hydro-500/15 px-3 py-2 text-xs font-medium text-hydro-300 hover:bg-hydro-500/25 disabled:opacity-60"
+            >
+              <Layers size={14} /> Burst 100 → flush
+            </button>
+          </div>
           <button
             onClick={onTopUp}
             className="rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 hover:border-hydro-500/30"
           >
-            +$100 → HYDRO
+            +$100 → HYDRO (top up agent wallet)
           </button>
         </div>
 
@@ -472,31 +536,86 @@ function DemoPanel({
   );
 }
 
-function SpecCard() {
+function SpecCard({ methodologyHash }: { methodologyHash?: string }) {
   return (
     <div className="glass rounded-xl p-5">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
-        <Droplets size={14} /> How it works
+        <Beaker size={14} /> Footprint methodology · v2
       </div>
-      <ol className="mt-3 space-y-2 text-xs leading-relaxed text-slate-300">
-        <li>
-          <span className="text-hydro-300">1.</span> Agent calls{" "}
-          <code className="text-slate-200">/api/ai/chat</code>. Server returns{" "}
-          <code className="text-hydro-300">402</code> with x402 payment requirements.
-        </li>
-        <li>
-          <span className="text-hydro-300">2.</span> Agent signs a HydroCoin
-          payload and retries with <code className="text-slate-200">X-PAYMENT</code>.
-        </li>
-        <li>
-          <span className="text-hydro-300">3.</span> Wire UTL routes the
-          payment from the agent&rsquo;s native chain to the Meraxis treasury.
-        </li>
-        <li>
-          <span className="text-hydro-300">4.</span> Equivalent HYDRO is
-          retired against a real water-restoration credit. Receipt is on-chain.
-        </li>
-      </ol>
+      <div className="mt-3 space-y-2 text-xs leading-relaxed text-slate-300">
+        <code className="block break-all rounded-md border border-edge bg-ink/60 p-2 font-mono text-[10px] text-hydro-300">
+          W_site = WUE × [(T_in/1000)·e_in + (T_out/1000)·e_out] × F_boundary
+        </code>
+        <p className="text-slate-400">
+          Boundary-aware Green Grid WUE v1 split. WUE encodes site cooling already, so
+          we don&rsquo;t multiply by a separate cooling factor (avoids double-count). Defaults:{" "}
+          <span className="text-slate-200">WUE 0.20 L/kWh</span>,{" "}
+          <span className="text-slate-200">e_in 0.0002 kWh/1K</span>,{" "}
+          <span className="text-slate-200">e_out 0.0006 kWh/1K</span>.
+        </p>
+        <p className="text-slate-400">
+          Sourced from LBNL 2024 data-center report, Microsoft FY25 / Meta 2024 / AWS 2024
+          disclosures, Epoch AI GPT-4o estimate, TokenPowerBench.
+        </p>
+        {methodologyHash && (
+          <div className="rounded-md border border-edge bg-panel/40 p-2">
+            <div className="text-[9px] uppercase tracking-wider text-slate-500">
+              Methodology hash (pinned in 402)
+            </div>
+            <div className="truncate font-mono text-[10px] text-slate-300">{methodologyHash}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BatchPanel({
+  batch,
+  onFlush,
+  running,
+}: {
+  batch?: { sizeTarget: number; pendingCalls: number; pendingDrops: number; pendingMl: number };
+  onFlush: () => void;
+  running: boolean;
+}) {
+  const calls = batch?.pendingCalls ?? 0;
+  const target = batch?.sizeTarget ?? 100;
+  const pct = Math.min(100, (calls / target) * 100);
+  const ml = batch?.pendingMl ?? 0;
+  return (
+    <div className="glass rounded-xl p-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
+          <Layers size={14} /> Pending batch
+        </div>
+        <div className="text-[10px] text-slate-500">flushes at {target} calls</div>
+      </div>
+      <div className="mt-3 flex items-baseline gap-2">
+        <div className="tick text-2xl font-semibold text-slate-100">
+          {calls}
+          <span className="text-sm text-slate-500">/{target}</span>
+        </div>
+        <div className="tick text-xs text-hydro-300">{ml.toFixed(3)} mL</div>
+        <div className="tick ml-auto text-xs text-slate-500">
+          {batch?.pendingDrops ?? 0} drops escrow
+        </div>
+      </div>
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-panel">
+        <motion.div
+          className="h-full rounded-full bg-gradient-to-r from-hydro-500 to-hydro-300"
+          initial={false}
+          animate={{ width: `${pct}%` }}
+          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+        />
+      </div>
+      <button
+        onClick={onFlush}
+        disabled={running || calls === 0}
+        className="mt-3 w-full rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 hover:border-hydro-500/30 disabled:opacity-50"
+      >
+        Force Wire UTL settlement now
+      </button>
     </div>
   );
 }
@@ -530,11 +649,9 @@ function Footer() {
   return (
     <footer className="mt-16 border-t border-edge pt-6 text-[11px] text-slate-500">
       <div className="flex flex-wrap items-center justify-between gap-2">
+        <span>Built for Consensus Hackathon · x402 + Wire UTL + HydroCoin</span>
         <span>
-          Built for Consensus Hackathon · x402 + Wire UTL + HydroCoin
-        </span>
-        <span>
-          Water cost calibrated to UC Riverside <em>Making AI Less Thirsty</em> (2023)
+          Footprint v2 · Green Grid WUE · LBNL 2024 · Microsoft / Meta / AWS disclosures · Epoch AI
         </span>
       </div>
     </footer>

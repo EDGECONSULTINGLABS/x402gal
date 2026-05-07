@@ -21,20 +21,50 @@ export interface Agent {
 }
 
 // x402-style payment requirement returned with HTTP 402.
-// Conforms to the spirit of https://www.x402.org/ — version, scheme, asset, amount, recipient, nonce.
+// Conforms to the spirit of https://www.x402.org/ — version, scheme, asset,
+// amount, recipient, nonce — plus a Meraxis-specific `footprint` block
+// describing the v2 Green Grid WUE methodology used to compute the price.
 export interface PaymentRequirement {
   x402Version: 1;
   scheme: "exact"; // exact-amount scheme, the simplest x402 mode
   network: Chain;
   asset: "HYDRO";
-  amountDrops: number; // payable amount in HYDRO drops
-  estimatedLiters: number;
+  amountDrops: number; // payable amount in HYDRO drops (1 HYDRO = 1 gallon)
+  estimatedLiters: number; // site water in liters
+  estimatedMl: number; // same in mL, for human readability at small scales
   recipient: string; // Meraxis treasury address on `network`
   resource: string; // resource identifier (URL/path)
   description: string;
   nonce: string;
   expiresAt: number;
   facilitator: string; // facilitator URL
+  footprint: FootprintBlock; // v2 boundary-aware methodology block
+}
+
+// Methodology + inputs surfaced inside the 402 response so the client (or a
+// third-party auditor) can independently re-derive the amount.
+export interface FootprintBlock {
+  mode: "site" | "source" | "lifecycle";
+  water_l: number;
+  water_ml: number;
+  inputs: {
+    tokens_in: number;
+    tokens_out: number;
+    e_in_kwh_per_1k: number;
+    e_out_kwh_per_1k: number;
+    wue_l_per_kwh: number;
+    boundary_factor: number;
+    pue: number | null;
+    energy_it_kwh: number;
+  };
+  methodology: {
+    spec: string;
+    formula: string;
+    mode_multiplier: number;
+    refs: string[];
+    methodology_hash: string;
+  };
+  uncertainty: { p10_ml: number; p90_ml: number; band: string };
 }
 
 // Payment payload sent back by the agent in the X-PAYMENT header (base64 JSON).
@@ -57,10 +87,11 @@ export type SettlementStatus = "routed" | "settled" | "retired" | "failed";
 export interface Settlement {
   id: SettlementId;
   txId: TxId;
-  agentId: AgentId;
+  agentId: AgentId | "batch"; // "batch" when this settlement aggregates many agents
   resource: string;
   amountDrops: number;
   litersOffset: number;
+  callCount: number; // number of x402 calls aggregated into this settlement
   sourceChain: Chain;
   destChain: Chain;
   wireUtlHash: string; // Wire UTL universal transaction hash
@@ -68,6 +99,18 @@ export interface Settlement {
   status: SettlementStatus;
   createdAt: number;
   hops: WireHop[]; // route taken across chains
+  methodologyHash: string; // pinned footprint methodology version
+}
+
+// One x402 call buffered into the next batch settlement.
+export interface BatchEntry {
+  agentId: AgentId;
+  resource: string;
+  amountDrops: number;
+  waterMl: number;
+  sourceChain: Chain;
+  nonce: string;
+  ts: number;
 }
 
 export interface WireHop {

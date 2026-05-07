@@ -5,7 +5,9 @@
 
 import { NextRequest } from "next/server";
 import { build402Response, buildRequirement, decodePayment, verifyPayment } from "@/lib/x402";
-import { buildSettlement, routeAndRetire } from "@/lib/wire";
+import { addToBatch, drainBatch, ledger } from "@/lib/ledger";
+import { settleBatch } from "@/lib/wire";
+import { BATCH_SIZE } from "@/lib/constants";
 
 export const runtime = "nodejs";
 
@@ -24,7 +26,20 @@ function fakeCompletion(prompt: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  const requirement = buildRequirement(RESOURCE);
+  let prompt = "";
+  let tokens_in: number | undefined;
+  let tokens_out: number | undefined;
+  try {
+    const body = await req.json();
+    prompt = String(body?.prompt ?? "").slice(0, 500);
+    if (Number.isFinite(body?.tokens_in)) tokens_in = Number(body.tokens_in);
+    if (Number.isFinite(body?.tokens_out)) tokens_out = Number(body.tokens_out);
+  } catch {
+    /* empty body is allowed */
+  }
+
+  // Token counts shape the price; we surface the full methodology in 402.
+  const requirement = buildRequirement(RESOURCE, { tokens_in, tokens_out });
   const payload = decodePayment(req.headers.get("x-payment"));
 
   if (!payload) return build402Response(requirement);
@@ -37,27 +52,54 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const route = await routeAndRetire(payload);
-  const settlement = buildSettlement(payload, RESOURCE, route);
+  // Add to the pending batch instead of routing immediately. Per-call
+  // settlements would be ~18 drops each (illegible on screen); we batch up
+  // to BATCH_SIZE calls and emit one human-visible Wire UTL retirement.
+  const { shouldFlush } = addToBatch({
+    agentId: payload.payer,
+    resource: RESOURCE,
+    amountDrops: payload.amountDrops,
+    waterMl: requirement.estimatedMl,
+    sourceChain: payload.sourceChain,
+    nonce: payload.nonce,
+    ts: Date.now(),
+  });
 
-  let prompt = "";
-  try {
-    const body = await req.json();
-    prompt = String(body?.prompt ?? "").slice(0, 500);
-  } catch {
-    /* empty body is allowed */
+  let flushedSettlement = null;
+  if (shouldFlush) {
+    flushedSettlement = await settleBatch(drainBatch());
   }
 
+  const pending = ledger().pendingTotals;
   return new Response(
     JSON.stringify({
       completion: fakeCompletion(prompt || "your question"),
-      settlement,
+      pricing: {
+        amountDrops: payload.amountDrops,
+        water_ml: requirement.estimatedMl,
+        water_l: requirement.estimatedLiters,
+        methodology_hash: requirement.footprint.methodology.methodology_hash,
+      },
+      batch: {
+        size_target: BATCH_SIZE,
+        pending_calls: pending.calls,
+        pending_drops: pending.drops,
+        pending_water_ml: pending.waterMl,
+        flushed: flushedSettlement?.id ?? null,
+      },
+      settlement: flushedSettlement, // null on most calls; populated on flush
     }),
     {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "X-PAYMENT-RESPONSE": Buffer.from(JSON.stringify({ settlementId: settlement.id })).toString("base64"),
+        "X-PAYMENT-RESPONSE": Buffer.from(
+          JSON.stringify({
+            accepted: true,
+            water_ml: requirement.estimatedMl,
+            batch_flushed: flushedSettlement?.wireUtlHash ?? null,
+          }),
+        ).toString("base64"),
       },
     },
   );

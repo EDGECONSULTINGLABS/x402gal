@@ -4,7 +4,8 @@
 
 import { NextRequest } from "next/server";
 import { verifyPayment } from "@/lib/x402";
-import { buildSettlement, routeAndRetire } from "@/lib/wire";
+import { addToBatch, drainBatch } from "@/lib/ledger";
+import { settleBatch } from "@/lib/wire";
 import { PaymentPayload, PaymentRequirement } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -18,7 +19,15 @@ export async function POST(req: NextRequest) {
   if (!v.ok) {
     return Response.json({ ok: false, reason: v.reason }, { status: 402 });
   }
-  const route = await routeAndRetire(payload);
-  const settlement = buildSettlement(payload, requirement.resource, route);
-  return Response.json({ ok: true, settlement });
+  const { shouldFlush } = addToBatch({
+    agentId: payload.payer,
+    resource: requirement.resource,
+    amountDrops: payload.amountDrops,
+    waterMl: requirement.estimatedMl,
+    sourceChain: payload.sourceChain,
+    nonce: payload.nonce,
+    ts: Date.now(),
+  });
+  const settlement = shouldFlush ? await settleBatch(drainBatch()) : null;
+  return Response.json({ ok: true, batched: true, settlement });
 }

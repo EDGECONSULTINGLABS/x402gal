@@ -6,9 +6,10 @@
 // route deterministically and emit synthetic UTL hashes so the demo is
 // fully offline-capable while reflecting the real protocol shape.
 
-import { Chain, PaymentPayload, Settlement, WireHop } from "./types";
-import { LITERS_PER_HYDRO, DROPS_PER_HYDRO, TREASURY_ADDRESS } from "./constants";
-import { recordSettlement } from "./ledger";
+import { BatchEntry, Chain, Settlement, WireHop } from "./types";
+import { TREASURY_ADDRESS } from "./constants";
+import { recordBatchSettlement } from "./ledger";
+import { FOOTPRINT_METHODOLOGY_HASH } from "./footprint";
 
 const HEX = "0123456789abcdef";
 function rndHex(n: number) {
@@ -37,56 +38,74 @@ export interface RouteResult {
   totalMs: number;
 }
 
-export async function routeAndRetire(payload: PaymentPayload): Promise<RouteResult> {
-  const route = planRoute(payload.sourceChain, "wire-utl");
+// Routes a batched payment through Wire UTL: aggregate sources → mint UTL
+// receipt → retire HYDRO. Real UTL would emit per-source-chain locks; we
+// collapse same-chain entries into a single lock hop for trace clarity.
+export async function routeBatch(entries: BatchEntry[]): Promise<{
+  hops: WireHop[];
+  wireUtlHash: string;
+  retirementReceipt: string;
+  totalMs: number;
+  sourceChains: Chain[];
+}> {
   const hops: WireHop[] = [];
   let totalMs = 0;
 
-  // Hop 1: lock funds on the source chain.
-  const lockMs = 40 + Math.random() * 60;
-  hops.push({ chain: route[0], action: "lock", hash: utlHash(route[0]), ms: lockMs });
-  totalMs += lockMs;
+  // Hop 1+: one lock per distinct source chain in the batch.
+  const sources = Array.from(new Set(entries.map((e) => e.sourceChain))) as Chain[];
+  for (const src of sources) {
+    const lockMs = 40 + Math.random() * 60;
+    hops.push({ chain: src, action: "lock", hash: utlHash(src), ms: lockMs });
+    totalMs += lockMs;
+  }
 
-  // Hop 2: mint a UTL-native receipt on Wire and route to the treasury.
+  // Hop N: mint a UTL-native aggregated receipt.
   const mintMs = 25 + Math.random() * 35;
   const wireUtlHash = utlHash("wutl");
   hops.push({ chain: "wire-utl", action: "mint", hash: wireUtlHash, ms: mintMs });
   totalMs += mintMs;
 
-  // Hop 3: retire HYDRO against a verifiable water-restoration credit.
+  // Hop N+1: retire HYDRO against a verifiable water-restoration credit.
   const retireMs = 30 + Math.random() * 40;
   const retirementReceipt = utlHash("retire");
   hops.push({ chain: "wire-utl", action: "retire", hash: retirementReceipt, ms: retireMs });
   totalMs += retireMs;
 
-  // Simulate latency (capped low for snappy UX).
-  await new Promise((r) => setTimeout(r, Math.min(totalMs, 220)));
+  await new Promise((r) => setTimeout(r, Math.min(totalMs, 260)));
 
-  return { hops, wireUtlHash, retirementReceipt, totalMs };
+  return { hops, wireUtlHash, retirementReceipt, totalMs, sourceChains: sources };
 }
 
-export function buildSettlement(
-  payload: PaymentPayload,
-  resource: string,
-  route: RouteResult,
-): Settlement {
-  const liters = (payload.amountDrops / DROPS_PER_HYDRO) * LITERS_PER_HYDRO;
+// Build + record a Settlement that aggregates the given batch entries.
+// `entries` should be the result of ledger.drainBatch(). All math here is
+// the sum of pre-computed per-call values (no double-counting).
+export async function settleBatch(entries: BatchEntry[]): Promise<Settlement | null> {
+  if (entries.length === 0) return null;
+
+  const route = await routeBatch(entries);
+  const totalDrops = entries.reduce((s, e) => s + e.amountDrops, 0);
+  const totalMl = entries.reduce((s, e) => s + e.waterMl, 0);
+  const primaryChain: Chain = route.sourceChains[0] ?? "wire-utl";
+  const resources = Array.from(new Set(entries.map((e) => e.resource)));
+
   const settlement: Settlement = {
     id: `stl_${rndHex(16)}`,
     txId: `tx_${rndHex(20)}`,
-    agentId: payload.payer,
-    resource,
-    amountDrops: payload.amountDrops,
-    litersOffset: liters,
-    sourceChain: payload.sourceChain,
+    agentId: "batch",
+    resource: resources.length === 1 ? resources[0] : `batch:${resources.length}-resources`,
+    amountDrops: totalDrops,
+    litersOffset: totalMl / 1000,
+    callCount: entries.length,
+    sourceChain: primaryChain,
     destChain: "wire-utl",
     wireUtlHash: route.wireUtlHash,
     retirementReceipt: route.retirementReceipt,
     status: "retired",
     createdAt: Date.now(),
     hops: route.hops,
+    methodologyHash: FOOTPRINT_METHODOLOGY_HASH,
   };
-  recordSettlement(settlement);
+  recordBatchSettlement(settlement);
   return settlement;
 }
 

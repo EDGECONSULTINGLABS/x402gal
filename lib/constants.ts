@@ -1,21 +1,75 @@
 // Economic constants for the Meraxis offset protocol.
 //
-// Real-world calibration: a single GPT-4-class query is estimated to consume
-// roughly 0.5 L of freshwater (cooling + power generation), per the
-// 2023 UC Riverside study "Making AI Less Thirsty" (Li et al.).
-// Meraxis prices each query at exactly its water footprint, paid in HYDRO.
+// Footprint is computed at request time by lib/footprint.ts using the v2
+// boundary-aware Green Grid WUE split (Alula spec). HYDRO is denominated in
+// US gallons of restored freshwater: 1 HYDRO = 1 gallon. A typical
+// GPT-4-class inference is ~0.07 mL ≈ 1.85e-5 HYDRO ≈ 18 drops, which is
+// why per-call x402 payments are aggregated into a Wire UTL settlement
+// every BATCH_SIZE calls so each on-chain tick is human-visible.
+
+import { ModelTier, InfraTier } from "./footprint";
 
 export const DROPS_PER_HYDRO = 1_000_000;
-export const LITERS_PER_HYDRO = 1; // 1 HYDRO retired = 1 L restored freshwater
+export const LITERS_PER_GALLON = 3.785411784; // exact, US liquid gallon
 export const TREASURY_ADDRESS = "wire1meraxistreasury000000000000000000hydr";
 export const FACILITATOR_URL = "/api/x402/verify";
 
-// Per-resource water cost (liters). Multiply by 1 HYDRO to get drops owed.
-export const RESOURCE_COSTS: Record<string, { liters: number; description: string }> = {
-  "/api/ai/chat": { liters: 0.52, description: "LLM chat completion (GPT-4 class)" },
-  "/api/ai/embed": { liters: 0.04, description: "Text embedding (1536-dim)" },
-  "/api/ai/image": { liters: 2.9, description: "Image generation (1024×1024)" },
-  "/api/ai/video": { liters: 38.0, description: "Video generation (5s clip)" },
+// Settlement batching. x402 micropayments accumulate per resource until the
+// batch hits BATCH_SIZE calls or BATCH_FLUSH_MS elapses, then a single
+// Wire UTL settlement is emitted with full hop trace.
+export const BATCH_SIZE = 100;
+export const BATCH_FLUSH_MS = 60_000;
+
+// Convert site water (liters) to HYDRO drops at the protocol denomination.
+export function litersToDrops(liters: number): number {
+  return Math.round((liters / LITERS_PER_GALLON) * DROPS_PER_HYDRO);
+}
+export function dropsToLiters(drops: number): number {
+  return (drops / DROPS_PER_HYDRO) * LITERS_PER_GALLON;
+}
+
+// Per-resource defaults for footprint calc. Token counts here are typical
+// expected sizes; the client may pass tokens_in/tokens_out to override.
+export interface ResourceDefaults {
+  description: string;
+  model_tier: ModelTier;
+  infra_tier: InfraTier;
+  tokens_in_default: number;
+  tokens_out_default: number;
+  e_overhead_kwh?: number; // fixed per-request overhead (e.g. image/video pipeline)
+}
+
+export const RESOURCE_DEFAULTS: Record<string, ResourceDefaults> = {
+  "/api/ai/chat": {
+    description: "LLM chat completion (GPT-4 class)",
+    model_tier: "gpt4_class",
+    infra_tier: "hyperscaler",
+    tokens_in_default: 200,
+    tokens_out_default: 500,
+  },
+  "/api/ai/embed": {
+    description: "Text embedding (1536-dim)",
+    model_tier: "small_open",
+    infra_tier: "hyperscaler",
+    tokens_in_default: 512,
+    tokens_out_default: 0,
+  },
+  "/api/ai/image": {
+    description: "Image generation (1024×1024)",
+    model_tier: "gpt4_class",
+    infra_tier: "hyperscaler",
+    tokens_in_default: 80,
+    tokens_out_default: 0,
+    e_overhead_kwh: 0.0024, // diffusion pipeline overhead
+  },
+  "/api/ai/video": {
+    description: "Video generation (5s clip)",
+    model_tier: "gpt4_class",
+    infra_tier: "hyperscaler",
+    tokens_in_default: 80,
+    tokens_out_default: 0,
+    e_overhead_kwh: 0.040, // sora-class video pipeline overhead
+  },
 };
 
 export const SEED_AGENTS = [

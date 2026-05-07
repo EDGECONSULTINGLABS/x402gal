@@ -4,27 +4,64 @@
 // a JSON body listing accepted PaymentRequirements; the client retries with
 // an `X-PAYMENT` header containing a base64-encoded payment payload.
 
-import { PaymentPayload, PaymentRequirement } from "./types";
-import { DROPS_PER_HYDRO, FACILITATOR_URL, RESOURCE_COSTS, TREASURY_ADDRESS } from "./constants";
+import { PaymentPayload, PaymentRequirement, FootprintBlock } from "./types";
+import {
+  FACILITATOR_URL,
+  RESOURCE_DEFAULTS,
+  TREASURY_ADDRESS,
+  litersToDrops,
+} from "./constants";
+import { calculateFootprint } from "./footprint";
 import { ledger } from "./ledger";
 
-export function buildRequirement(resource: string): PaymentRequirement {
-  const meta = RESOURCE_COSTS[resource];
+export interface RequirementOpts {
+  tokens_in?: number;
+  tokens_out?: number;
+  mode?: "site" | "source" | "lifecycle";
+}
+
+export function buildRequirement(
+  resource: string,
+  opts: RequirementOpts = {},
+): PaymentRequirement {
+  const meta = RESOURCE_DEFAULTS[resource];
   if (!meta) throw new Error(`Unknown resource ${resource}`);
-  const amountDrops = Math.round(meta.liters * DROPS_PER_HYDRO);
+
+  const result = calculateFootprint({
+    tokens_in: opts.tokens_in ?? meta.tokens_in_default,
+    tokens_out: opts.tokens_out ?? meta.tokens_out_default,
+    model_tier: meta.model_tier,
+    infra_tier: meta.infra_tier,
+    mode: opts.mode ?? "site",
+    e_overhead_kwh: meta.e_overhead_kwh,
+  });
+
+  const amountDrops = Math.max(1, litersToDrops(result.water_l));
+
+  const footprint: FootprintBlock = {
+    mode: result.mode,
+    water_l: result.water_l,
+    water_ml: result.water_ml,
+    inputs: result.inputs,
+    methodology: result.methodology,
+    uncertainty: result.uncertainty,
+  };
+
   return {
     x402Version: 1,
     scheme: "exact",
     network: "wire-utl",
     asset: "HYDRO",
     amountDrops,
-    estimatedLiters: meta.liters,
+    estimatedLiters: result.water_l,
+    estimatedMl: result.water_ml,
     recipient: TREASURY_ADDRESS,
     resource,
     description: `Meraxis water-offset for ${meta.description}`,
     nonce: cryptoNonce(),
     expiresAt: Date.now() + 60_000,
     facilitator: FACILITATOR_URL,
+    footprint,
   };
 }
 

@@ -877,6 +877,17 @@ function Footer() {
         Footprint v2 · Green Grid WUE · LBNL 2024 · Microsoft / Meta / AWS
         disclosures · Epoch AI · methodology pinned per 402 response
       </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-amber-300/80">
+        <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 font-mono uppercase tracking-[0.18em]">
+          ◆ Simulated
+        </span>
+        <span>
+          HydroCoin is not yet deployed on-chain. AMM, balances, and HYDRO
+          retirements are an in-memory simulation; Wire UTL hops are
+          simulated route traces. The x402 contract, footprint model, and
+          settlement state machine run for real.
+        </span>
+      </div>
     </footer>
   );
 }

@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 import { executeBuyHydro } from "@/lib/amm";
 import { ledger } from "@/lib/ledger";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   const { agentId, usdc } = await req.json();

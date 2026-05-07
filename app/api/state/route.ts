@@ -5,7 +5,7 @@ import { marketCapUSDC, priceUSDC } from "@/lib/amm";
 import { BATCH_SIZE, DROPS_PER_HYDRO } from "@/lib/constants";
 import { FOOTPRINT_METHODOLOGY_HASH } from "@/lib/footprint";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {

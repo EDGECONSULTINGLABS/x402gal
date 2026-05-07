@@ -34,9 +34,9 @@ export function HydroCoinPanel({
         <div className="absolute -inset-x-20 top-0 h-px bg-gradient-to-r from-transparent via-hydro-300/70 to-transparent" />
       </div>
 
-      <div className="relative grid grid-cols-1 gap-8 lg:grid-cols-[auto,1fr,auto] lg:items-center">
+      <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center lg:gap-8">
         {/* ── Coin orb ── */}
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-5 lg:col-span-4">
           <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
             <span className="ring-pulse" />
             <span className="ring-pulse" style={{ animationDelay: "0.8s" }} />
@@ -54,8 +54,16 @@ export function HydroCoinPanel({
             <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-hydro-200/80">
               <ShieldCheck size={12} /> Settlement asset
             </div>
-            <div className="mt-1 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              HydroCoin
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <span className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                HydroCoin
+              </span>
+              <span
+                title="HydroCoin is not yet deployed on-chain. AMM, balances, and HYDRO retirements shown here are an in-memory simulation of the constant-product economics."
+                className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-amber-200"
+              >
+                ◆ Simulated
+              </span>
             </div>
             <div className="font-mono text-xs text-hydro-300">
               HYDRO · 1 token = 1 verified gallon
@@ -64,7 +72,7 @@ export function HydroCoinPanel({
         </div>
 
         {/* ── Live stats ── */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:col-span-5 lg:grid-cols-4">
           <Tile label="Price" accent>
             <AnimatedNumber value={priceUSDC} decimals={4} prefix="$" />
           </Tile>
@@ -76,16 +84,16 @@ export function HydroCoinPanel({
           </Tile>
           <Tile label="Market cap">
             <AnimatedNumber
-              value={marketCap / 1000}
-              decimals={1}
+              value={marketCap / 1_000_000}
+              decimals={2}
               prefix="$"
-              suffix="k"
+              suffix="M"
             />
           </Tile>
         </div>
 
         {/* ── CTA ── */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 lg:col-span-3">
           <a
             href="https://www.hydrocoin.com/"
             target="_blank"

@@ -1,9 +1,9 @@
-# Meraxis
+# 402GAL
 
 **Water-offset rails for AI agents.** Built for the Consensus Hackathon.
 
 > Every AI inference consumes freshwater (data-center cooling, power
-> generation). Meraxis intercepts agent traffic with an HTTP `402 Payment
+> generation). 402GAL intercepts agent traffic with an HTTP `402 Payment
 > Required` response per the [x402 protocol](https://www.x402.org/), the agent
 > auto-pays in **HydroCoin (HYDRO)**, and the payment is settled cross-chain
 > through [Wire Network's Universal Transaction Layer](https://wire.network)
@@ -14,7 +14,7 @@
 
 ```
 ┌────────────┐    402 + reqs    ┌────────────────┐
-│  AI agent  │ ───────────────▶ │ Meraxis server │
+│  AI agent  │ ───────────────▶ │  402GAL server │
 │ (Base/Sol/ │ ◀─── X-PAYMENT ──│   (x402 host)  │
 │  Eth/Poly) │                  └───────┬────────┘
 └─────┬──────┘                          │ verify + route
@@ -83,7 +83,7 @@ GPT-4-class call is **0.068 mL** ≈ **18 HYDRO drops** (1 HYDRO = 1 US gallon).
 ## Batching
 
 Per-call settlements would be 18 drops each — illegible on screen and
-wasteful on chain. Meraxis aggregates micro-payments into a 100-call batch
+wasteful on chain. 402GAL aggregates micro-payments into a 100-call batch
 (or 60s window), then a single Wire UTL settlement locks the funds, mints a
 universal-receipt, and retires HYDRO. The dashboard's *Pending batch* panel
 shows the fill state in real time; the *Burst 100 → flush* button drives a
@@ -92,12 +92,26 @@ visible cycle.
 ## Why this matters
 
 A typical GPT-4-class inference is ~0.07 mL. **1 billion calls/day = 68,000 L
-= one swimming pool, every day** — today, with no settlement layer. Meraxis
+= one swimming pool, every day** — today, with no settlement layer. 402GAL
 turns that hidden externality into a programmable, agent-native payment
 using primitives (x402, Wire UTL) that already exist.
 
 ## Status
 
-Hackathon prototype. The Wire UTL hops are simulated; the protocol shape,
-x402 contract, and HydroCoin AMM are functional. Swap the bridge module for
-a real UTL relay client to ship.
+Hackathon prototype. **HydroCoin is not yet live on-chain** — the AMM,
+balances, and HYDRO retirements in this repo are an in-memory simulation
+of the constant-product economics, not a deployed XRPL token. The Wire UTL
+bridge hops are likewise simulated. What *is* real and runnable here:
+
+- the **x402 v1 "exact" scheme** (requirement build, payload encode/decode,
+  signature verify) over real HTTP `402` responses,
+- the **v2 boundary-aware Green Grid WUE footprint model** with a pinned
+  methodology hash returned in every 402 body,
+- the **batching / settlement state machine** (per-call escrow → 100-call
+  batch → single retirement event),
+- and the agent-side `meraxisFetch()` SDK that round-trips a 402 → pay → 200.
+
+To ship for real you would (a) deploy HydroCoin as an XRPL IOU or fungible
+token and point `lib/amm.ts` at on-chain reserves, and (b) swap
+`lib/wire.ts` for a real Wire Network UTL relay client. Both are
+single-file integration points by design.

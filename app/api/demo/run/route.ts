@@ -8,7 +8,7 @@ import { buildRequirement, encodePayment } from "@/lib/x402";
 import { ledger } from "@/lib/ledger";
 import { PaymentPayload } from "@/lib/types";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 const RESOURCE = "/api/ai/chat";
 

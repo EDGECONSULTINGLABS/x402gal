@@ -5,7 +5,7 @@
 import { drainBatch, ledger } from "@/lib/ledger";
 import { settleBatch } from "@/lib/wire";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function POST() {
   const before = ledger().pendingTotals.calls;

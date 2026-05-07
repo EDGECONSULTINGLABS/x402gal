@@ -8,7 +8,7 @@ import { addToBatch, drainBatch } from "@/lib/ledger";
 import { settleBatch } from "@/lib/wire";
 import { PaymentPayload, PaymentRequirement } from "@/lib/types";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   const { requirement, payload } = (await req.json()) as {

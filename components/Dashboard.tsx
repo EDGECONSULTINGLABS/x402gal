@@ -10,12 +10,25 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Cpu, Zap, ArrowRightLeft, ShieldCheck, Send, Layers, Beaker } from "lucide-react";
+import {
+  Cpu,
+  Zap,
+  ArrowRightLeft,
+  ShieldCheck,
+  Send,
+  Layers,
+  Beaker,
+  Droplets,
+  ExternalLink,
+  Activity,
+} from "lucide-react";
 import { Logo } from "./Logo";
-import { Stat } from "./Stat";
 import { ChainBadge } from "./ChainBadge";
 import { RouteTrace } from "./RouteTrace";
 import { SettlementRow } from "./SettlementRow";
+import { WaterBackdrop } from "./WaterBackdrop";
+import { HydroCoinPanel } from "./HydroCoinPanel";
+import { AnimatedNumber } from "./AnimatedNumber";
 import { Agent, Settlement } from "@/lib/types";
 import { DROPS_PER_HYDRO } from "@/lib/constants";
 
@@ -48,11 +61,15 @@ interface State {
 export function Dashboard() {
   const [state, setState] = useState<State | null>(null);
   const [selected, setSelected] = useState<string>("agent_meridian_v3");
-  const [prompt, setPrompt] = useState("How should I price autonomous AI inference?");
+  const [prompt, setPrompt] = useState(
+    "How should I price autonomous AI inference?",
+  );
   const [running, setRunning] = useState(false);
   const [lastSettlement, setLastSettlement] = useState<Settlement | null>(null);
   const [completion, setCompletion] = useState<string>("");
-  const [history, setHistory] = useState<{ t: number; price: number; liters: number }[]>([]);
+  const [history, setHistory] = useState<
+    { t: number; price: number; liters: number }[]
+  >([]);
   const lastIdsRef = useRef<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
@@ -62,7 +79,11 @@ export function Dashboard() {
     setHistory((h) => {
       const next = [
         ...h,
-        { t: Date.now(), price: data.amm.priceUSDC, liters: data.totals.litersOffset },
+        {
+          t: Date.now(),
+          price: data.amm.priceUSDC,
+          liters: data.totals.litersOffset,
+        },
       ];
       return next.slice(-60);
     });
@@ -74,13 +95,9 @@ export function Dashboard() {
     return () => clearInterval(id);
   }, [refresh]);
 
-  // Track which settlements are new for the slide-in highlight.
   useEffect(() => {
     if (!state) return;
-    const seen = lastIdsRef.current;
-    const ids = new Set(state.settlements.map((s) => s.id));
-    lastIdsRef.current = ids;
-    // No-op; we read this in render via the previous set.
+    lastIdsRef.current = new Set(state.settlements.map((s) => s.id));
   }, [state]);
 
   const runDemo = useCallback(
@@ -132,23 +149,36 @@ export function Dashboard() {
   );
 
   return (
-    <div className="relative min-h-screen">
-      <div className="pointer-events-none absolute inset-0 gridline opacity-30" />
-      <div className="relative mx-auto max-w-7xl px-6 py-8">
-        <Header price={state?.amm.priceUSDC} />
+    <div className="relative min-h-screen overflow-x-hidden">
+      <WaterBackdrop />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
+      <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} />
+
+      <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8">
         <Hero
           totalLiters={state?.totals.litersOffset ?? 0}
           totalMl={state?.totals.mlOffset ?? 0}
           callsServed={state?.totals.callsServed ?? 0}
           settlements={state?.totals.settlements ?? 0}
           retired={state?.amm.retiredHydro ?? 0}
-          price={state?.amm.priceUSDC ?? 0}
-          marketCap={state?.amm.marketCapUSDC ?? 0}
+          onRun={() => runDemo(1)}
+          onBurst={() => runDemo(100)}
+          running={running}
         />
 
+        <div className="mt-10 sm:mt-14">
+          <HydroCoinPanel
+            priceUSDC={state?.amm.priceUSDC ?? 0}
+            marketCap={state?.amm.marketCapUSDC ?? 0}
+            retiredHydro={state?.amm.retiredHydro ?? 0}
+            circulatingHydro={state?.amm.circulatingHydro ?? 0}
+            totalLitersOffset={state?.totals.litersOffset ?? 0}
+          />
+        </div>
+
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             <PriceChart history={history} />
             <SettlementsTable settlements={state?.settlements ?? []} />
           </div>
@@ -164,7 +194,11 @@ export function Dashboard() {
               running={running}
               selectedAgent={selectedAgent}
             />
-            <BatchPanel batch={state?.batch} onFlush={flushNow} running={running} />
+            <BatchPanel
+              batch={state?.batch}
+              onFlush={flushNow}
+              running={running}
+            />
             <AnimatePresence>
               {lastSettlement && (
                 <motion.div
@@ -172,22 +206,30 @@ export function Dashboard() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="glass rounded-xl p-5"
+                  className="glass-strong rounded-2xl p-5"
                 >
                   <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
                     <ShieldCheck size={14} /> Wire UTL route
                   </div>
-                  <div className="mt-3"><RouteTrace hops={lastSettlement.hops} /></div>
+                  <div className="mt-3">
+                    <RouteTrace hops={lastSettlement.hops} />
+                  </div>
                   <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
                     <Mini label="UTL hash" value={lastSettlement.wireUtlHash} mono />
-                    <Mini label="Retirement receipt" value={lastSettlement.retirementReceipt} mono />
+                    <Mini
+                      label="Retirement receipt"
+                      value={lastSettlement.retirementReceipt}
+                      mono
+                    />
                     <Mini
                       label={`Aggregated calls`}
                       value={`${lastSettlement.callCount.toLocaleString()} \u00d7 \u22480.07 mL`}
                     />
                     <Mini
                       label="Paid"
-                      value={`${(lastSettlement.amountDrops / DROPS_PER_HYDRO).toFixed(6)} HYDRO`}
+                      value={`${(
+                        lastSettlement.amountDrops / DROPS_PER_HYDRO
+                      ).toFixed(6)} HYDRO`}
                     />
                     <Mini
                       label="Water restored"
@@ -216,47 +258,87 @@ export function Dashboard() {
         </div>
 
         <Footer />
-      </div>
+      </main>
     </div>
   );
 }
 
-function Header({ price }: { price?: number }) {
+/* ─────────────────────────────────────────────────────── */
+
+function Nav({ price, retired }: { price?: number; retired: number }) {
   return (
-    <header className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <Logo size={32} />
-        <div>
-          <div className="text-lg font-semibold tracking-tight">Meraxis</div>
-          <div className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
-            Water-offset rails for AI agents
+    <header className="sticky top-0 z-40 border-b border-edge/60 bg-abyss/70 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3">
+          <Logo size={30} />
+          <div>
+            <div className="font-display text-base font-semibold tracking-tight">
+              402GAL
+            </div>
+            <div className="hidden text-[10px] uppercase tracking-[0.22em] text-slate-500 sm:block">
+              Water-offset rails for AI agents
+            </div>
           </div>
         </div>
-      </div>
-      <div className="flex items-center gap-3 text-xs">
-        <span className="rounded-md border border-edge bg-panel/60 px-3 py-1.5 font-mono text-hydro-300">
-          HYDRO ${price ? price.toFixed(4) : "—"}
-        </span>
-        <a
-          href="https://www.x402.org/"
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-md border border-edge bg-panel/60 px-3 py-1.5 text-slate-300 hover:border-hydro-500/40"
-        >
-          x402 spec ↗
-        </a>
-        <a
-          href="https://wire.network"
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-md border border-edge bg-panel/60 px-3 py-1.5 text-slate-300 hover:border-hydro-500/40"
-        >
-          Wire UTL ↗
-        </a>
+
+        <div className="hidden items-center gap-2 md:flex">
+          <Pill>
+            <Activity size={11} className="text-hydro-300 animate-pulse" />
+            HYDRO ${price ? price.toFixed(4) : "—"}
+          </Pill>
+          <Pill>
+            <Droplets size={11} className="text-hydro-300" />
+            {retired.toFixed(3)} gal restored
+          </Pill>
+        </div>
+
+        <nav className="flex items-center gap-1 text-xs">
+          <NavLink href="https://www.x402.org/">x402</NavLink>
+          <NavLink href="https://wire.network">Wire UTL</NavLink>
+          <NavLink href="https://www.hydrocoin.com/" highlight>
+            HydroCoin
+          </NavLink>
+        </nav>
       </div>
     </header>
   );
 }
+
+function Pill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-edge bg-panel/60 px-3 py-1 font-mono text-[11px] text-slate-300">
+      {children}
+    </span>
+  );
+}
+
+function NavLink({
+  href,
+  children,
+  highlight,
+}: {
+  href: string;
+  children: React.ReactNode;
+  highlight?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 transition ${
+        highlight
+          ? "border border-hydro-400/40 bg-hydro-500/10 text-hydro-200 hover:border-hydro-300 hover:bg-hydro-500/20"
+          : "border border-transparent text-slate-300 hover:border-edge hover:bg-panel/50 hover:text-white"
+      }`}
+    >
+      {children}
+      <ExternalLink size={11} className="opacity-60" />
+    </a>
+  );
+}
+
+/* ─────────────────────────────────────────────────────── */
 
 function Hero({
   totalLiters,
@@ -264,93 +346,188 @@ function Hero({
   callsServed,
   settlements,
   retired,
-  price,
-  marketCap,
+  onRun,
+  onBurst,
+  running,
 }: {
   totalLiters: number;
   totalMl: number;
   callsServed: number;
   settlements: number;
   retired: number;
-  price: number;
-  marketCap: number;
+  onRun: () => void;
+  onBurst: () => void;
+  running: boolean;
 }) {
-  // Headline framing per the v2 spec: a single GPT-4-class call costs ≈0.07 mL.
-  // 1 billion calls/day → ~68,000 L → one swimming pool. We surface mL per
-  // call up front so the scale story reads correctly.
   const litersDisplay =
-    totalLiters >= 0.01 ? `${totalLiters.toFixed(3)} L` : `${totalMl.toFixed(2)} mL`;
+    totalLiters >= 0.01
+      ? `${totalLiters.toFixed(3)} L`
+      : `${totalMl.toFixed(2)} mL`;
+
   return (
-    <section className="mt-10">
-      <motion.h1
-        initial={{ opacity: 0, y: 10 }}
+    <section className="relative pt-12 sm:pt-20">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-tight md:text-5xl"
+        transition={{ duration: 0.6 }}
+        className="mb-6 inline-flex items-center gap-2 rounded-full border border-hydro-400/30 bg-hydro-500/5 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-hydro-200/90"
+      >
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hydro-400 opacity-75" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-hydro-300" />
+        </span>
+        x402 · Wire UTL · HydroCoin · XRPL
+      </motion.div>
+
+      <motion.h1
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="display-fluid max-w-5xl text-balance font-display font-semibold text-white"
       >
         Every AI query has a{" "}
-        <span className="bg-gradient-to-r from-hydro-300 to-hydro-500 bg-clip-text text-transparent">
-          water footprint.
-        </span>{" "}
-        Meraxis settles it in real time.
+        <span className="sheen-text">water footprint.</span>
+        <br className="hidden sm:block" />{" "}
+        <span className="text-slate-400">402GAL settles it</span>{" "}
+        <span className="text-white">in real time.</span>
       </motion.h1>
-      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-400">
-        Each inference returns HTTP <code className="text-hydro-300">402 Payment Required</code>{" "}
-        with a v2 boundary-aware footprint (Green Grid WUE). The agent signs an x402 payload, micro-payments
-        accrue into a 100-call batch, and Wire&rsquo;s Universal Transaction Layer retires HydroCoin
-        against a verifiable water-restoration credit.
-      </p>
-      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Stat
-          label="Water restored"
-          value={litersDisplay}
-          sub="Audited via Wire UTL"
-          accent
-        />
-        <Stat
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.6 }}
+        className="mt-6 max-w-2xl text-balance text-base leading-relaxed text-slate-400 sm:text-lg"
+      >
+        Each inference returns HTTP{" "}
+        <code className="rounded bg-hydro-500/10 px-1.5 py-0.5 font-mono text-sm text-hydro-300">
+          402 Payment Required
+        </code>{" "}
+        with a v2 boundary-aware footprint. The agent signs an x402 payload,
+        micro-payments accrue into a 100-call batch, and Wire&rsquo;s Universal
+        Transaction Layer retires{" "}
+        <span className="font-semibold text-hydro-300">HydroCoin</span> against
+        a verifiable water-restoration credit on XRPL.
+      </motion.p>
+
+      {/* CTAs */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="mt-8 flex flex-wrap items-center gap-3"
+      >
+        <button
+          onClick={onRun}
+          disabled={running}
+          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-hydro-gradient px-6 py-3 text-sm font-semibold text-abyss shadow-glow-lg transition hover:brightness-110 disabled:opacity-60"
+        >
+          <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+          <Send size={14} /> Send 1 paid query
+        </button>
+        <button
+          onClick={onBurst}
+          disabled={running}
+          className="inline-flex items-center gap-2 rounded-xl border border-hydro-400/40 bg-hydro-500/10 px-5 py-3 text-sm font-medium text-hydro-200 transition hover:border-hydro-300 hover:bg-hydro-500/20 disabled:opacity-60"
+        >
+          <Layers size={14} /> Burst 100 → flush
+        </button>
+        <a
+          href="https://www.hydrocoin.com/"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-xl px-4 py-3 text-xs uppercase tracking-[0.18em] text-slate-400 transition hover:text-hydro-200"
+        >
+          HydroCoin.com <ExternalLink size={11} />
+        </a>
+      </motion.div>
+
+      {/* Live metric strip */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7, duration: 0.6 }}
+        className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4"
+      >
+        <Metric label="Water restored" value={litersDisplay} accent />
+        <Metric
           label="Calls served"
           value={callsServed.toLocaleString()}
-          sub="≈0.07 mL each (GPT-4 class)"
+          sub="≈0.07 mL each"
         />
-        <Stat
+        <Metric
           label="HYDRO retired"
-          value={retired.toFixed(4)}
-          sub={`${settlements} Wire UTL settlement${settlements === 1 ? "" : "s"}`}
+          value={<AnimatedNumber value={retired} decimals={4} />}
+          sub={`${settlements} settlement${settlements === 1 ? "" : "s"}`}
         />
-        <Stat
-          label="Market cap"
-          value={`$${(marketCap / 1000).toFixed(1)}k`}
-          sub={`@ $${price.toFixed(4)} per HYDRO (1 gal)`}
-        />
-      </div>
+        <Metric label="Verified gallons" value={<AnimatedNumber value={retired} decimals={4} />} sub="1 HYDRO = 1 gallon" accent />
+      </motion.div>
     </section>
   );
 }
 
-function PriceChart({ history }: { history: { t: number; price: number; liters: number }[] }) {
+function Metric({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: React.ReactNode;
+  sub?: React.ReactNode;
+  accent?: boolean;
+}) {
+  return (
+    <div className="glass glass-hover rounded-xl p-4 sm:p-5">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+        {label}
+      </div>
+      <div
+        className={`tick mt-2 font-display text-2xl font-semibold sm:text-3xl ${
+          accent ? "text-hydro-300 text-glow" : "text-white"
+        }`}
+      >
+        {value}
+      </div>
+      {sub != null && (
+        <div className="mt-1 text-[11px] text-slate-500">{sub}</div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────── */
+
+function PriceChart({
+  history,
+}: {
+  history: { t: number; price: number; liters: number }[];
+}) {
   const data = history.map((h, i) => ({
     i,
     price: Number(h.price.toFixed(6)),
     liters: Number(h.liters.toFixed(2)),
   }));
   return (
-    <div className="glass rounded-xl p-5">
+    <div className="glass rounded-2xl p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
             Live offset throughput
           </div>
-          <div className="text-sm text-slate-200">
-            Cumulative liters restored vs HYDRO price
+          <div className="font-display text-lg text-white">
+            Cumulative liters restored
           </div>
         </div>
-        <div className="text-[10px] text-slate-500">refreshed every 2.5s</div>
+        <div className="font-mono text-[10px] text-slate-500">
+          refreshed every 2.5s
+        </div>
       </div>
       <div className="h-56 w-full">
         <ResponsiveContainer>
           <AreaChart data={data}>
             <defs>
               <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.55} />
+                <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.7} />
                 <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
               </linearGradient>
             </defs>
@@ -358,10 +535,11 @@ function PriceChart({ history }: { history: { t: number; price: number; liters: 
             <YAxis hide domain={["auto", "auto"]} />
             <Tooltip
               contentStyle={{
-                background: "#0a1018",
-                border: "1px solid #142033",
-                borderRadius: 8,
+                background: "#02060d",
+                border: "1px solid #16263d",
+                borderRadius: 10,
                 fontSize: 12,
+                boxShadow: "0 0 30px -10px rgba(34,211,238,0.45)",
               }}
               labelStyle={{ color: "#94a3b8" }}
             />
@@ -381,16 +559,18 @@ function PriceChart({ history }: { history: { t: number; price: number; liters: 
 
 function SettlementsTable({ settlements }: { settlements: Settlement[] }) {
   return (
-    <div className="glass overflow-hidden rounded-xl">
+    <div className="glass overflow-hidden rounded-2xl">
       <div className="flex items-center justify-between border-b border-edge px-4 py-3">
         <div className="flex items-center gap-2 text-sm">
           <ArrowRightLeft size={14} className="text-hydro-300" />
-          <span className="font-medium">Settlement stream</span>
-          <span className="text-[10px] text-slate-500">
+          <span className="font-display font-medium text-white">
+            Settlement stream
+          </span>
+          <span className="font-mono text-[10px] text-slate-500">
             x402 → Wire UTL → HYDRO retired
           </span>
         </div>
-        <span className="text-[10px] uppercase tracking-wider text-slate-500">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
           {settlements.length} recent
         </span>
       </div>
@@ -441,12 +621,14 @@ function DemoPanel({
   selectedAgent?: Agent;
 }) {
   return (
-    <div className="glass rounded-xl p-5">
+    <div className="glass rounded-2xl p-5">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
         <Cpu size={14} /> Agent console
       </div>
       <div className="mt-4 space-y-3">
-        <label className="text-[11px] uppercase tracking-wider text-slate-500">Agent</label>
+        <label className="text-[11px] uppercase tracking-wider text-slate-500">
+          Agent
+        </label>
         <div className="grid grid-cols-1 gap-2">
           {agents.map((a) => (
             <button
@@ -454,15 +636,15 @@ function DemoPanel({
               onClick={() => onSelect(a.id)}
               className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition ${
                 selected === a.id
-                  ? "border-hydro-500/40 bg-hydro-500/10"
-                  : "border-edge bg-panel/60 hover:border-hydro-500/20"
+                  ? "border-hydro-400/50 bg-hydro-500/10 shadow-glow-inset"
+                  : "border-edge bg-panel/60 hover:border-hydro-500/30 hover:bg-panel"
               }`}
             >
               <span className="flex items-center gap-2">
                 <span className="font-medium text-slate-100">{a.label}</span>
                 <ChainBadge chain={a.chain} />
               </span>
-              <span className="tick text-[11px] text-slate-400">
+              <span className="tick font-mono text-[11px] text-slate-400">
                 {(a.balanceDrops / DROPS_PER_HYDRO).toFixed(2)} HYDRO
               </span>
             </button>
@@ -476,7 +658,7 @@ function DemoPanel({
           value={prompt}
           onChange={(e) => onPrompt(e.target.value)}
           rows={3}
-          className="w-full resize-none rounded-md border border-edge bg-ink/60 p-3 text-xs text-slate-200 outline-none focus:border-hydro-500/40"
+          className="w-full resize-none rounded-md border border-edge bg-ink/60 p-3 text-xs text-slate-200 outline-none transition focus:border-hydro-400/50 focus:shadow-glow-inset"
         />
 
         <div className="flex flex-col gap-2 pt-2">
@@ -484,7 +666,7 @@ function DemoPanel({
             <button
               onClick={() => onRun(1)}
               disabled={running}
-              className="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-md border border-hydro-500/40 bg-hydro-500/10 px-3 py-2 text-xs font-medium text-hydro-300 transition hover:bg-hydro-500/20 disabled:opacity-60"
+              className="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-md border border-hydro-400/50 bg-hydro-500/15 px-3 py-2 text-xs font-medium text-hydro-200 transition hover:bg-hydro-500/25 disabled:opacity-60"
             >
               {running ? (
                 <>
@@ -500,14 +682,14 @@ function DemoPanel({
             <button
               onClick={() => onRun(100)}
               disabled={running}
-              className="inline-flex items-center justify-center gap-1 rounded-md border border-hydro-500/40 bg-hydro-500/15 px-3 py-2 text-xs font-medium text-hydro-300 hover:bg-hydro-500/25 disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-1 rounded-md border border-hydro-400/50 bg-hydro-500/20 px-3 py-2 text-xs font-medium text-hydro-100 hover:bg-hydro-500/30 disabled:opacity-60"
             >
               <Layers size={14} /> Burst 100 → flush
             </button>
           </div>
           <button
             onClick={onTopUp}
-            className="rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 hover:border-hydro-500/30"
+            className="rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 transition hover:border-hydro-500/30 hover:text-white"
           >
             +$100 → HYDRO (top up agent wallet)
           </button>
@@ -516,15 +698,23 @@ function DemoPanel({
         {selectedAgent && (
           <div className="mt-3 grid grid-cols-3 gap-2 rounded-md border border-edge bg-panel/40 p-3 text-[10px]">
             <div>
-              <div className="text-slate-500 uppercase tracking-wider">Operator</div>
+              <div className="uppercase tracking-wider text-slate-500">
+                Operator
+              </div>
               <div className="text-slate-200">{selectedAgent.operator}</div>
             </div>
             <div>
-              <div className="text-slate-500 uppercase tracking-wider">Queries</div>
-              <div className="tick text-slate-200">{selectedAgent.totalQueries}</div>
+              <div className="uppercase tracking-wider text-slate-500">
+                Queries
+              </div>
+              <div className="tick text-slate-200">
+                {selectedAgent.totalQueries}
+              </div>
             </div>
             <div>
-              <div className="text-slate-500 uppercase tracking-wider">Liters offset</div>
+              <div className="uppercase tracking-wider text-slate-500">
+                Liters offset
+              </div>
               <div className="tick text-hydro-300">
                 {selectedAgent.totalLitersOffset.toFixed(2)}
               </div>
@@ -538,7 +728,7 @@ function DemoPanel({
 
 function SpecCard({ methodologyHash }: { methodologyHash?: string }) {
   return (
-    <div className="glass rounded-xl p-5">
+    <div className="glass rounded-2xl p-5">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
         <Beaker size={14} /> Footprint methodology · v2
       </div>
@@ -547,14 +737,15 @@ function SpecCard({ methodologyHash }: { methodologyHash?: string }) {
           W_site = WUE × [(T_in/1000)·e_in + (T_out/1000)·e_out] × F_boundary
         </code>
         <p className="text-slate-400">
-          Boundary-aware Green Grid WUE v1 split. WUE encodes site cooling already, so
-          we don&rsquo;t multiply by a separate cooling factor (avoids double-count). Defaults:{" "}
+          Boundary-aware Green Grid WUE v1 split. WUE encodes site cooling
+          already, so we don&rsquo;t multiply by a separate cooling factor
+          (avoids double-count). Defaults:{" "}
           <span className="text-slate-200">WUE 0.20 L/kWh</span>,{" "}
           <span className="text-slate-200">e_in 0.0002 kWh/1K</span>,{" "}
           <span className="text-slate-200">e_out 0.0006 kWh/1K</span>.
         </p>
         <p className="text-slate-400">
-          Sourced from LBNL 2024 data-center report, Microsoft FY25 / Meta 2024 / AWS 2024
+          Sourced from LBNL 2024, Microsoft FY25 / Meta 2024 / AWS 2024
           disclosures, Epoch AI GPT-4o estimate, TokenPowerBench.
         </p>
         {methodologyHash && (
@@ -562,7 +753,9 @@ function SpecCard({ methodologyHash }: { methodologyHash?: string }) {
             <div className="text-[9px] uppercase tracking-wider text-slate-500">
               Methodology hash (pinned in 402)
             </div>
-            <div className="truncate font-mono text-[10px] text-slate-300">{methodologyHash}</div>
+            <div className="truncate font-mono text-[10px] text-slate-300">
+              {methodologyHash}
+            </div>
           </div>
         )}
       </div>
@@ -575,7 +768,12 @@ function BatchPanel({
   onFlush,
   running,
 }: {
-  batch?: { sizeTarget: number; pendingCalls: number; pendingDrops: number; pendingMl: number };
+  batch?: {
+    sizeTarget: number;
+    pendingCalls: number;
+    pendingDrops: number;
+    pendingMl: number;
+  };
   onFlush: () => void;
   running: boolean;
 }) {
@@ -584,26 +782,30 @@ function BatchPanel({
   const pct = Math.min(100, (calls / target) * 100);
   const ml = batch?.pendingMl ?? 0;
   return (
-    <div className="glass rounded-xl p-5">
+    <div className="glass rounded-2xl p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
           <Layers size={14} /> Pending batch
         </div>
-        <div className="text-[10px] text-slate-500">flushes at {target} calls</div>
+        <div className="font-mono text-[10px] text-slate-500">
+          flushes at {target} calls
+        </div>
       </div>
       <div className="mt-3 flex items-baseline gap-2">
-        <div className="tick text-2xl font-semibold text-slate-100">
+        <div className="tick font-display text-3xl font-semibold text-white">
           {calls}
-          <span className="text-sm text-slate-500">/{target}</span>
+          <span className="text-base text-slate-500">/{target}</span>
         </div>
-        <div className="tick text-xs text-hydro-300">{ml.toFixed(3)} mL</div>
-        <div className="tick ml-auto text-xs text-slate-500">
+        <div className="tick font-mono text-xs text-hydro-300">
+          {ml.toFixed(3)} mL
+        </div>
+        <div className="tick ml-auto font-mono text-xs text-slate-500">
           {batch?.pendingDrops ?? 0} drops escrow
         </div>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-panel">
         <motion.div
-          className="h-full rounded-full bg-gradient-to-r from-hydro-500 to-hydro-300"
+          className="h-full rounded-full bg-gradient-to-r from-hydro-500 via-hydro-400 to-hydro-200 shadow-glow"
           initial={false}
           animate={{ width: `${pct}%` }}
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
@@ -612,7 +814,7 @@ function BatchPanel({
       <button
         onClick={onFlush}
         disabled={running || calls === 0}
-        className="mt-3 w-full rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 hover:border-hydro-500/30 disabled:opacity-50"
+        className="mt-3 w-full rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 transition hover:border-hydro-500/40 hover:text-white disabled:opacity-50"
       >
         Force Wire UTL settlement now
       </button>
@@ -633,7 +835,9 @@ function Mini({
 }) {
   return (
     <div className="rounded-md border border-edge bg-ink/40 p-2">
-      <div className="text-[9px] uppercase tracking-wider text-slate-500">{label}</div>
+      <div className="text-[9px] uppercase tracking-wider text-slate-500">
+        {label}
+      </div>
       <div
         className={`truncate ${mono ? "font-mono" : ""} ${
           accent ? "text-hydro-300" : "text-slate-200"
@@ -647,12 +851,31 @@ function Mini({
 
 function Footer() {
   return (
-    <footer className="mt-16 border-t border-edge pt-6 text-[11px] text-slate-500">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span>Built for Consensus Hackathon · x402 + Wire UTL + HydroCoin</span>
-        <span>
-          Footprint v2 · Green Grid WUE · LBNL 2024 · Microsoft / Meta / AWS disclosures · Epoch AI
-        </span>
+    <footer className="mt-20 border-t border-edge/60 pt-8 text-[11px] text-slate-500">
+      <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-2">
+          <Logo size={20} />
+          <span>
+            <span className="text-slate-300">402GAL</span> · Built for Consensus
+            Hackathon Miami 2026 · ECL × Parjana
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span>x402 + Wire UTL + HydroCoin</span>
+          <span className="hidden md:inline text-slate-700">|</span>
+          <a
+            href="https://www.hydrocoin.com/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-hydro-300 hover:text-hydro-200"
+          >
+            HydroCoin.com <ExternalLink size={10} />
+          </a>
+        </div>
+      </div>
+      <div className="mt-3 text-[10px] text-slate-600">
+        Footprint v2 · Green Grid WUE · LBNL 2024 · Microsoft / Meta / AWS
+        disclosures · Epoch AI · methodology pinned per 402 response
       </div>
     </footer>
   );

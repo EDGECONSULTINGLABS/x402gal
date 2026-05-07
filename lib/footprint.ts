@@ -13,7 +13,10 @@
 // (0.61); energy intensity from Epoch AI GPT-4o estimate (~0.0006 kWh/1K
 // output tokens), TokenPowerBench, IEEE Access Pythia measurements.
 
-import { createHash } from "crypto";
+// NOTE: methodology hash is precomputed below as a string constant so this
+// module stays edge-runtime safe (Cloudflare Pages, Vercel Edge, etc.).
+// Regenerate via `npm run hash:methodology` if SPEC / FORMULA / REFS /
+// MODEL_DEFAULTS / WUE_DEFAULTS / MODE_MULT change.
 
 export type ModelTier = "gpt4_class" | "small_open" | "unknown";
 export type InfraTier = "hyperscaler" | "unknown";
@@ -97,18 +100,14 @@ const FORMULA =
   "W_site = WUE × [(T_in/1000)*e_in + (T_out/1000)*e_out + e_overhead] × F_boundary";
 
 // Stable hash over the methodology + numeric defaults so a verifier can pin
-// this revision exactly. Any change to constants/refs changes the hash.
-const METHODOLOGY_HASH = (() => {
-  const payload = JSON.stringify({
-    spec: SPEC,
-    formula: FORMULA,
-    refs: REFS,
-    MODEL_DEFAULTS,
-    WUE_DEFAULTS,
-    MODE_MULT,
-  });
-  return "sha256:" + createHash("sha256").update(payload).digest("hex");
-})();
+// this revision exactly. Precomputed (see top-of-file note) so this module
+// has zero Node-only deps and runs on the edge.
+//
+// Source payload:
+//   JSON.stringify({ spec, formula, refs, MODEL_DEFAULTS, WUE_DEFAULTS, MODE_MULT })
+// Algorithm: sha256
+const METHODOLOGY_HASH =
+  "sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc20ca8f38413d03122b6f0";
 
 export function calculateFootprint(input: CalcInput): FootprintResult {
   const mode = input.mode ?? "site";

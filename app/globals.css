@@ -2,37 +2,152 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
-html, body { background: #04070d; color: #d6e2f3; }
+:root {
+  color-scheme: dark;
+  --c-hydro: 34 211 238;
+  --c-deep: 8 145 178;
+}
+
+html, body {
+  background: #000409;
+  color: #d6e2f3;
+}
+
 body {
+  position: relative;
   background-image:
-    radial-gradient(1200px 600px at 80% -10%, rgba(34,211,238,0.10), transparent 60%),
-    radial-gradient(900px 500px at 10% 110%, rgba(8,145,178,0.10), transparent 60%);
+    radial-gradient(1400px 700px at 80% -10%, rgba(34,211,238,0.18), transparent 60%),
+    radial-gradient(1100px 600px at 10% 110%, rgba(8,145,178,0.16), transparent 60%),
+    radial-gradient(800px 600px at 50% 50%, rgba(2,6,13,0.95), #000409 80%);
 }
 
+::selection { background: rgba(34,211,238,0.45); color: white; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #02060d; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #0e7490, #155e75);
+  border-radius: 8px;
+  border: 2px solid #02060d;
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #22d3ee, #0891b2); }
+
+/* ── Glass tiers ─────────────────────────────── */
 .glass {
-  background: linear-gradient(180deg, rgba(20,32,51,0.55), rgba(10,16,24,0.55));
-  border: 1px solid rgba(34,211,238,0.12);
-  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(16,28,46,0.62), rgba(6,11,20,0.72));
+  border: 1px solid rgba(34,211,238,0.14);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
 }
-.glass-hover { transition: border-color .2s ease, box-shadow .2s ease; }
-.glass-hover:hover { border-color: rgba(34,211,238,0.35); box-shadow: 0 0 30px -10px rgba(34,211,238,0.45); }
+.glass-strong {
+  background:
+    linear-gradient(180deg, rgba(34,211,238,0.06), rgba(6,11,20,0.85)),
+    radial-gradient(120% 120% at 0% 0%, rgba(95,225,255,0.10), transparent 60%);
+  border: 1px solid rgba(95,225,255,0.22);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 rgba(95,225,255,0.18),
+    0 30px 80px -30px rgba(0,0,0,0.9);
+}
+.glass-hover {
+  transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.glass-hover:hover {
+  border-color: rgba(34,211,238,0.45);
+  box-shadow: 0 0 40px -10px rgba(34,211,238,0.55);
+  transform: translateY(-1px);
+}
 
+/* ── Animated neon edge (gradient border) ────── */
+.neon-edge {
+  position: relative;
+  border-radius: 14px;
+  isolation: isolate;
+}
+.neon-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(95,225,255,0.0) 0%, rgba(95,225,255,0.7) 25%, rgba(34,211,238,0.0) 50%, rgba(95,225,255,0.7) 75%, rgba(95,225,255,0.0) 100%);
+  background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: border-flow 7s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Type & numerics ─────────────────────────── */
 .tick { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+.text-glow { text-shadow: 0 0 24px rgba(34,211,238,0.55); }
+.text-balance { text-wrap: balance; }
+.display-fluid { font-size: clamp(2.25rem, 5.5vw, 5rem); line-height: 0.98; letter-spacing: -0.03em; }
 
+/* ── Effects ─────────────────────────────────── */
 .shimmer {
-  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.18), transparent);
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.22), transparent);
   background-size: 200% 100%;
   animation: shimmer 2.4s linear infinite;
 }
 @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
 
-.drop {
-  filter: drop-shadow(0 0 12px rgba(34,211,238,0.55));
+.sheen-text {
+  background-image: linear-gradient(110deg, #bff3ff 0%, #5fe1ff 30%, #ffffff 50%, #5fe1ff 70%, #bff3ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  animation: sheen 6s ease-in-out infinite;
 }
 
+.drop { filter: drop-shadow(0 0 14px rgba(34,211,238,0.65)); }
+
 .gridline {
-  background-image: linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(95,225,255,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(95,225,255,0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 75%);
+}
+
+.scanlines {
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,0.018) 0px,
+    rgba(255,255,255,0.018) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* ── Bubble particle ─────────────────────────── */
+.bubble {
+  position: absolute;
+  bottom: -60px;
+  width: 6px; height: 6px; border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(95,225,255,0.4) 60%, transparent 70%);
+  filter: blur(0.4px);
+  animation: bubble 14s linear infinite;
+}
+
+/* ── Pulse ring (HydroCoin orb) ──────────────── */
+.ring-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid rgba(95,225,255,0.55);
+  animation: pulse-ring 2.4s cubic-bezier(0.4,0,0.6,1) infinite;
+}
+
+/* ── Reduced motion ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

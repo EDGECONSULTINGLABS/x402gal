@@ -9,7 +9,7 @@ test("dashboard renders and demo round-trip works", async ({ page }) => {
   });
 
   await page.goto("http://localhost:3000/", { waitUntil: "networkidle", timeout: 60000 });
-  await expect(page.getByText("Meraxis", { exact: true })).toBeVisible({ timeout: 30000 });
+  await expect(page.getByText("402GAL", { exact: true }).first()).toBeVisible({ timeout: 30000 });
   await expect(page.getByText("Water-offset rails for AI agents")).toBeVisible();
   await expect(page.locator("text=Water restored").first()).toBeVisible({ timeout: 15000 });
   await expect(page.getByText("Pending batch")).toBeVisible();
@@ -17,12 +17,12 @@ test("dashboard renders and demo round-trip works", async ({ page }) => {
   await page.screenshot({ path: "e2e/screenshots/01-loaded.png", fullPage: true });
 
   // Single 402-paid query — should appear in pending batch (no Wire UTL flush).
-  await page.getByRole("button", { name: /Send 1 paid query/i }).click();
+  await page.getByRole("button", { name: /Send 1 paid query/i }).first().click();
   await page.waitForTimeout(1500);
   await page.screenshot({ path: "e2e/screenshots/02-after-single.png", fullPage: true });
 
   // Burst 100 calls — must trigger a Wire UTL settlement (batch flush).
-  await page.getByRole("button", { name: /Burst 100/i }).click();
+  await page.getByRole("button", { name: /Burst 100/i }).first().click();
   await expect(page.getByText("Wire UTL route")).toBeVisible({ timeout: 30000 });
   await expect(page.getByText("Aggregated calls")).toBeVisible();
   await page.screenshot({ path: "e2e/screenshots/03-after-flush.png", fullPage: true });

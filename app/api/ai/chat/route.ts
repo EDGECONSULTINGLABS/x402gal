@@ -9,7 +9,7 @@ import { addToBatch, drainBatch, ledger } from "@/lib/ledger";
 import { settleBatch } from "@/lib/wire";
 import { BATCH_SIZE } from "@/lib/constants";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 const RESOURCE = "/api/ai/chat";
 

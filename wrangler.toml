@@ -1,0 +1,10 @@
+# Cloudflare Pages config for 402GAL.
+#
+# Build:  npm run pages:build   (uses @cloudflare/next-on-pages)
+# Dev:    npm run pages:dev     (local Workers runtime preview)
+# Deploy: npm run pages:deploy  (requires `wrangler login` first)
+
+name = "402gal"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"

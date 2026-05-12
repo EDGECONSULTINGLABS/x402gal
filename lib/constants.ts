@@ -1,4 +1,4 @@
-// Economic constants for the Meraxis offset protocol.
+// Economic constants for the 402GAL offset protocol.
 //
 // Footprint is computed at request time by lib/footprint.ts using the v2
 // boundary-aware Green Grid WUE split (Alula spec). HYDRO is denominated in
@@ -11,7 +11,7 @@ import { ModelTier, InfraTier } from "./footprint";
 
 export const DROPS_PER_HYDRO = 1_000_000;
 export const LITERS_PER_GALLON = 3.785411784; // exact, US liquid gallon
-export const TREASURY_ADDRESS = "wire1meraxistreasury000000000000000000hydr";
+export const TREASURY_ADDRESS = "wire1gal402treasury00000000000000000000hydr";
 export const FACILITATOR_URL = "/api/x402/verify";
 
 // Settlement batching. x402 micropayments accumulate per resource until the

@@ -1,4 +1,4 @@
-// Meraxis agent SDK — what an autonomous agent embeds to transparently
+// 402GAL agent SDK — what an autonomous agent embeds to transparently
 // pay 402 challenges. Mirrors the ergonomics of `fetch` and works with
 // any x402-compliant resource. This is the public-facing developer surface.
 
@@ -10,12 +10,12 @@ export interface AgentWallet {
   sign: (req: PaymentRequirement) => Promise<string>;
 }
 
-export interface MeraxisFetchOptions extends RequestInit {
+export interface Gal402FetchOptions extends RequestInit {
   wallet: AgentWallet;
   maxDrops?: number; // refuse to pay more than this per request
 }
 
-export async function meraxisFetch(input: string, opts: MeraxisFetchOptions): Promise<Response> {
+export async function gal402Fetch(input: string, opts: Gal402FetchOptions): Promise<Response> {
   const first = await fetch(input, opts);
   if (first.status !== 402) return first;
 

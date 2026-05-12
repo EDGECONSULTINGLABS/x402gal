@@ -1,4 +1,4 @@
-// Core types for the Meraxis water-offset protocol.
+// Core types for the 402GAL water-offset protocol.
 // HydroCoin (HYDRO) is denominated in "drops" (1 HYDRO = 1_000_000 drops, like satoshis).
 // Each HYDRO retired offsets 1 liter of restored freshwater, audited via Wire UTL receipts.
 
@@ -22,7 +22,7 @@ export interface Agent {
 
 // x402-style payment requirement returned with HTTP 402.
 // Conforms to the spirit of https://www.x402.org/ — version, scheme, asset,
-// amount, recipient, nonce — plus a Meraxis-specific `footprint` block
+// amount, recipient, nonce — plus a 402GAL-specific `footprint` block
 // describing the v2 Green Grid WUE methodology used to compute the price.
 export interface PaymentRequirement {
   x402Version: 1;
@@ -32,7 +32,7 @@ export interface PaymentRequirement {
   amountDrops: number; // payable amount in HYDRO drops (1 HYDRO = 1 gallon)
   estimatedLiters: number; // site water in liters
   estimatedMl: number; // same in mL, for human readability at small scales
-  recipient: string; // Meraxis treasury address on `network`
+  recipient: string; // 402GAL treasury address on `network`
   resource: string; // resource identifier (URL/path)
   description: string;
   nonce: string;

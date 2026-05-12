@@ -1,4 +1,4 @@
-// Meraxis Footprint Model — v2 (Alula spec, 2026-05).
+// 402GAL Footprint Model — v2 (Alula spec, 2026-05).
 //
 // Boundary-aware split that fixes two flaws in v1:
 //   (1) v1 multiplied a measured site WUE by a separate cooling multiplier,

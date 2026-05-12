@@ -57,7 +57,7 @@ export function buildRequirement(
     estimatedMl: result.water_ml,
     recipient: TREASURY_ADDRESS,
     resource,
-    description: `Meraxis water-offset for ${meta.description}`,
+    description: `402GAL water-offset for ${meta.description}`,
     nonce: cryptoNonce(),
     expiresAt: Date.now() + 60_000,
     facilitator: FACILITATOR_URL,
@@ -118,7 +118,7 @@ export function build402Response(req: PaymentRequirement): Response {
       status: 402,
       headers: {
         "Content-Type": "application/json",
-        "X-Meraxis-Facilitator": FACILITATOR_URL,
+        "X-402GAL-Facilitator": FACILITATOR_URL,
       },
     },
   );

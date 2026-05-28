@@ -1,17 +1,15 @@
 "use client";
 import { motion } from "framer-motion";
-import { WireHop } from "@/lib/types";
+import { XrplHop } from "@/lib/types";
 import { ChainBadge } from "./ChainBadge";
 
-const actionLabel: Record<WireHop["action"], string> = {
-  lock: "Lock funds",
-  mint: "Mint UTL receipt",
-  swap: "Cross-chain swap",
-  burn: "Burn shadow asset",
-  retire: "Retire HYDRO → water credit",
+const actionLabel: Record<XrplHop["action"], string> = {
+  swap: "Swap USDC → HYDRO (XRPL DEX)",
+  burn: "Burn HYDRO",
+  retire: "Retire HYDRO → water credit (XRPL)",
 };
 
-export function RouteTrace({ hops }: { hops: WireHop[] }) {
+export function RouteTrace({ hops }: { hops: XrplHop[] }) {
   return (
     <div className="space-y-2">
       {hops.map((h, i) => (

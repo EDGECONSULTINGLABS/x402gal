@@ -12,7 +12,7 @@ export interface AgentWallet {
 
 export interface Gal402FetchOptions extends RequestInit {
   wallet: AgentWallet;
-  maxDrops?: number; // refuse to pay more than this per request
+  maxUsdc?: number; // refuse to pay more than this many micro-USDC per request
 }
 
 export async function gal402Fetch(input: string, opts: Gal402FetchOptions): Promise<Response> {
@@ -22,8 +22,8 @@ export async function gal402Fetch(input: string, opts: Gal402FetchOptions): Prom
   const body = await first.json();
   const req: PaymentRequirement = body.accepts?.[0];
   if (!req) throw new Error("402 response missing payment requirements");
-  if (opts.maxDrops != null && req.amountDrops > opts.maxDrops) {
-    throw new Error(`Payment ${req.amountDrops} drops exceeds maxDrops ${opts.maxDrops}`);
+  if (opts.maxUsdc != null && req.amountUsdc > opts.maxUsdc) {
+    throw new Error(`Payment ${req.amountUsdc} micro-USDC exceeds maxUsdc ${opts.maxUsdc}`);
   }
 
   const signature = await opts.wallet.sign(req);
@@ -31,13 +31,13 @@ export async function gal402Fetch(input: string, opts: Gal402FetchOptions): Prom
     x402Version: 1,
     scheme: "exact",
     network: req.network,
-    asset: "HYDRO",
-    amountDrops: req.amountDrops,
+    asset: "USDC",
+    amountUsdc: req.amountUsdc,
+    offsetHydroDrops: req.offsetHydroDrops,
     payer: opts.wallet.agentId,
     recipient: req.recipient,
     nonce: req.nonce,
     signature,
-    routedVia: "wire-utl",
     sourceChain: opts.wallet.sourceChain,
   };
   const headerB64 = Buffer.from(JSON.stringify(payload)).toString("base64");
@@ -57,7 +57,7 @@ export function memoryWallet(agentId: string, sourceChain: Chain): AgentWallet {
     agentId,
     sourceChain,
     async sign(req) {
-      const base = `${agentId}|${req.nonce}|${req.amountDrops}`;
+      const base = `${agentId}|${req.nonce}|${req.amountUsdc}`;
       return "sig_" + Buffer.from(base).toString("hex").slice(0, 48);
     },
   };

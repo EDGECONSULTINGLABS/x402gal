@@ -29,7 +29,8 @@ export async function GET() {
     batch: {
       sizeTarget: BATCH_SIZE,
       pendingCalls: l.pendingTotals.calls,
-      pendingDrops: l.pendingTotals.drops,
+      pendingUsdc: l.pendingTotals.usdc,
+      pendingOffsetDrops: l.pendingTotals.offsetDrops,
       pendingMl,
       lastFlushAt: l.pendingTotals.lastFlushAt,
     },

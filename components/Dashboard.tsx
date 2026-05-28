@@ -30,7 +30,6 @@ import { WaterBackdrop } from "./WaterBackdrop";
 import { HydroCoinPanel } from "./HydroCoinPanel";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { Agent, Settlement } from "@/lib/types";
-import { DROPS_PER_HYDRO } from "@/lib/constants";
 
 interface State {
   agents: Agent[];
@@ -46,7 +45,8 @@ interface State {
   batch: {
     sizeTarget: number;
     pendingCalls: number;
-    pendingDrops: number;
+    pendingUsdc: number;
+    pendingOffsetDrops: number;
     pendingMl: number;
     lastFlushAt: number;
   };
@@ -209,13 +209,13 @@ export function Dashboard() {
                   className="glass-strong rounded-2xl p-5"
                 >
                   <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
-                    <ShieldCheck size={14} /> Wire UTL route
+                    <ShieldCheck size={14} /> XRPL settlement
                   </div>
                   <div className="mt-3">
                     <RouteTrace hops={lastSettlement.hops} />
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                    <Mini label="UTL hash" value={lastSettlement.wireUtlHash} mono />
+                    <Mini label="Swap hash" value={lastSettlement.settlementHash} mono />
                     <Mini
                       label="Retirement receipt"
                       value={lastSettlement.retirementReceipt}
@@ -226,10 +226,12 @@ export function Dashboard() {
                       value={`${lastSettlement.callCount.toLocaleString()} \u00d7 \u22480.07 mL`}
                     />
                     <Mini
-                      label="Paid"
-                      value={`${(
-                        lastSettlement.amountDrops / DROPS_PER_HYDRO
-                      ).toFixed(6)} HYDRO`}
+                      label="USDC settled"
+                      value={`$${(lastSettlement.usdcSettled / 1_000_000).toFixed(4)}`}
+                    />
+                    <Mini
+                      label="HYDRO retired (XRPL)"
+                      value={`${(lastSettlement.amountDrops / 1_000_000).toFixed(6)} HYDRO`}
                     />
                     <Mini
                       label="Water restored"
@@ -294,7 +296,7 @@ function Nav({ price, retired }: { price?: number; retired: number }) {
 
         <nav className="flex items-center gap-1 text-xs">
           <NavLink href="https://www.x402.org/">x402</NavLink>
-          <NavLink href="https://wire.network">Wire UTL</NavLink>
+          <NavLink href="https://xrpl.org/" >XRPL</NavLink>
           <NavLink href="https://www.hydrocoin.com/" highlight>
             HydroCoin
           </NavLink>
@@ -376,7 +378,7 @@ function Hero({
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hydro-400 opacity-75" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-hydro-300" />
         </span>
-        x402 · Wire UTL · HydroCoin · XRPL
+        x402 · XRPL · HydroCoin
       </motion.div>
 
       <motion.h1
@@ -402,11 +404,12 @@ function Hero({
         <code className="rounded bg-hydro-500/10 px-1.5 py-0.5 font-mono text-sm text-hydro-300">
           402 Payment Required
         </code>{" "}
-        with a v2 boundary-aware footprint. The agent signs an x402 payload,
-        micro-payments accrue into a 100-call batch, and Wire&rsquo;s Universal
-        Transaction Layer retires{" "}
-        <span className="font-semibold text-hydro-300">HydroCoin</span> against
-        a verifiable water-restoration credit on XRPL.
+        with a v2 boundary-aware footprint. The agent signs an x402 payload to
+        pay in <span className="font-semibold text-hydro-300">USDC</span>,
+        micro-payments accrue into a 100-call batch, the treasury swaps the
+        USDC for{" "}
+        <span className="font-semibold text-hydro-300">HydroCoin</span> on the
+        XRPL DEX and retires it as a verifiable water-restoration credit.
       </motion.p>
 
       {/* CTAs */}
@@ -567,7 +570,7 @@ function SettlementsTable({ settlements }: { settlements: Settlement[] }) {
             Settlement stream
           </span>
           <span className="font-mono text-[10px] text-slate-500">
-            x402 → Wire UTL → HYDRO retired
+            x402 → XRPL (USDC→HYDRO swap → retire)
           </span>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
@@ -645,7 +648,7 @@ function DemoPanel({
                 <ChainBadge chain={a.chain} />
               </span>
               <span className="tick font-mono text-[11px] text-slate-400">
-                {(a.balanceDrops / DROPS_PER_HYDRO).toFixed(2)} HYDRO
+                ${(a.balanceUsdc / 1_000_000).toFixed(2)} USDC
               </span>
             </button>
           ))}
@@ -691,7 +694,7 @@ function DemoPanel({
             onClick={onTopUp}
             className="rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 transition hover:border-hydro-500/30 hover:text-white"
           >
-            +$100 → HYDRO (top up agent wallet)
+            +$100 USDC (top up agent wallet)
           </button>
         </div>
 
@@ -771,7 +774,8 @@ function BatchPanel({
   batch?: {
     sizeTarget: number;
     pendingCalls: number;
-    pendingDrops: number;
+    pendingUsdc: number;
+    pendingOffsetDrops: number;
     pendingMl: number;
   };
   onFlush: () => void;
@@ -781,6 +785,7 @@ function BatchPanel({
   const target = batch?.sizeTarget ?? 100;
   const pct = Math.min(100, (calls / target) * 100);
   const ml = batch?.pendingMl ?? 0;
+  const usdc = (batch?.pendingUsdc ?? 0) / 1_000_000;
   return (
     <div className="glass rounded-2xl p-5">
       <div className="flex items-center justify-between">
@@ -800,7 +805,7 @@ function BatchPanel({
           {ml.toFixed(3)} mL
         </div>
         <div className="tick ml-auto font-mono text-xs text-slate-500">
-          {batch?.pendingDrops ?? 0} drops escrow
+          ${usdc.toFixed(4)} USDC escrow
         </div>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-panel">
@@ -816,7 +821,7 @@ function BatchPanel({
         disabled={running || calls === 0}
         className="mt-3 w-full rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 transition hover:border-hydro-500/40 hover:text-white disabled:opacity-50"
       >
-        Force Wire UTL settlement now
+        Settle on XRPL now
       </button>
     </div>
   );
@@ -861,7 +866,7 @@ function Footer() {
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span>x402 + Wire UTL + HydroCoin</span>
+          <span>x402 + XRPL + HydroCoin</span>
           <span className="hidden md:inline text-slate-700">|</span>
           <a
             href="https://www.hydrocoin.com/"
@@ -883,9 +888,8 @@ function Footer() {
         </span>
         <span>
           HydroCoin is not yet deployed on-chain. AMM, balances, and HYDRO
-          retirements are an in-memory simulation; Wire UTL hops are
-          simulated route traces. The x402 contract, footprint model, and
-          settlement state machine run for real.
+          retirements are an in-memory simulation of the XRPL DEX settlement.
+          The x402 contract, footprint model, and settlement state machine run for real.
         </span>
       </div>
     </footer>

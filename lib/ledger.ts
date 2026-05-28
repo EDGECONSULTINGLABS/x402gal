@@ -11,11 +11,12 @@ interface LedgerState {
   settlements: Settlement[];
   amm: AmmState;
   bootedAt: number;
-  // Pending batch: x402 micropayments accumulated but not yet routed through
-  // Wire UTL. Flushed when length hits BATCH_SIZE or BATCH_FLUSH_MS elapses.
+  // Pending batch: x402 micropayments accumulated but not yet settled on XRPL.
+  // Flushed when length hits BATCH_SIZE or BATCH_FLUSH_MS elapses.
   pendingBatch: BatchEntry[];
   pendingTotals: {
-    drops: number;
+    usdc: number; // micro-USDC collected awaiting XRPL settlement
+    offsetDrops: number; // HYDRO drops queued for XRPL retirement
     waterMl: number;
     calls: number;
     sinceFlushMs: number;
@@ -37,7 +38,7 @@ function bootstrap(): LedgerState {
       operator: a.operator,
       chain: a.chain,
       walletAddress: `${a.chain}1${a.id.slice(0, 12)}xxxxxxxxxx`,
-      balanceDrops: a.balanceDrops,
+      balanceUsdc: a.balanceUsdc,
       totalLitersOffset: 0,
       totalQueries: 0,
       joinedAt: Date.now(),
@@ -61,7 +62,8 @@ function bootstrap(): LedgerState {
     bootedAt: Date.now(),
     pendingBatch: [],
     pendingTotals: {
-      drops: 0,
+      usdc: 0,
+      offsetDrops: 0,
       waterMl: 0,
       calls: 0,
       sinceFlushMs: 0,
@@ -77,34 +79,36 @@ export function ledger(): LedgerState {
   return globalThis.__gal402Ledger;
 }
 
-// Append a single x402 micro-payment to the pending batch. Debits the agent
-// immediately (they've paid into escrow); the cross-chain settlement that
-// retires HYDRO happens later when the batch flushes.
+// Append a single x402 micro-payment to the pending batch. Debits the agent's
+// USDC immediately; XRPL settlement (USDC→HYDRO swap + retire) happens when
+// the batch flushes.
 export function addToBatch(entry: BatchEntry): { shouldFlush: boolean } {
   const l = ledger();
   const agent = l.agents.get(entry.agentId);
   if (agent) {
-    agent.balanceDrops -= entry.amountDrops;
+    agent.balanceUsdc -= entry.amountUsdc;
     agent.totalLitersOffset += entry.waterMl / 1000;
     agent.totalQueries += 1;
   }
   l.pendingBatch.push(entry);
-  l.pendingTotals.drops += entry.amountDrops;
+  l.pendingTotals.usdc += entry.amountUsdc;
+  l.pendingTotals.offsetDrops += entry.offsetDrops;
   l.pendingTotals.waterMl += entry.waterMl;
   l.pendingTotals.calls += 1;
   l.pendingTotals.sinceFlushMs = Date.now() - l.pendingTotals.lastFlushAt;
   return { shouldFlush: l.pendingBatch.length >= BATCH_SIZE };
 }
 
-// Drain the pending batch. Caller (lib/wire.ts) is responsible for actually
-// routing the settlement through Wire UTL and writing the resulting
-// Settlement record via recordBatchSettlement().
+// Drain the pending batch. Caller (lib/settlement.ts) is responsible for
+// executing the XRPL settlement and writing the resulting Settlement record
+// via recordBatchSettlement().
 export function drainBatch(): BatchEntry[] {
   const l = ledger();
   const drained = l.pendingBatch;
   l.pendingBatch = [];
   l.pendingTotals = {
-    drops: 0,
+    usdc: 0,
+    offsetDrops: 0,
     waterMl: 0,
     calls: 0,
     sinceFlushMs: 0,

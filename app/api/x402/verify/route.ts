@@ -5,7 +5,7 @@
 import { NextRequest } from "next/server";
 import { verifyPayment } from "@/lib/x402";
 import { addToBatch, drainBatch } from "@/lib/ledger";
-import { settleBatch } from "@/lib/wire";
+import { settleBatch } from "@/lib/settlement";
 import { PaymentPayload, PaymentRequirement } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
   const { shouldFlush } = addToBatch({
     agentId: payload.payer,
     resource: requirement.resource,
-    amountDrops: payload.amountDrops,
+    amountUsdc: payload.amountUsdc,
+    offsetDrops: payload.offsetHydroDrops,
     waterMl: requirement.estimatedMl,
     sourceChain: payload.sourceChain,
     nonce: payload.nonce,

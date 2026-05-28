@@ -1,7 +1,7 @@
 // Server-side demo runner: executes one or more full x402 round-trips on
 // behalf of an agent so the dashboard can show the entire flow with one
 // click. With `count > 1` (default 1) it fires repeated paid calls so the
-// user can drive the pending batch toward a Wire UTL flush in real time.
+// user can drive the pending batch toward an XRPL settlement flush in real time.
 
 import { NextRequest } from "next/server";
 import { buildRequirement, encodePayment } from "@/lib/x402";
@@ -33,9 +33,9 @@ export async function POST(req: NextRequest) {
     const requirement = buildRequirement(RESOURCE, { tokens_in, tokens_out });
     lastRequirement = requirement;
 
-    if (agent.balanceDrops < requirement.amountDrops) {
+    if (agent.balanceUsdc < requirement.amountUsdc) {
       return Response.json(
-        { error: "insufficient HYDRO; top up agent at the AMM first", at: i },
+        { error: "insufficient USDC; top up the agent wallet first", at: i },
         { status: 402 },
       );
     }
@@ -44,14 +44,14 @@ export async function POST(req: NextRequest) {
       x402Version: 1,
       scheme: "exact",
       network: requirement.network,
-      asset: "HYDRO",
-      amountDrops: requirement.amountDrops,
+      asset: "USDC",
+      amountUsdc: requirement.amountUsdc,
+      offsetHydroDrops: requirement.offsetHydroDrops,
       payer: agent.id,
       recipient: requirement.recipient,
       nonce: requirement.nonce,
       signature:
         "sig_" + Buffer.from(`${agent.id}|${requirement.nonce}`).toString("hex").slice(0, 48),
-      routedVia: "wire-utl",
       sourceChain: agent.chain,
     };
 

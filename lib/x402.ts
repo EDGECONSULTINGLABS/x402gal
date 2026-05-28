@@ -3,6 +3,7 @@
 // and https://github.com/coinbase/x402: the resource server returns 402 with
 // a JSON body listing accepted PaymentRequirements; the client retries with
 // an `X-PAYMENT` header containing a base64-encoded payment payload.
+// Settlement is direct to XRPL — no intermediate layer.
 
 import { PaymentPayload, PaymentRequirement, FootprintBlock } from "./types";
 import {
@@ -13,6 +14,7 @@ import {
 } from "./constants";
 import { calculateFootprint } from "./footprint";
 import { ledger } from "./ledger";
+import { dropsToUsdcMicros } from "./amm";
 
 export interface RequirementOpts {
   tokens_in?: number;
@@ -36,7 +38,8 @@ export function buildRequirement(
     e_overhead_kwh: meta.e_overhead_kwh,
   });
 
-  const amountDrops = Math.max(1, litersToDrops(result.water_l));
+  const offsetHydroDrops = Math.max(1, litersToDrops(result.water_l));
+  const amountUsdc = dropsToUsdcMicros(offsetHydroDrops);
 
   const footprint: FootprintBlock = {
     mode: result.mode,
@@ -50,9 +53,10 @@ export function buildRequirement(
   return {
     x402Version: 1,
     scheme: "exact",
-    network: "wire-utl",
-    asset: "HYDRO",
-    amountDrops,
+    network: "xrpl",
+    asset: "USDC",
+    amountUsdc,
+    offsetHydroDrops,
     estimatedLiters: result.water_l,
     estimatedMl: result.water_ml,
     recipient: TREASURY_ADDRESS,
@@ -81,7 +85,8 @@ export function decodePayment(header: string | null): PaymentPayload | null {
     const parsed = JSON.parse(json) as PaymentPayload;
     if (parsed.x402Version !== 1) return null;
     if (parsed.scheme !== "exact") return null;
-    if (parsed.asset !== "HYDRO") return null;
+    if (parsed.asset !== "USDC") return null;
+    if (!parsed.sourceChain) return null;
     return parsed;
   } catch {
     return null;
@@ -95,14 +100,14 @@ export interface VerifyResult {
 
 export function verifyPayment(req: PaymentRequirement, payload: PaymentPayload): VerifyResult {
   if (payload.recipient !== req.recipient) return { ok: false, reason: "recipient mismatch" };
-  if (payload.amountDrops < req.amountDrops) return { ok: false, reason: "underpayment" };
+  if (payload.amountUsdc < req.amountUsdc) return { ok: false, reason: "underpayment" };
   if (!payload.signature || payload.signature.length < 16) {
     return { ok: false, reason: "invalid signature" };
   }
   const agent = ledger().agents.get(payload.payer);
   if (!agent) return { ok: false, reason: "unknown payer" };
-  if (agent.balanceDrops < payload.amountDrops) {
-    return { ok: false, reason: "insufficient HYDRO balance" };
+  if (agent.balanceUsdc < payload.amountUsdc) {
+    return { ok: false, reason: "insufficient USDC balance" };
   }
   return { ok: true };
 }
@@ -119,6 +124,7 @@ export function build402Response(req: PaymentRequirement): Response {
       headers: {
         "Content-Type": "application/json",
         "X-402GAL-Facilitator": FACILITATOR_URL,
+        "X-402GAL-Settlement": "xrpl",
       },
     },
   );

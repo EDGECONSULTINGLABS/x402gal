@@ -52,7 +52,7 @@ export function HydroCoinPanel({
           </div>
           <div>
             <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-hydro-200/80">
-              <ShieldCheck size={12} /> Settlement asset
+              <ShieldCheck size={12} /> Retirement asset · XRPL
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <span className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -107,7 +107,7 @@ export function HydroCoinPanel({
             <ExternalLink size={14} className="relative text-hydro-300" />
           </a>
           <div className="px-1 text-[10px] uppercase tracking-[0.18em] text-slate-500">
-            Backed by Parjana stormwater · XRPL retired
+            Agents pay USDC · retired as HYDRO on XRPL
           </div>
           <div className="px-1 font-mono text-[10px] text-slate-500">
             Circulating · {circulatingHydro.toLocaleString(undefined, { maximumFractionDigits: 0 })} HYDRO

@@ -6,7 +6,7 @@
 import { NextRequest } from "next/server";
 import { build402Response, buildRequirement, decodePayment, verifyPayment } from "@/lib/x402";
 import { addToBatch, drainBatch, ledger } from "@/lib/ledger";
-import { settleBatch } from "@/lib/wire";
+import { settleBatch } from "@/lib/settlement";
 import { BATCH_SIZE } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -54,11 +54,12 @@ export async function POST(req: NextRequest) {
 
   // Add to the pending batch instead of routing immediately. Per-call
   // settlements would be ~18 drops each (illegible on screen); we batch up
-  // to BATCH_SIZE calls and emit one human-visible Wire UTL retirement.
+  // to BATCH_SIZE calls and emit one human-visible XRPL retirement.
   const { shouldFlush } = addToBatch({
     agentId: payload.payer,
     resource: RESOURCE,
-    amountDrops: payload.amountDrops,
+    amountUsdc: payload.amountUsdc,
+    offsetDrops: payload.offsetHydroDrops,
     waterMl: requirement.estimatedMl,
     sourceChain: payload.sourceChain,
     nonce: payload.nonce,
@@ -75,7 +76,8 @@ export async function POST(req: NextRequest) {
     JSON.stringify({
       completion: fakeCompletion(prompt || "your question"),
       pricing: {
-        amountDrops: payload.amountDrops,
+        amountUsdc: payload.amountUsdc,
+        offsetHydroDrops: payload.offsetHydroDrops,
         water_ml: requirement.estimatedMl,
         water_l: requirement.estimatedLiters,
         methodology_hash: requirement.footprint.methodology.methodology_hash,
@@ -83,7 +85,8 @@ export async function POST(req: NextRequest) {
       batch: {
         size_target: BATCH_SIZE,
         pending_calls: pending.calls,
-        pending_drops: pending.drops,
+        pending_usdc: pending.usdc,
+        pending_offset_drops: pending.offsetDrops,
         pending_water_ml: pending.waterMl,
         flushed: flushedSettlement?.id ?? null,
       },
@@ -97,7 +100,7 @@ export async function POST(req: NextRequest) {
           JSON.stringify({
             accepted: true,
             water_ml: requirement.estimatedMl,
-            batch_flushed: flushedSettlement?.wireUtlHash ?? null,
+            batch_flushed: flushedSettlement?.settlementHash ?? null,
           }),
         ).toString("base64"),
       },

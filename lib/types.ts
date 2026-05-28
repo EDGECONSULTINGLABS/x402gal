@@ -1,8 +1,11 @@
 // Core types for the 402GAL water-offset protocol.
-// HydroCoin (HYDRO) is denominated in "drops" (1 HYDRO = 1_000_000 drops, like satoshis).
-// Each HYDRO retired offsets 1 liter of restored freshwater, audited via Wire UTL receipts.
+//
+// Agents pay in USDC via x402. Micro-payments batch; on flush the treasury
+// swaps the accumulated USDC for HydroCoin (HYDRO) and retires it on XRPL
+// as a verifiable water-restoration credit. HYDRO is denominated in "drops"
+// (1 HYDRO = 1_000_000 drops); 1 HYDRO = 1 US gallon of restored freshwater.
 
-export type Chain = "wire-utl" | "base" | "solana" | "ethereum" | "polygon";
+export type Chain = "base" | "solana" | "ethereum" | "polygon" | "xrpl";
 
 export type AgentId = string; // e.g. "agent_meridian_v3"
 export type TxId = string;
@@ -14,7 +17,7 @@ export interface Agent {
   operator: string;
   chain: Chain;
   walletAddress: string;
-  balanceDrops: number;
+  balanceUsdc: number; // agent's spendable balance in micro-USDC (6 decimals)
   totalLitersOffset: number;
   totalQueries: number;
   joinedAt: number;
@@ -27,9 +30,10 @@ export interface Agent {
 export interface PaymentRequirement {
   x402Version: 1;
   scheme: "exact"; // exact-amount scheme, the simplest x402 mode
-  network: Chain;
-  asset: "HYDRO";
-  amountDrops: number; // payable amount in HYDRO drops (1 HYDRO = 1 gallon)
+  network: Chain; // settlement network; XRPL is the retirement registry
+  asset: "USDC"; // agents pay in USDC; HYDRO is the downstream retirement unit
+  amountUsdc: number; // payable amount in micro-USDC (6 decimals)
+  offsetHydroDrops: number; // HYDRO drops to be retired on XRPL for this call
   estimatedLiters: number; // site water in liters
   estimatedMl: number; // same in mL, for human readability at small scales
   recipient: string; // 402GAL treasury address on `network`
@@ -72,33 +76,33 @@ export interface PaymentPayload {
   x402Version: 1;
   scheme: "exact";
   network: Chain;
-  asset: "HYDRO";
-  amountDrops: number;
+  asset: "USDC";
+  amountUsdc: number; // micro-USDC the agent is paying
+  offsetHydroDrops: number; // HYDRO drops this payment will retire on XRPL
   payer: AgentId;
   recipient: string;
   nonce: string;
   signature: string; // ed25519-style stub signature
-  routedVia: "wire-utl"; // every payment is settled through Wire's Universal Transaction Layer
   sourceChain: Chain; // the chain the agent's wallet lives on
 }
 
-export type SettlementStatus = "routed" | "settled" | "retired" | "failed";
+export type SettlementStatus = "pending" | "settled" | "retired" | "failed";
 
 export interface Settlement {
   id: SettlementId;
   txId: TxId;
   agentId: AgentId | "batch"; // "batch" when this settlement aggregates many agents
   resource: string;
-  amountDrops: number;
+  usdcSettled: number; // micro-USDC collected from x402 payments
+  amountDrops: number; // HYDRO drops retired on XRPL against the water credit
   litersOffset: number;
   callCount: number; // number of x402 calls aggregated into this settlement
   sourceChain: Chain;
-  destChain: Chain;
-  wireUtlHash: string; // Wire UTL universal transaction hash
-  retirementReceipt: string; // hash of HydroCoin retirement event
+  settlementHash: string; // XRPL transaction hash (USDC→HYDRO swap)
+  retirementReceipt: string; // XRPL transaction hash (HYDRO retire)
   status: SettlementStatus;
   createdAt: number;
-  hops: WireHop[]; // route taken across chains
+  hops: XrplHop[]; // XRPL settlement hops (swap + retire)
   methodologyHash: string; // pinned footprint methodology version
 }
 
@@ -106,16 +110,17 @@ export interface Settlement {
 export interface BatchEntry {
   agentId: AgentId;
   resource: string;
-  amountDrops: number;
+  amountUsdc: number; // micro-USDC paid for this call
+  offsetDrops: number; // HYDRO drops to retire for this call
   waterMl: number;
   sourceChain: Chain;
   nonce: string;
   ts: number;
 }
 
-export interface WireHop {
+export interface XrplHop {
   chain: Chain;
-  action: "lock" | "mint" | "swap" | "burn" | "retire";
+  action: "swap" | "burn" | "retire";
   hash: string;
   ms: number;
 }

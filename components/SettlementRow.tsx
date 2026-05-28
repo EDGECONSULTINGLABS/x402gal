@@ -2,13 +2,12 @@
 import { motion } from "framer-motion";
 import { Settlement } from "@/lib/types";
 import { ChainBadge } from "./ChainBadge";
-import { DROPS_PER_HYDRO } from "@/lib/constants";
 
 export function SettlementRow({ s, isNew }: { s: Settlement; isNew?: boolean }) {
   const ago = Math.max(0, Math.round((Date.now() - s.createdAt) / 1000));
   const ml = s.litersOffset * 1000;
   const restored = ml >= 1 ? `${ml.toFixed(1)} mL` : `${ml.toFixed(2)} mL`;
-  const hydro = s.amountDrops / DROPS_PER_HYDRO;
+  const usdc = s.usdcSettled / 1_000_000;
   return (
     <motion.div
       initial={isNew ? { opacity: 0, y: -8, backgroundColor: "rgba(34,211,238,0.18)" } : false}
@@ -25,7 +24,7 @@ export function SettlementRow({ s, isNew }: { s: Settlement; isNew?: boolean }) 
         {s.callCount.toLocaleString()} <span className="text-slate-500">calls</span>
       </div>
       <div className="col-span-2 tick text-right text-hydro-300">
-        {hydro >= 1 ? hydro.toFixed(3) : hydro.toFixed(6)} HYDRO
+        {usdc >= 1 ? `$${usdc.toFixed(2)}` : `$${usdc.toFixed(4)}`}
       </div>
       <div className="col-span-2 tick text-right text-slate-200">{restored}</div>
       <div className="col-span-1 text-right font-mono text-[10px] text-slate-500">

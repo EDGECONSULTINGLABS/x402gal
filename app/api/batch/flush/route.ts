@@ -1,9 +1,9 @@
-// Manual batch flush — drains the pending escrow and emits a Wire UTL
+// Manual batch flush — drains the pending batch and triggers a direct XRPL
 // settlement immediately. Useful for the BATCH_FLUSH_MS timer surrogate
-// and for the dashboard's "force settle now" button.
+// and for the dashboard's "settle now" button.
 
 import { drainBatch, ledger } from "@/lib/ledger";
-import { settleBatch } from "@/lib/wire";
+import { settleBatch } from "@/lib/settlement";
 
 export const runtime = "nodejs";
 

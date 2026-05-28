@@ -1,7 +1,7 @@
-// AMM buy endpoint: top up an agent's HYDRO balance with USDC.
+// Wallet top-up endpoint: fund an agent's USDC balance. Agents pay for water
+// offsets in USDC, so a top-up simply credits their micro-USDC balance.
 
 import { NextRequest } from "next/server";
-import { executeBuyHydro } from "@/lib/amm";
 import { ledger } from "@/lib/ledger";
 
 export const runtime = "nodejs";
@@ -12,9 +12,10 @@ export async function POST(req: NextRequest) {
   if (!Number.isFinite(usdcMicros) || usdcMicros <= 0) {
     return Response.json({ error: "invalid usdc" }, { status: 400 });
   }
-  if (!ledger().agents.has(agentId)) {
+  const agent = ledger().agents.get(agentId);
+  if (!agent) {
     return Response.json({ error: "unknown agent" }, { status: 404 });
   }
-  const quote = executeBuyHydro(usdcMicros, agentId);
-  return Response.json({ ok: true, quote });
+  agent.balanceUsdc += usdcMicros;
+  return Response.json({ ok: true, balanceUsdc: agent.balanceUsdc });
 }

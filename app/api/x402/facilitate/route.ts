@@ -33,6 +33,7 @@
 
 import { NextRequest } from "next/server";
 import { xrplVerify, xrplSettle, X402Requirement, X402Payload } from "@/lib/x402XrplAdapter";
+import { pullUsdcToTreasury, isEvmTreasuryConfigured } from "@/lib/evmTreasury";
 import { addToBatch, drainBatch } from "@/lib/ledger";
 import { settleBatch } from "@/lib/settlement";
 
@@ -66,7 +67,33 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Step 2: Settle ──────────────────────────────────────────────────────────
+  // ── Step 2: Pull USDC to EVM treasury (if configured + auth has v/r/s) ──────
+  const auth = payload.payload?.authorization;
+  let usdcPull: { success: boolean; skipped?: boolean; txHash?: string; explorer?: string; error?: string } =
+    { success: true, skipped: true };
+
+  if (isEvmTreasuryConfigured() && auth?.v && auth?.r && auth?.s) {
+    const pullResult = await pullUsdcToTreasury({
+      from:        auth.from,
+      to:          auth.to,
+      value:       auth.value,
+      validAfter:  auth.validAfter ?? "0",
+      validBefore: auth.validBefore ?? "9999999999",
+      nonce:       auth.nonce ?? "",
+      v:           Number(auth.v),
+      r:           auth.r,
+      s:           auth.s,
+    });
+    if (!pullResult.success && !pullResult.skipped) {
+      return Response.json(
+        { isValid: true, success: false, errorReason: `USDC pull failed: ${pullResult.error}`, network: "xrpl" },
+        { status: 500 },
+      );
+    }
+    usdcPull = pullResult;
+  }
+
+  // ── Step 3: Settle on XRPL ──────────────────────────────────────────────────
   const settleResult = await xrplSettle(payload, requirement);
 
   if (!settleResult.success) {
@@ -81,7 +108,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Step 3: Record in 402GAL batch ledger ───────────────────────────────────
+  // ── Step 4: Record in 402GAL batch ledger ───────────────────────────────────
   // Accumulate into the same batch pipeline as the internal x402 flow so
   // the dashboard settlement stream reflects externally-facilitated payments.
   const usdcMicros = parseInt(payload.payload?.authorization?.value ?? "0", 10);
@@ -101,22 +128,26 @@ export async function POST(req: NextRequest) {
 
   const batchSettlement = shouldFlush ? await settleBatch(drainBatch()) : null;
 
-  // ── Step 4: Return full receipt ─────────────────────────────────────────────
+  // ── Step 5: Return full receipt ─────────────────────────────────────────────
   return Response.json({
     isValid: true,
     success: true,
+    // ─ Avalanche USDC pull
+    usdcPulled: !usdcPull.skipped,
+    usdcTxHash: usdcPull.txHash ?? null,
+    explorerUsdc: usdcPull.explorer ?? null,
+    // ─ XRPL settlement
     txHash: settleResult.txHash,
     retirementTxHash: settleResult.retirementTxHash,
     network: "xrpl",
     simulated: settleResult.simulated ?? false,
-    // Explorer links for verification
     explorerSwap: settleResult.txHash && !settleResult.simulated
       ? `https://testnet.xrpscan.com/tx/${settleResult.txHash}`
       : null,
     explorerRetirement: settleResult.retirementTxHash && !settleResult.simulated
       ? `https://testnet.xrpscan.com/tx/${settleResult.retirementTxHash}`
       : null,
-    // Batch state
+    // ─ Batch state
     batchSettlement,
   });
 }

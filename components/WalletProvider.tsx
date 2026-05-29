@@ -3,7 +3,7 @@
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { wagmiConfig } from "@/lib/walletConfig";
 
 function makeQueryClient() {
@@ -16,6 +16,35 @@ function getQueryClient() {
   if (typeof window === "undefined") return makeQueryClient();
   if (!browserQueryClient) browserQueryClient = makeQueryClient();
   return browserQueryClient;
+}
+
+const WC_NOISE = [
+  "Connection interrupted while trying to subscribe",
+  "WebSocket connection failed",
+  "socket hang up",
+  "WalletConnect",
+];
+
+function isWcNoise(msg: string) {
+  return WC_NOISE.some((s) => msg.includes(s));
+}
+
+function WcErrorSuppressor() {
+  useEffect(() => {
+    const onUnhandled = (e: PromiseRejectionEvent) => {
+      if (e.reason?.message && isWcNoise(e.reason.message)) e.preventDefault();
+    };
+    const onError = (e: ErrorEvent) => {
+      if (e.message && isWcNoise(e.message)) e.preventDefault();
+    };
+    window.addEventListener("unhandledrejection", onUnhandled);
+    window.addEventListener("error", onError);
+    return () => {
+      window.removeEventListener("unhandledrejection", onUnhandled);
+      window.removeEventListener("error", onError);
+    };
+  }, []);
+  return null;
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
@@ -31,6 +60,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             fontStack: "system",
           })}
         >
+          <WcErrorSuppressor />
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>

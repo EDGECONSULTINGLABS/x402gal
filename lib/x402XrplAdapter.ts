@@ -86,12 +86,16 @@ export interface X402Payload {
   payload: {
     signature: string;        // XRPL ed25519 or secp256k1 signature over auth hash
     authorization: {
-      from: string;           // payer XRPL address
-      to: string;             // treasury XRPL address (must match payTo)
+      from: string;           // payer address (XRPL r-address or EVM 0x address)
+      to: string;             // treasury address (must match payTo)
       value: string;          // micro-USDC as decimal string
       validAfter: string;     // unix seconds string
       validBefore: string;    // unix seconds string (expiry)
       nonce: string;
+      // ERC-3009 signature components (EVM chains) — optional for XRPL
+      v?: number | string;
+      r?: string;
+      s?: string;
     };
   };
 }

@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
   if (!payload) return build402Response(requirement);
 
-  const verify = verifyPayment(requirement, payload);
+  const verify = await verifyPayment(requirement, payload);
   if (!verify.ok) {
     return new Response(
       JSON.stringify({ error: "payment invalid", reason: verify.reason }),

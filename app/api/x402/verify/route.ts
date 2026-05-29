@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     requirement: PaymentRequirement;
     payload: PaymentPayload;
   };
-  const v = verifyPayment(requirement, payload);
+  const v = await verifyPayment(requirement, payload);
   if (!v.ok) {
     return Response.json({ ok: false, reason: v.reason }, { status: 402 });
   }

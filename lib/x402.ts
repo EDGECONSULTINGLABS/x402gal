@@ -15,6 +15,7 @@ import {
 import { calculateFootprint } from "./footprint";
 import { ledger } from "./ledger";
 import { dropsToUsdcMicros } from "./amm";
+import { verifyOnChain } from "./chainVerifier";
 
 export interface RequirementOpts {
   tokens_in?: number;
@@ -98,7 +99,10 @@ export interface VerifyResult {
   reason?: string;
 }
 
-export function verifyPayment(req: PaymentRequirement, payload: PaymentPayload): VerifyResult {
+export async function verifyPayment(
+  req: PaymentRequirement,
+  payload: PaymentPayload,
+): Promise<VerifyResult> {
   if (payload.recipient !== req.recipient) return { ok: false, reason: "recipient mismatch" };
   if (payload.amountUsdc < req.amountUsdc) return { ok: false, reason: "underpayment" };
   if (!payload.signature || payload.signature.length < 16) {
@@ -109,6 +113,9 @@ export function verifyPayment(req: PaymentRequirement, payload: PaymentPayload):
   if (agent.balanceUsdc < payload.amountUsdc) {
     return { ok: false, reason: "insufficient USDC balance" };
   }
+  // On-chain RPC verification — uses real RPC when env vars are set, ledger fallback otherwise
+  const onChain = await verifyOnChain(req, payload);
+  if (!onChain.ok) return { ok: false, reason: onChain.reason };
   return { ok: true };
 }
 

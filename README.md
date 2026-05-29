@@ -13,7 +13,7 @@
 
 > ⚠️ **Testnet demo only.** This is an independent hackathon-derived project. Water credits are tied to [HydroCoin's MRV Framework](https://hydrocoin.com/whitepaper) but currently issued under a custodial model. Not financial advice. No real-world carbon/water offsets are guaranteed.
 
-> **Disclaimer:** Funds on testnet have no real-world value. HydroCoin branding and water restoration methodology are developed by [Parjana Engineering](https://parjanaengineering.com). Issuer is currently custodial.
+> **Disclaimer:** Funds on testnet have no real-world value. HydroCoin water credits are backed by the [HydroCoin MRV Framework](https://hydrocoin.com/whitepaper). Currently operates under a custodial issuance model during testnet phase; transitioning toward decentralized verification aligned with HydroCoin's MRV roadmap.
 
 ---
 
@@ -201,10 +201,10 @@ Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc
 
 ## Intellectual Property
 
-- **x402GAL** is an open-source project created in partnership with HydroCoin & [Parjana Engineering](https://parjanaengineering.com).
+- **x402GAL** is an open-source reference implementation of HydroCoin's XRPL settlement rails.
 - The code in this repository is released under the MIT license.
-- **HydroCoin (HYD)**, the associated water credit methodology, and MRV framework are developed by Parjana Engineering.
-- Commercial use of HydroCoin branding or methodology requires permission from Parjana Engineering.
+- **HydroCoin (HYD)** and the associated MRV framework are the core protocol. [Parjana Engineering](https://parjanaengineering.com) is one qualifying infrastructure provider for the water restoration methodology.
+- Commercial use of HydroCoin branding or methodology requires permission from the HydroCoin project.
 
 ---
 

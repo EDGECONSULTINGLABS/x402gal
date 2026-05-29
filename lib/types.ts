@@ -1,11 +1,11 @@
-// Core types for the 402GAL water-offset protocol.
+// Core types for the x402GAL water-offset protocol.
 //
 // Agents pay in USDC via x402. Micro-payments batch; on flush the treasury
 // swaps the accumulated USDC for HydroCoin (HYDRO) and retires it on XRPL
 // as a verifiable water-restoration credit. HYDRO is denominated in "drops"
 // (1 HYDRO = 1_000_000 drops); 1 HYDRO = 1 US gallon of restored freshwater.
 
-export type Chain = "base" | "solana" | "ethereum" | "polygon" | "xrpl";
+export type Chain = "base" | "solana" | "ethereum" | "polygon" | "xrpl" | "avalanche";
 
 export type AgentId = string; // e.g. "agent_meridian_v3"
 export type TxId = string;

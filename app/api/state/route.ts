@@ -4,6 +4,7 @@ import { ledger } from "@/lib/ledger";
 import { marketCapUSDC, priceUSDC } from "@/lib/amm";
 import { BATCH_SIZE, DROPS_PER_HYDRO } from "@/lib/constants";
 import { FOOTPRINT_METHODOLOGY_HASH } from "@/lib/footprint";
+import { isXrplConfigured, xrplEndpoint } from "@/lib/xrplClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,6 +42,15 @@ export async function GET() {
       callsServed:
         l.pendingTotals.calls +
         l.settlements.reduce((s, x) => s + (x.callCount || 0), 0),
+    },
+    xrpl: {
+      live: isXrplConfigured(),
+      endpoint: isXrplConfigured() ? xrplEndpoint() : null,
+      explorerBase: isXrplConfigured()
+        ? xrplEndpoint().includes("altnet")
+          ? "https://testnet.xrpl.org/transactions/"
+          : "https://xrpscan.com/tx/"
+        : null,
     },
   });
 }

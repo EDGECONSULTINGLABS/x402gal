@@ -1,4 +1,4 @@
-// Economic constants for the 402GAL offset protocol.
+// Economic constants for the x402GAL offset protocol.
 //
 // Footprint is computed at request time by lib/footprint.ts using the v2
 // boundary-aware Green Grid WUE split (Alula spec). HYDRO is denominated in
@@ -11,7 +11,7 @@ import { ModelTier, InfraTier } from "./footprint";
 
 export const DROPS_PER_HYDRO = 1_000_000;
 export const LITERS_PER_GALLON = 3.785411784; // exact, US liquid gallon
-export const TREASURY_ADDRESS = "rGAL402TreasuryXRPLHydroCoinOffset00000";
+export const TREASURY_ADDRESS = "rX402GALTreasuryXRPLHydroCoinOffset0000";
 export const FACILITATOR_URL = "/api/x402/verify";
 
 // Settlement batching. x402 micropayments accumulate until the batch hits
@@ -79,4 +79,5 @@ export const SEED_AGENTS = [
   { id: "agent_solace_alpha", label: "Solace-α", operator: "Helix Labs", chain: "solana", balanceUsdc: 350_000_000 },
   { id: "agent_orin_x7", label: "Orin-x7", operator: "OpenForge", chain: "ethereum", balanceUsdc: 220_000_000 },
   { id: "agent_kairo_pro", label: "Kairo-Pro", operator: "Drift Robotics", chain: "polygon", balanceUsdc: 640_000_000 },
+  { id: "agent_apex_av1", label: "Apex-av1", operator: "Avax Labs", chain: "avalanche", balanceUsdc: 400_000_000 },
 ] as const;

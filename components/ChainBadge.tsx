@@ -6,6 +6,7 @@ const colors: Record<Chain, string> = {
   ethereum: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
   polygon: "bg-violet-500/15 text-violet-300 border-violet-500/30",
   xrpl: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  avalanche: "bg-red-500/15 text-red-300 border-red-500/30",
 };
 
 const labels: Record<Chain, string> = {
@@ -14,6 +15,7 @@ const labels: Record<Chain, string> = {
   ethereum: "Ethereum",
   polygon: "Polygon",
   xrpl: "XRPL",
+  avalanche: "Avalanche",
 };
 
 export function ChainBadge({ chain }: { chain: Chain }) {

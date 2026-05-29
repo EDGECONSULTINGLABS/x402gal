@@ -1,14 +1,14 @@
 // CLI demo: a real agent walking the x402 round-trip end-to-end.
 // Usage: BASE=http://localhost:3000 npm run demo:agent
 
-import { gal402Fetch, memoryWallet } from "@/lib/agentSdk";
+import { x402galFetch, memoryWallet } from "@/lib/agentSdk";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
 
 async function main() {
   const wallet = memoryWallet("agent_meridian_v3", "base");
   console.log(`→ Calling ${BASE}/api/ai/chat as ${wallet.agentId}`);
-  const res = await gal402Fetch(`${BASE}/api/ai/chat`, {
+  const res = await x402galFetch(`${BASE}/api/ai/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt: "What's the water cost of this query?" }),

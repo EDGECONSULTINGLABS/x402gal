@@ -26,7 +26,7 @@ interface LedgerState {
 
 declare global {
   // eslint-disable-next-line no-var
-  var __gal402Ledger: LedgerState | undefined;
+  var __x402galLedger: LedgerState | undefined;
 }
 
 function bootstrap(): LedgerState {
@@ -73,10 +73,10 @@ function bootstrap(): LedgerState {
 }
 
 export function ledger(): LedgerState {
-  if (!globalThis.__gal402Ledger) {
-    globalThis.__gal402Ledger = bootstrap();
+  if (!globalThis.__x402galLedger) {
+    globalThis.__x402galLedger = bootstrap();
   }
-  return globalThis.__gal402Ledger;
+  return globalThis.__x402galLedger;
 }
 
 // Append a single x402 micro-payment to the pending batch. Debits the agent's

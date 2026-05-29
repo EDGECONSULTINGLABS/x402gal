@@ -21,6 +21,7 @@ import {
   Droplets,
   ExternalLink,
   Activity,
+  Wallet,
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { ChainBadge } from "./ChainBadge";
@@ -29,6 +30,9 @@ import { SettlementRow } from "./SettlementRow";
 import { WaterBackdrop } from "./WaterBackdrop";
 import { HydroCoinPanel } from "./HydroCoinPanel";
 import { AnimatedNumber } from "./AnimatedNumber";
+import { ConnectButton } from "./ConnectButton";
+import { AgentSessionPanel } from "./AgentSessionPanel";
+import { useAccount } from "wagmi";
 import { Agent, Settlement } from "@/lib/types";
 
 interface State {
@@ -56,9 +60,27 @@ interface State {
     mlOffset: number;
     callsServed: number;
   };
+  xrpl: {
+    live: boolean;
+    endpoint: string | null;
+    explorerBase: string | null;
+  };
+}
+
+function useSafeAccount() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useAccount();
+  } catch {
+    return { isConnected: false, address: undefined };
+  }
 }
 
 export function Dashboard() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const { isConnected: walletConnected } = useSafeAccount();
+  const isConnected = mounted && walletConnected;
   const [state, setState] = useState<State | null>(null);
   const [selected, setSelected] = useState<string>("agent_meridian_v3");
   const [prompt, setPrompt] = useState(
@@ -153,7 +175,7 @@ export function Dashboard() {
       <WaterBackdrop />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
-      <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} />
+      <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} />
 
       <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8">
         <Hero
@@ -165,6 +187,7 @@ export function Dashboard() {
           onRun={() => runDemo(1)}
           onBurst={() => runDemo(100)}
           running={running}
+          isConnected={isConnected}
         />
 
         <div className="mt-10 sm:mt-14">
@@ -177,7 +200,27 @@ export function Dashboard() {
           />
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {!isConnected && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8 flex items-center justify-center rounded-2xl border border-hydro-400/20 bg-hydro-500/5 px-6 py-10 text-center"
+          >
+            <div>
+              <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border border-hydro-400/30 bg-hydro-500/10">
+                <Wallet size={22} className="text-hydro-300" />
+              </div>
+              <p className="text-sm font-medium text-slate-200">Connect your wallet to interact</p>
+              <p className="mt-1 text-xs text-slate-500">Send queries, flush batches, and track your agent&apos;s water offset</p>
+              <div className="mt-4 flex justify-center">
+                <ConnectButton />
+              </div>
+            </div>
+          </motion.div>
+        )}
+        <div className={`mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3 ${
+          isConnected ? "" : "pointer-events-none select-none opacity-0 h-0 overflow-hidden"
+        }`}>
           <div className="space-y-6 lg:col-span-2">
             <PriceChart history={history} />
             <SettlementsTable settlements={state?.settlements ?? []} />
@@ -214,13 +257,11 @@ export function Dashboard() {
                   <div className="mt-3">
                     <RouteTrace hops={lastSettlement.hops} />
                   </div>
+                  <div className="mt-3 space-y-2 text-xs">
+                    <HashRow label="Swap hash" hash={lastSettlement.settlementHash} explorerBase={state?.xrpl.explorerBase} />
+                    <HashRow label="Retirement receipt" hash={lastSettlement.retirementReceipt} explorerBase={state?.xrpl.explorerBase} accent />
+                  </div>
                   <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                    <Mini label="Swap hash" value={lastSettlement.settlementHash} mono />
-                    <Mini
-                      label="Retirement receipt"
-                      value={lastSettlement.retirementReceipt}
-                      mono
-                    />
                     <Mini
                       label={`Aggregated calls`}
                       value={`${lastSettlement.callCount.toLocaleString()} \u00d7 \u22480.07 mL`}
@@ -267,7 +308,7 @@ export function Dashboard() {
 
 /* ─────────────────────────────────────────────────────── */
 
-function Nav({ price, retired }: { price?: number; retired: number }) {
+function Nav({ price, retired, xrplLive }: { price?: number; retired: number; xrplLive: boolean }) {
   return (
     <header className="sticky top-0 z-40 border-b border-edge/60 bg-abyss/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
@@ -275,7 +316,7 @@ function Nav({ price, retired }: { price?: number; retired: number }) {
           <Logo size={30} />
           <div>
             <div className="font-display text-base font-semibold tracking-tight">
-              402GAL
+              x402GAL
             </div>
             <div className="hidden text-[10px] uppercase tracking-[0.22em] text-slate-500 sm:block">
               Water-offset rails for AI agents
@@ -292,15 +333,28 @@ function Nav({ price, retired }: { price?: number; retired: number }) {
             <Droplets size={11} className="text-hydro-300" />
             {retired.toFixed(3)} gal restored
           </Pill>
+          {xrplLive ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10px] text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              XRPL live
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] text-amber-300/80">
+              ◆ simulated
+            </span>
+          )}
         </div>
 
-        <nav className="flex items-center gap-1 text-xs">
-          <NavLink href="https://www.x402.org/">x402</NavLink>
-          <NavLink href="https://xrpl.org/" >XRPL</NavLink>
-          <NavLink href="https://www.hydrocoin.com/" highlight>
-            HydroCoin
-          </NavLink>
-        </nav>
+        <div className="flex items-center gap-3">
+          <nav className="hidden items-center gap-1 text-xs md:flex">
+            <NavLink href="https://www.x402.org/">x402</NavLink>
+            <NavLink href="https://xrpl.org/">XRPL</NavLink>
+            <NavLink href="https://www.hydrocoin.com/" highlight>
+              HydroCoin
+            </NavLink>
+          </nav>
+          <ConnectButton />
+        </div>
       </div>
     </header>
   );
@@ -351,6 +405,7 @@ function Hero({
   onRun,
   onBurst,
   running,
+  isConnected,
 }: {
   totalLiters: number;
   totalMl: number;
@@ -360,6 +415,7 @@ function Hero({
   onRun: () => void;
   onBurst: () => void;
   running: boolean;
+  isConnected: boolean;
 }) {
   const litersDisplay =
     totalLiters >= 0.01
@@ -390,7 +446,7 @@ function Hero({
         Every AI query has a{" "}
         <span className="sheen-text">water footprint.</span>
         <br className="hidden sm:block" />{" "}
-        <span className="text-slate-400">402GAL settles it</span>{" "}
+        <span className="text-slate-400">x402GAL settles it</span>{" "}
         <span className="text-white">in real time.</span>
       </motion.h1>
 
@@ -419,21 +475,27 @@ function Hero({
         transition={{ delay: 0.5, duration: 0.5 }}
         className="mt-8 flex flex-wrap items-center gap-3"
       >
-        <button
-          onClick={onRun}
-          disabled={running}
-          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-hydro-gradient px-6 py-3 text-sm font-semibold text-abyss shadow-glow-lg transition hover:brightness-110 disabled:opacity-60"
-        >
-          <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-          <Send size={14} /> Send 1 paid query
-        </button>
-        <button
-          onClick={onBurst}
-          disabled={running}
-          className="inline-flex items-center gap-2 rounded-xl border border-hydro-400/40 bg-hydro-500/10 px-5 py-3 text-sm font-medium text-hydro-200 transition hover:border-hydro-300 hover:bg-hydro-500/20 disabled:opacity-60"
-        >
-          <Layers size={14} /> Burst 100 → flush
-        </button>
+        {isConnected ? (
+          <>
+            <button
+              onClick={onRun}
+              disabled={running}
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-hydro-gradient px-6 py-3 text-sm font-semibold text-abyss shadow-glow-lg transition hover:brightness-110 disabled:opacity-60"
+            >
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              <Send size={14} /> Send 1 paid query
+            </button>
+            <button
+              onClick={onBurst}
+              disabled={running}
+              className="inline-flex items-center gap-2 rounded-xl border border-hydro-400/40 bg-hydro-500/10 px-5 py-3 text-sm font-medium text-hydro-200 transition hover:border-hydro-300 hover:bg-hydro-500/20 disabled:opacity-60"
+            >
+              <Layers size={14} /> Burst 100 → flush
+            </button>
+          </>
+        ) : (
+          <ConnectButton />
+        )}
         <a
           href="https://www.hydrocoin.com/"
           target="_blank"
@@ -628,6 +690,7 @@ function DemoPanel({
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
         <Cpu size={14} /> Agent console
       </div>
+      <AgentSessionPanel />
       <div className="mt-4 space-y-3">
         <label className="text-[11px] uppercase tracking-wider text-slate-500">
           Agent
@@ -827,29 +890,71 @@ function BatchPanel({
   );
 }
 
+function HashRow({
+  label,
+  hash,
+  explorerBase,
+  accent,
+}: {
+  label: string;
+  hash: string;
+  explorerBase?: string | null;
+  accent?: boolean;
+}) {
+  return (
+    <div className="rounded-md border border-edge bg-ink/40 p-2">
+      <div className="mb-1 flex items-center justify-between">
+        <span className="text-[9px] uppercase tracking-wider text-slate-500">{label}</span>
+        {explorerBase && hash && (
+          <a
+            href={`${explorerBase}${hash}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider border border-hydro-400/30 bg-hydro-500/10 text-hydro-300 hover:bg-hydro-500/20 hover:border-hydro-300 transition"
+          >
+            View on explorer <ExternalLink size={9} />
+          </a>
+        )}
+      </div>
+      <div className={`overflow-x-auto font-mono text-[10px] whitespace-nowrap ${accent ? "text-hydro-300" : "text-slate-200"}`}>
+        {hash || "—"}
+      </div>
+    </div>
+  );
+}
+
 function Mini({
   label,
   value,
   mono,
   accent,
+  explorerBase,
 }: {
   label: string;
   value: string;
   mono?: boolean;
   accent?: boolean;
+  explorerBase?: string | null;
 }) {
+  const inner = (
+    <div
+      className={`truncate ${mono ? "font-mono" : ""} ${
+        accent ? "text-hydro-300" : "text-slate-200"
+      } ${explorerBase && mono ? "underline decoration-dotted hover:text-hydro-300 cursor-pointer" : ""}`}
+    >
+      {value}
+    </div>
+  );
   return (
     <div className="rounded-md border border-edge bg-ink/40 p-2">
       <div className="text-[9px] uppercase tracking-wider text-slate-500">
         {label}
       </div>
-      <div
-        className={`truncate ${mono ? "font-mono" : ""} ${
-          accent ? "text-hydro-300" : "text-slate-200"
-        }`}
-      >
-        {value}
-      </div>
+      {explorerBase && mono ? (
+        <a href={`${explorerBase}${value}`} target="_blank" rel="noreferrer">
+          {inner}
+        </a>
+      ) : inner}
     </div>
   );
 }
@@ -861,7 +966,7 @@ function Footer() {
         <div className="flex items-center gap-2">
           <Logo size={20} />
           <span>
-            <span className="text-slate-300">402GAL</span> · Built for Consensus
+            <span className="text-slate-300">x402GAL</span> · Built for Consensus
             Hackathon Miami 2026 · ECL × Parjana
           </span>
         </div>

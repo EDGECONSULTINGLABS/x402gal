@@ -5,15 +5,18 @@
 // immediately retires that HYDRO as a verifiable water-restoration credit.
 // There is no intermediate settlement layer: one batch → two XRPL hops.
 //
-// For the portfolio demo both hops are modelled deterministically with
-// synthetic hashes so the app runs fully offline while reflecting the
-// real on-chain protocol shape.
+// When XRPL_TREASURY_SEED + HYDROCOIN_ISSUER + HYDROCOIN_CURRENCY are set in
+// .env.local the pipeline submits real signed transactions to the configured
+// XRPL node and returns the actual on-chain tx hashes. Without those vars it
+// falls back to the in-memory simulation so the app works fully offline.
 
 import { BatchEntry, Chain, Settlement, XrplHop } from "./types";
 import { TREASURY_ADDRESS } from "./constants";
 import { recordBatchSettlement } from "./ledger";
 import { swapUsdcForHydro } from "./amm";
 import { FOOTPRINT_METHODOLOGY_HASH } from "./footprint";
+import { isXrplConfigured } from "./xrplClient";
+import { swapAndRetireHydro } from "./xrplHydro";
 
 const HEX = "0123456789abcdef";
 function rndHex(n: number) {
@@ -37,29 +40,52 @@ export interface SettleResult {
 }
 
 // Settle a batch on XRPL in two hops:
-//   1) Swap accumulated USDC → HYDRO on the XRPL DEX (moves the AMM price).
-//   2) Retire the HYDRO against a verifiable water-restoration credit.
+//   1) Swap accumulated USDC → HYDRO on the XRPL DEX (OfferCreate).
+//   2) Retire the HYDRO against a verifiable water-restoration credit (Payment to black-hole).
+//
+// Falls back to in-memory simulation when env vars are not set.
 export async function routeBatch(entries: BatchEntry[]): Promise<SettleResult> {
   const hops: XrplHop[] = [];
-  let totalMs = 0;
 
   const totalUsdc = entries.reduce((s, e) => s + e.amountUsdc, 0);
   const totalOffsetDrops = entries.reduce((s, e) => s + e.offsetDrops, 0);
   const sources = Array.from(new Set(entries.map((e) => e.sourceChain))) as Chain[];
 
-  // Hop 1: swap USDC → HYDRO on the XRPL DEX pool.
+  // Always update the local AMM model (keeps dashboard price/charts accurate).
   swapUsdcForHydro(totalUsdc);
+
+  if (isXrplConfigured()) {
+    // ── Real XRPL path ────────────────────────────────────────────────────────
+    const t0 = Date.now();
+    const { swapHash, retireHash } = await swapAndRetireHydro(totalUsdc, totalOffsetDrops);
+    const totalMs = Date.now() - t0;
+    const swapMs = totalMs * 0.4;
+    const retireMs = totalMs * 0.6;
+
+    hops.push({ chain: "xrpl", action: "swap", hash: swapHash, ms: swapMs });
+    hops.push({ chain: "xrpl", action: "retire", hash: retireHash, ms: retireMs });
+
+    return {
+      hops,
+      settlementHash: swapHash,
+      retirementReceipt: retireHash,
+      totalMs,
+      sourceChains: sources,
+      hydroRetiredDrops: totalOffsetDrops,
+      usdcSettled: totalUsdc,
+    };
+  }
+
+  // ── Simulated path (no env vars) ──────────────────────────────────────────
   const swapMs = 20 + Math.random() * 30;
   const settlementHash = xrplHash("xrpl_swap");
   hops.push({ chain: "xrpl", action: "swap", hash: settlementHash, ms: swapMs });
-  totalMs += swapMs;
 
-  // Hop 2: retire HYDRO against a water-restoration credit on XRPL.
   const retireMs = 30 + Math.random() * 40;
   const retirementReceipt = xrplHash("xrpl_retire");
   hops.push({ chain: "xrpl", action: "retire", hash: retirementReceipt, ms: retireMs });
-  totalMs += retireMs;
 
+  const totalMs = swapMs + retireMs;
   await new Promise((r) => setTimeout(r, Math.min(totalMs, 120)));
 
   return {

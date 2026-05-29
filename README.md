@@ -1,9 +1,9 @@
-# 402GAL
+# x402GAL
 
 **Water-offset rails for AI agents.** Built for the EasyA Consensus Miami Hackathon.
 
 > Every AI inference consumes freshwater (data-center cooling, power
-> generation). 402GAL intercepts agent traffic with an HTTP `402 Payment
+> generation). x402GAL intercepts agent traffic with an HTTP `402 Payment
 > Required` response per the [x402 protocol](https://www.x402.org/), the agent
 > auto-pays in **USDC**, and the proceeds are swapped for **HydroCoin (HYDRO)**
 > and retired on **XRPL** as a verifiable water-restoration credit — direct,
@@ -13,7 +13,7 @@
 
 ```
 ┌────────────┐  402 (price in USDC) ┌────────────────┐
-│  AI agent  │ ───────────────────▶ │  402GAL server │
+│  AI agent  │ ───────────────────▶ │ x402GAL server │
 │ (Base/Sol/ │ ◀──── X-PAYMENT ──────│   (x402 host)  │
 │  Eth/Poly) │                       └───────┬────────┘
 └─────┬──────┘                               │ verify + batch
@@ -36,7 +36,7 @@
 | `lib/x402.ts` | x402 v1 "exact" scheme: requirement builder, payload encode/decode, verifier |
 | `lib/settlement.ts` | XRPL settlement: batch flush → USDC→HYDRO swap on XRPL DEX → HYDRO retire |
 | `lib/amm.ts` | HydroCoin constant-product AMM on XRPL (USDC → HYDRO swap + USDC pricing helper) |
-| `lib/agentSdk.ts` | `gal402Fetch()` — drop-in replacement for `fetch()` that auto-pays 402s |
+| `lib/agentSdk.ts` | `x402galFetch()` — drop-in replacement for `fetch()` that auto-pays 402s |
 | `lib/ledger.ts` | In-memory ledger (agents, settlements, AMM, pending batch) |
 | `app/api/ai/chat` | x402-gated demo inference endpoint (per-call mL price, methodology in 402 body) |
 | `app/api/x402/verify` | Standalone facilitator endpoint (pluggable into any resource server) |
@@ -80,7 +80,7 @@ GPT-4-class call is **0.068 mL** ≈ **18 HYDRO drops** (1 HYDRO = 1 US gallon).
 ## Batching
 
 Per-call settlements would be 18 drops each — illegible on screen and
-wasteful on chain. 402GAL aggregates micro-payments into a 100-call batch
+wasteful on chain. x402GAL aggregates micro-payments into a 100-call batch
 (or 60s window), then a single XRPL settlement swaps the accumulated USDC
 for HYDRO and retires it. The dashboard's *Pending batch* panel shows the
 fill state in real time; the *Burst 100 → flush* button drives a visible cycle.
@@ -105,7 +105,7 @@ XRPL token. What *is* real and runnable here:
   methodology hash returned in every 402 body,
 - the **batching / settlement state machine** (per-call escrow → 100-call
   batch → single XRPL retirement event),
-- and the agent-side `gal402Fetch()` SDK that round-trips a 402 → pay → 200.
+- and the agent-side `x402galFetch()` SDK that round-trips a 402 → pay → 200.
 
 To ship for real: deploy HydroCoin as an XRPL token and point the swap/retire
 leg in `lib/settlement.ts` + `lib/amm.ts` at the on-chain XRPL DEX pool and

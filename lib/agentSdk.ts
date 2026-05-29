@@ -1,4 +1,4 @@
-// 402GAL agent SDK — what an autonomous agent embeds to transparently
+// x402GAL agent SDK — what an autonomous agent embeds to transparently
 // pay 402 challenges. Mirrors the ergonomics of `fetch` and works with
 // any x402-compliant resource. This is the public-facing developer surface.
 
@@ -10,12 +10,12 @@ export interface AgentWallet {
   sign: (req: PaymentRequirement) => Promise<string>;
 }
 
-export interface Gal402FetchOptions extends RequestInit {
+export interface X402galFetchOptions extends RequestInit {
   wallet: AgentWallet;
   maxUsdc?: number; // refuse to pay more than this many micro-USDC per request
 }
 
-export async function gal402Fetch(input: string, opts: Gal402FetchOptions): Promise<Response> {
+export async function x402galFetch(input: string, opts: X402galFetchOptions): Promise<Response> {
   const first = await fetch(input, opts);
   if (first.status !== 402) return first;
 

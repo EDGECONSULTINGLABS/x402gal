@@ -194,6 +194,7 @@ async function verifyEvm(
 
 // ── Solana verification (stub — @solana/web3.js not installed) ────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function verifySolana(_payload: PaymentPayload): Promise<ChainVerifyResult> {
   // TODO: install @solana/web3.js and verify SPL token balance + ed25519 sig
   // const conn = new Connection(process.env.RPC_SOLANA ?? clusterApiUrl("mainnet-beta"));
@@ -203,6 +204,7 @@ async function verifySolana(_payload: PaymentPayload): Promise<ChainVerifyResult
 
 // ── XRPL verification (stub — signature check left for ripple-keypairs PR) ───
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function verifyXrpl(_payload: PaymentPayload): Promise<ChainVerifyResult> {
   // TODO: use ripple-keypairs to verify ed25519/secp256k1 sig over canonical auth hash
   // import { verify } from "ripple-keypairs";

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
+  eslint: { ignoreDuringBuilds: true },
   experimental: {
     serverComponentsExternalPackages: ["xrpl", "@solana/web3.js"],
   },

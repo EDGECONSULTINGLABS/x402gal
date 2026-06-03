@@ -33,7 +33,7 @@ import { HydroCoinPanel } from "./HydroCoinPanel";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { ConnectButton } from "./ConnectButton";
 import { AgentSessionPanel } from "./AgentSessionPanel";
-import { OnboardingGuide, OnboardingGuideRef } from "./OnboardingGuide";
+import { OnboardingGuide } from "./OnboardingGuide";
 import { useAccount } from "wagmi";
 import { Agent, Settlement } from "@/lib/types";
 
@@ -94,8 +94,8 @@ export function Dashboard() {
   const [history, setHistory] = useState<
     { t: number; price: number; liters: number }[]
   >([]);
-  const [guideCompleted, setGuideCompleted] = useState(false);
-  const guideRef = useRef<OnboardingGuideRef>(null);
+  const [guideKey, setGuideKey] = useState(0);
+  const [forceShowGuide, setForceShowGuide] = useState(false);
   const lastIdsRef = useRef<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
@@ -175,22 +175,28 @@ export function Dashboard() {
   );
 
   const handleGuideComplete = () => {
-    setGuideCompleted(true);
+    setForceShowGuide(false);
   };
 
   const restartGuide = () => {
     localStorage.removeItem("x402gal-guide-completed");
     localStorage.removeItem("x402gal-guide-skipped");
-    guideRef.current?.restart();
+    setForceShowGuide(true);
+    setGuideKey(prev => prev + 1); // Force remount
   };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <WaterBackdrop />
-      <OnboardingGuide ref={guideRef} isConnected={isConnected} onComplete={handleGuideComplete} />
+      <OnboardingGuide 
+        key={guideKey}
+        isConnected={isConnected} 
+        onComplete={handleGuideComplete}
+        forceShow={forceShowGuide}
+      />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
-      <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} />
+      <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} onRestartTour={restartGuide} />
 
       <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8">
         <Hero
@@ -318,7 +324,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        <Footer onRestartTour={restartGuide} />
+        <Footer />
       </main>
     </div>
   );
@@ -326,7 +332,7 @@ export function Dashboard() {
 
 /* ─────────────────────────────────────────────────────── */
 
-function Nav({ price, retired, xrplLive }: { price?: number; retired: number; xrplLive: boolean }) {
+function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; retired: number; xrplLive: boolean; onRestartTour?: () => void }) {
   return (
     <header className="sticky top-0 z-40 border-b border-edge/60 bg-abyss/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
@@ -364,6 +370,13 @@ function Nav({ price, retired, xrplLive }: { price?: number; retired: number; xr
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={onRestartTour}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-hydro-400/50 bg-hydro-500/20 px-2.5 py-1.5 text-xs font-medium text-white transition hover:border-hydro-300 hover:bg-hydro-500/30"
+            title="Start tour"
+          >
+            <HelpCircle size={14} className="text-hydro-300" /> Tour
+          </button>
           <nav className="hidden items-center gap-1 text-xs md:flex">
             <NavLink href="https://www.x402.org/">x402</NavLink>
             <NavLink href="https://xrpl.org/">XRPL</NavLink>
@@ -983,11 +996,7 @@ function Mini({
   );
 }
 
-interface FooterProps {
-  onRestartTour?: () => void;
-}
-
-function Footer({ onRestartTour }: FooterProps) {
+function Footer() {
   return (
     <footer className="mt-20 border-t border-edge/60 pt-8 text-[11px] text-slate-500">
       <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
@@ -999,14 +1008,6 @@ function Footer({ onRestartTour }: FooterProps) {
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <button
-            onClick={onRestartTour}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-hydro-400/50 bg-hydro-500/20 px-3 py-2 text-sm font-bold text-white shadow-glow transition hover:border-hydro-300 hover:bg-hydro-500/30"
-            title="Restart onboarding tour"
-          >
-            <HelpCircle size={14} className="text-hydro-300" /> Tour
-          </button>
-          <span className="hidden md:inline text-slate-700">|</span>
           <span>x402 + XRPL + HydroCoin</span>
           <span className="hidden md:inline text-slate-700">|</span>
           <a

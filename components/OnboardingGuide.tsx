@@ -1,16 +1,13 @@
 "use client";
 
-import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, ArrowLeft, Zap, Layers, Send, Wallet, Droplets, Bot } from "lucide-react";
-
-export interface OnboardingGuideRef {
-  restart: () => void;
-}
 
 interface OnboardingGuideProps {
   isConnected: boolean;
   onComplete: () => void;
+  forceShow?: boolean;
 }
 
 interface Step {
@@ -88,38 +85,24 @@ const steps: Step[] = [
   },
 ];
 
-export const OnboardingGuide = forwardRef<OnboardingGuideRef, OnboardingGuideProps>(
-  function OnboardingGuide({ isConnected, onComplete }, ref) {
-    const [showGuide, setShowGuide] = useState(false);
-    const [currentStep, setCurrentStep] = useState(0);
-    const [hasCheckedStorage, setHasCheckedStorage] = useState(false);
-    const [hasSeenGuide, setHasSeenGuide] = useState(false);
+export function OnboardingGuide({ isConnected, onComplete, forceShow }: OnboardingGuideProps) {
+  const [showGuide, setShowGuide] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
-    // Expose restart method via ref
-    useImperativeHandle(ref, () => ({
-      restart: () => {
-        setCurrentStep(0);
+  useEffect(() => {
+    // Check localStorage for guide status
+    const guideCompleted = localStorage.getItem("x402gal-guide-completed");
+    const guideSkipped = localStorage.getItem("x402gal-guide-skipped");
+    const hasSeenGuide = !!(guideCompleted || guideSkipped);
+    
+    // Show guide when user connects for the first time, or if forceShow is set
+    if ((isConnected && !hasSeenGuide) || forceShow) {
+      const timer = setTimeout(() => {
         setShowGuide(true);
-      }
-    }));
-
-    useEffect(() => {
-      // Check localStorage for guide status
-      const guideCompleted = localStorage.getItem("x402gal-guide-completed");
-      const guideSkipped = localStorage.getItem("x402gal-guide-skipped");
-      setHasSeenGuide(!!(guideCompleted || guideSkipped));
-      setHasCheckedStorage(true);
-    }, []);
-
-    useEffect(() => {
-      // Show guide when user connects for the first time (only after checking storage)
-      if (isConnected && hasCheckedStorage && !hasSeenGuide && !showGuide) {
-        const timer = setTimeout(() => {
-          setShowGuide(true);
-        }, 500);
-        return () => clearTimeout(timer);
-      }
-    }, [isConnected, hasCheckedStorage, hasSeenGuide, showGuide]);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, forceShow]);
 
   const handleSkip = () => {
     localStorage.setItem("x402gal-guide-skipped", "true");
@@ -286,4 +269,3 @@ export const OnboardingGuide = forwardRef<OnboardingGuideRef, OnboardingGuidePro
     </AnimatePresence>
   );
 }
-);

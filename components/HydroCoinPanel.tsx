@@ -34,27 +34,23 @@ export function HydroCoinPanel({
         <div className="absolute -inset-x-20 top-0 h-px bg-gradient-to-r from-transparent via-hydro-300/70 to-transparent" />
       </div>
 
-      <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center lg:gap-8">
-        {/* ── Coin orb ── */}
-        <div className="flex items-center gap-5 lg:col-span-4">
-          <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
+      <div className="relative flex flex-col gap-6">
+        {/* ── Header: Coin + Name ── */}
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+          <div className="relative h-[120px] w-[120px] shrink-0">
             <span className="ring-pulse" />
             <span className="ring-pulse" style={{ animationDelay: "0.8s" }} />
-            <div className="absolute inset-2 animate-float rounded-full bg-hydro-gradient shadow-glow-lg">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/40 via-transparent to-transparent" />
-              <div className="absolute inset-3 rounded-full border border-white/30" />
-              <Droplets
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-abyss"
-                size={32}
-                strokeWidth={2.5}
-              />
-            </div>
+            <img
+              src="/hydrocoin-coin.jpg"
+              alt="HydroCoin"
+              className="absolute inset-0 h-full w-full animate-float rounded-full object-cover shadow-glow-lg"
+            />
           </div>
-          <div>
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-hydro-200/80">
+          <div className="text-center sm:text-left">
+            <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.24em] text-hydro-200/80 sm:justify-start">
               <ShieldCheck size={12} /> Retirement asset · XRPL
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
+            <div className="mt-1 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
               <span className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                 HydroCoin
               </span>
@@ -65,14 +61,14 @@ export function HydroCoinPanel({
                 ◆ Simulated
               </span>
             </div>
-            <div className="font-mono text-xs text-hydro-300">
+            <div className="mt-1 font-mono text-xs text-hydro-300">
               HYDRO · 1 token = 1 verified gallon
             </div>
           </div>
         </div>
 
         {/* ── Live stats ── */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:col-span-5 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Tile label="Price" accent>
             <AnimatedNumber value={priceUSDC} decimals={4} prefix="$" />
           </Tile>
@@ -93,7 +89,7 @@ export function HydroCoinPanel({
         </div>
 
         {/* ── CTA ── */}
-        <div className="flex flex-col gap-2 lg:col-span-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <a
             href="https://www.hydrocoin.com/"
             target="_blank"
@@ -106,11 +102,13 @@ export function HydroCoinPanel({
             </span>
             <ExternalLink size={14} className="relative text-hydro-300" />
           </a>
-          <div className="px-1 text-[10px] uppercase tracking-[0.18em] text-slate-500">
-            Agents pay USDC · retired as HYDRO on XRPL
-          </div>
-          <div className="px-1 font-mono text-[10px] text-slate-500">
-            Circulating · {circulatingHydro.toLocaleString(undefined, { maximumFractionDigits: 0 })} HYDRO
+          <div className="flex flex-col gap-1">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              Agents pay USDC · retired as HYDRO on XRPL
+            </div>
+            <div className="font-mono text-[10px] text-slate-500">
+              Circulating · {circulatingHydro.toLocaleString(undefined, { maximumFractionDigits: 0 })} HYDRO
+            </div>
           </div>
         </div>
       </div>

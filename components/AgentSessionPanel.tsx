@@ -133,7 +133,25 @@ export function AgentSessionPanel() {
               </span>
             )}
           </div>
-          {result.error ? (
+          {result.status === 402 ? (
+            <div className="mt-2 space-y-2">
+              <p className="font-medium text-hydro-300">Payment Required</p>
+              <p className="leading-relaxed text-slate-400">
+                This is the x402 protocol working as designed. The AI endpoint requires a micro-payment to offset the water footprint of each inference.
+              </p>
+              <div className="rounded-md border border-hydro-400/20 bg-hydro-500/5 p-3 space-y-1.5">
+                <p className="text-[10px] uppercase tracking-wider text-hydro-200/80">To test with real payments:</p>
+                <ol className="list-decimal list-inside space-y-1 text-slate-300">
+                  <li>Fund your wallet with testnet USDC on Base Sepolia</li>
+                  <li>The agent auto-signs an x402 payment header</li>
+                  <li>Payment is verified → inference runs → water offset settles</li>
+                </ol>
+                <p className="mt-2 text-slate-500">
+                  Use the <span className="text-slate-300">demo buttons</span> on the left panel to simulate the full pipeline without a funded wallet.
+                </p>
+              </div>
+            </div>
+          ) : result.error ? (
             <p className="mt-1 text-red-400">{result.error}</p>
           ) : (
             <p className="mt-1 leading-relaxed text-slate-300">{result.completion}</p>

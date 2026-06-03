@@ -93,7 +93,20 @@ export function Dashboard() {
   const [completion, setCompletion] = useState<string>("");
   const [history, setHistory] = useState<
     { t: number; price: number; liters: number }[]
-  >([]);
+  >(() => {
+    // Seed with demo data so the chart shows movement on load
+    const now = Date.now();
+    const seed: { t: number; price: number; liters: number }[] = [];
+    for (let i = 0; i < 30; i++) {
+      const progress = i / 29;
+      seed.push({
+        t: now - (29 - i) * 2500,
+        price: 1.2 + Math.sin(progress * Math.PI * 2) * 0.08 + progress * 0.05,
+        liters: progress * 0.42 + Math.sin(progress * 5) * 0.02,
+      });
+    }
+    return seed;
+  });
   const [guideKey, setGuideKey] = useState(0);
   const [forceShowGuide, setForceShowGuide] = useState(false);
   const lastIdsRef = useRef<Set<string>>(new Set());
@@ -188,12 +201,12 @@ export function Dashboard() {
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <WaterBackdrop />
-      {/* <OnboardingGuide 
+      <OnboardingGuide 
         key={guideKey}
         isConnected={isConnected} 
         onComplete={handleGuideComplete}
         forceShow={forceShowGuide}
-      /> */}
+      />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
       <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} onRestartTour={restartGuide} />
@@ -211,7 +224,7 @@ export function Dashboard() {
           isConnected={isConnected}
         />
 
-        <div className="mt-10 sm:mt-14">
+        <div className="mt-10 sm:mt-14" data-guide="hydrocoin">
           <HydroCoinPanel
             priceUSDC={state?.amm.priceUSDC ?? 0}
             marketCap={state?.amm.marketCapUSDC ?? 0}
@@ -240,12 +253,14 @@ export function Dashboard() {
           </motion.div>
         )}
         <div className={`mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3 ${
-          isConnected ? "" : "pointer-events-none select-none opacity-0 h-0 overflow-hidden"
+          isConnected ? "" : "pointer-events-none select-none opacity-40"
         }`}>
           <div className="space-y-6 lg:col-span-2">
-            <PriceChart history={history} />
+            <div data-guide="price-chart">
+              <PriceChart history={history} />
+            </div>
             <SettlementsTable settlements={state?.settlements ?? []} />
-          </div>
+            </div>
           <div className="space-y-6">
             <DemoPanel
               agents={state?.agents ?? []}
@@ -320,7 +335,9 @@ export function Dashboard() {
                 </motion.div>
               )}
             </AnimatePresence>
-            <SpecCard methodologyHash={state?.methodologyHash} />
+            <div data-guide="methodology">
+              <SpecCard methodologyHash={state?.methodologyHash} />
+            </div>
           </div>
         </div>
 
@@ -335,11 +352,11 @@ export function Dashboard() {
 function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; retired: number; xrplLive: boolean; onRestartTour?: () => void }) {
   return (
     <header className="sticky top-0 z-40 border-b border-edge/60 bg-abyss/70 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Logo size={30} />
           <div>
-            <div className="font-display text-base font-semibold tracking-tight">
+            <div className="font-display text-sm font-semibold tracking-tight sm:text-base">
               x402GAL
             </div>
             <div className="hidden text-[10px] uppercase tracking-[0.22em] text-slate-500 sm:block">
@@ -369,12 +386,12 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={onRestartTour}
-            className="inline-flex items-center gap-1.5 rounded-lg border-2 border-cyan-400 bg-cyan-500/30 px-3 py-2 text-sm font-bold text-white shadow-lg shadow-cyan-500/50 hover:bg-cyan-500/50"
+            className="inline-flex items-center gap-1 rounded-lg border-2 border-cyan-400 bg-cyan-500/30 px-2 py-1.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/50 hover:bg-cyan-500/50 sm:gap-1.5 sm:px-3 sm:py-2 sm:text-sm"
           >
-            <HelpCircle size={16} /> Tour
+            <HelpCircle size={14} /> Tour
           </button>
           <nav className="hidden items-center gap-1 text-xs md:flex">
             <NavLink href="https://www.x402.org/">x402</NavLink>
@@ -383,7 +400,9 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
               HydroCoin
             </NavLink>
           </nav>
-          <ConnectButton />
+          <div className="hidden sm:block">
+            <ConnectButton />
+          </div>
         </div>
       </div>
     </header>
@@ -542,7 +561,7 @@ function Hero({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7, duration: 0.6 }}
         data-guide="metrics"
-        className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4"
+        className="mt-8 grid grid-cols-2 gap-2 sm:mt-12 sm:gap-3 md:grid-cols-4"
       >
         <Metric label="Water restored" value={litersDisplay} accent />
         <Metric
@@ -605,20 +624,20 @@ function PriceChart({
   }));
   return (
     <div className="glass rounded-2xl p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <div>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="min-w-0">
           <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
             Live offset throughput
           </div>
-          <div className="font-display text-lg text-white">
+          <div className="font-display text-base text-white sm:text-lg">
             Cumulative liters restored
           </div>
         </div>
-        <div className="font-mono text-[10px] text-slate-500">
+        <div className="shrink-0 font-mono text-[10px] text-slate-500">
           refreshed every 2.5s
         </div>
       </div>
-      <div className="h-56 w-full">
+      <div className="h-40 w-full sm:h-56">
         <ResponsiveContainer>
           <AreaChart data={data}>
             <defs>
@@ -656,21 +675,21 @@ function PriceChart({
 function SettlementsTable({ settlements }: { settlements: Settlement[] }) {
   return (
     <div className="glass overflow-hidden rounded-2xl">
-      <div className="flex items-center justify-between border-b border-edge px-4 py-3">
-        <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center justify-between gap-2 border-b border-edge px-3 py-3 sm:px-4">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
           <ArrowRightLeft size={14} className="text-hydro-300" />
           <span className="font-display font-medium text-white">
             Settlement stream
           </span>
-          <span className="font-mono text-[10px] text-slate-500">
+          <span className="hidden font-mono text-[10px] text-slate-500 sm:inline">
             x402 → XRPL (USDC→HYDRO swap → retire)
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
+        <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-slate-500">
           {settlements.length} recent
         </span>
       </div>
-      <div className="grid grid-cols-12 gap-3 border-b border-edge/60 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-500">
+      <div className="hidden grid-cols-12 gap-3 border-b border-edge/60 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-500 sm:grid">
         <div className="col-span-2">Payer</div>
         <div className="col-span-2">Resource</div>
         <div className="col-span-1">Chain</div>
@@ -895,8 +914,8 @@ function BatchPanel({
           flushes at {target} calls
         </div>
       </div>
-      <div className="mt-3 flex items-baseline gap-2">
-        <div className="tick font-display text-3xl font-semibold text-white">
+      <div className="mt-3 flex flex-wrap items-baseline gap-2">
+        <div className="tick font-display text-2xl font-semibold text-white sm:text-3xl">
           {calls}
           <span className="text-base text-slate-500">/{target}</span>
         </div>

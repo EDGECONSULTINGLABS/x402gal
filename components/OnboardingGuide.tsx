@@ -96,6 +96,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
   const [currentStep, setCurrentStep] = useState(0);
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; placement: "above" | "below" | "center" }>({ top: 0, left: 0, placement: "center" });
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
+  const [isMobileView, setIsMobileView] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -131,40 +132,28 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
 
       const vh = window.innerHeight;
       const vw = window.innerWidth;
-      const isMobile = vw < 640;
-      const tooltipHeight = isMobile ? 260 : 300;
+      const mobile = vw < 640;
+      setIsMobileView(mobile);
+      const tooltipHeight = 300;
       const padding = 12;
 
-      const tooltipWidth = isMobile ? vw - 32 : 400;
-
-      // Clamp horizontal: align tooltip center with element center, but keep in viewport
-      const elCenterX = rect.left + rect.width / 2;
-      const clampedLeft = Math.min(
-        Math.max(elCenterX, tooltipWidth / 2 + padding),
-        vw - tooltipWidth / 2 - padding
-      );
-
-      // On mobile, always place tooltip at bottom of screen as a drawer
-      if (isMobile) {
-        setTooltipPos({
-          top: vh - tooltipHeight - padding,
-          left: clampedLeft,
-          placement: "below",
-        });
+      // On mobile, tooltip is fixed to bottom via CSS — just set placement
+      if (mobile) {
+        setTooltipPos({ top: 0, left: 0, placement: "below" });
         return;
       }
 
-      // Desktop: prefer below, but go above if no room
+      // Desktop: position near the element
       if (step.position === "top" || rect.bottom + tooltipHeight + padding > vh) {
         setTooltipPos({
           top: Math.max(padding, rect.top - tooltipHeight - padding),
-          left: clampedLeft,
+          left: 0,
           placement: "above",
         });
       } else {
         setTooltipPos({
           top: rect.bottom + padding,
-          left: clampedLeft,
+          left: 0,
           placement: "below",
         });
       }
@@ -271,6 +260,11 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "min(calc(100% - 2rem), 28rem)",
+          } : isMobileView ? {
+            bottom: 0,
+            left: 0,
+            right: 0,
+            top: "auto",
           } : {
             top: tooltipPos.top,
             left: "1rem",
@@ -280,7 +274,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
             marginRight: "auto",
           }}
         >
-          <div className="glass-strong rounded-2xl border border-hydro-400/30 p-5 shadow-glow-lg">
+          <div className={`glass-strong shadow-glow-lg ${isMobileView ? "rounded-t-2xl border-t border-hydro-400/30 px-4 pt-4 pb-6" : "mx-auto rounded-2xl border border-hydro-400/30 p-5"}`} style={isMobileView ? { paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" } : undefined}>
             {/* Header */}
             <div className="mb-4 flex items-start justify-between">
               <div className="flex items-center gap-3">
@@ -318,7 +312,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
             </div>
 
             {/* Content */}
-            <p className="mb-5 text-sm leading-relaxed text-slate-300">
+            <p className="mb-4 text-xs leading-relaxed text-slate-300 sm:mb-5 sm:text-sm">
               {currentStepData.description}
             </p>
 

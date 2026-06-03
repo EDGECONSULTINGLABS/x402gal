@@ -33,7 +33,7 @@ import { HydroCoinPanel } from "./HydroCoinPanel";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { ConnectButton } from "./ConnectButton";
 import { AgentSessionPanel } from "./AgentSessionPanel";
-import { OnboardingGuide } from "./OnboardingGuide";
+import { OnboardingGuide, OnboardingGuideRef } from "./OnboardingGuide";
 import { useAccount } from "wagmi";
 import { Agent, Settlement } from "@/lib/types";
 
@@ -95,6 +95,7 @@ export function Dashboard() {
     { t: number; price: number; liters: number }[]
   >([]);
   const [guideCompleted, setGuideCompleted] = useState(false);
+  const guideRef = useRef<OnboardingGuideRef>(null);
   const lastIdsRef = useRef<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
@@ -180,13 +181,13 @@ export function Dashboard() {
   const restartGuide = () => {
     localStorage.removeItem("x402gal-guide-completed");
     localStorage.removeItem("x402gal-guide-skipped");
-    setGuideCompleted(false);
+    guideRef.current?.restart();
   };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <WaterBackdrop />
-      <OnboardingGuide isConnected={isConnected} onComplete={handleGuideComplete} />
+      <OnboardingGuide ref={guideRef} isConnected={isConnected} onComplete={handleGuideComplete} />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
       <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} />
@@ -1000,10 +1001,10 @@ function Footer({ onRestartTour }: FooterProps) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <button
             onClick={onRestartTour}
-            className="inline-flex items-center gap-1 text-slate-400 hover:text-hydro-300 transition"
+            className="inline-flex items-center gap-1.5 rounded-md border border-hydro-400/30 bg-hydro-500/10 px-2 py-1 text-hydro-300 transition hover:border-hydro-300 hover:bg-hydro-500/20"
             title="Restart onboarding tour"
           >
-            <HelpCircle size={10} /> Tour
+            <HelpCircle size={12} /> <span className="font-medium">Tour</span>
           </button>
           <span className="hidden md:inline text-slate-700">|</span>
           <span>x402 + XRPL + HydroCoin</span>

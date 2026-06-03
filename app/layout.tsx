@@ -31,6 +31,9 @@ export const metadata: Metadata = {
   title: "x402GAL — Water-offset rails for AI agents",
   description:
     "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin, settled cross-chain through Wire's Universal Transaction Layer.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

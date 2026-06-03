@@ -372,10 +372,9 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
         <div className="flex items-center gap-3">
           <button
             onClick={onRestartTour}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-hydro-400/50 bg-hydro-500/20 px-2.5 py-1.5 text-xs font-medium text-white transition hover:border-hydro-300 hover:bg-hydro-500/30"
-            title="Start tour"
+            className="inline-flex items-center gap-1.5 rounded-lg border-2 border-cyan-400 bg-cyan-500/30 px-3 py-2 text-sm font-bold text-white shadow-lg shadow-cyan-500/50 hover:bg-cyan-500/50"
           >
-            <HelpCircle size={14} className="text-hydro-300" /> Tour
+            <HelpCircle size={16} /> Tour
           </button>
           <nav className="hidden items-center gap-1 text-xs md:flex">
             <NavLink href="https://www.x402.org/">x402</NavLink>

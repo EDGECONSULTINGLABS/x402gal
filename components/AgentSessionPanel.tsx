@@ -25,17 +25,13 @@ interface SessionResult {
 }
 
 export function AgentSessionPanel() {
-  let address: `0x${string}` | undefined;
-  let isConnected = false;
-  let chainId = 8453;
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    ({ address, isConnected } = useAccount());
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    chainId = useChainId();
-  } catch {
-    isConnected = false;
-  }
+  // Always call hooks at top level - never conditionally
+  const account = useAccount();
+  const chainId = useChainId();
+
+  // Safely extract values (these will be undefined during SSR)
+  const address = account?.address;
+  const isConnected = account?.isConnected ?? false;
 
   const [prompt, setPrompt] = useState("What is the water cost of this AI inference?");
   const [running, setRunning] = useState(false);

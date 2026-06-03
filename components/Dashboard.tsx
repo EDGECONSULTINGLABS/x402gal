@@ -188,12 +188,12 @@ export function Dashboard() {
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <WaterBackdrop />
-      <OnboardingGuide 
+      {/* <OnboardingGuide 
         key={guideKey}
         isConnected={isConnected} 
         onComplete={handleGuideComplete}
         forceShow={forceShowGuide}
-      />
+      /> */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
       <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} onRestartTour={restartGuide} />

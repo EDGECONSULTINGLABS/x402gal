@@ -1001,7 +1001,7 @@ function Footer({ onRestartTour }: FooterProps) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <button
             onClick={onRestartTour}
-            className="inline-flex items-center gap-1.5 rounded-md border border-hydro-400/50 bg-hydro-500/20 px-2.5 py-1.5 text-sm font-medium text-white transition hover:border-hydro-300 hover:bg-hydro-500/30"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-hydro-400/50 bg-hydro-500/20 px-3 py-2 text-sm font-bold text-white shadow-glow transition hover:border-hydro-300 hover:bg-hydro-500/30"
             title="Restart onboarding tour"
           >
             <HelpCircle size={14} className="text-hydro-300" /> Tour

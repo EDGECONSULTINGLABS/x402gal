@@ -400,9 +400,7 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
               HydroCoin
             </NavLink>
           </nav>
-          <div className="hidden sm:block">
-            <ConnectButton />
-          </div>
+          <ConnectButton />
         </div>
       </div>
     </header>

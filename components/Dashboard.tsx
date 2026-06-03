@@ -22,6 +22,7 @@ import {
   ExternalLink,
   Activity,
   Wallet,
+  HelpCircle,
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { ChainBadge } from "./ChainBadge";
@@ -32,6 +33,7 @@ import { HydroCoinPanel } from "./HydroCoinPanel";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { ConnectButton } from "./ConnectButton";
 import { AgentSessionPanel } from "./AgentSessionPanel";
+import { OnboardingGuide } from "./OnboardingGuide";
 import { useAccount } from "wagmi";
 import { Agent, Settlement } from "@/lib/types";
 
@@ -92,6 +94,7 @@ export function Dashboard() {
   const [history, setHistory] = useState<
     { t: number; price: number; liters: number }[]
   >([]);
+  const [guideCompleted, setGuideCompleted] = useState(false);
   const lastIdsRef = useRef<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
@@ -170,9 +173,20 @@ export function Dashboard() {
     [state, selected],
   );
 
+  const handleGuideComplete = () => {
+    setGuideCompleted(true);
+  };
+
+  const restartGuide = () => {
+    localStorage.removeItem("x402gal-guide-completed");
+    localStorage.removeItem("x402gal-guide-skipped");
+    setGuideCompleted(false);
+  };
+
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <WaterBackdrop />
+      <OnboardingGuide isConnected={isConnected} onComplete={handleGuideComplete} />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
       <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} />
@@ -237,11 +251,13 @@ export function Dashboard() {
               running={running}
               selectedAgent={selectedAgent}
             />
-            <BatchPanel
-              batch={state?.batch}
-              onFlush={flushNow}
-              running={running}
-            />
+            <div data-guide="batch-panel">
+              <BatchPanel
+                batch={state?.batch}
+                onFlush={flushNow}
+                running={running}
+              />
+            </div>
             <AnimatePresence>
               {lastSettlement && (
                 <motion.div
@@ -249,6 +265,7 @@ export function Dashboard() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
+                  data-guide="settlement"
                   className="glass-strong rounded-2xl p-5"
                 >
                   <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
@@ -300,7 +317,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        <Footer />
+        <Footer onRestartTour={restartGuide} />
       </main>
     </div>
   );
@@ -511,6 +528,7 @@ function Hero({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7, duration: 0.6 }}
+        data-guide="metrics"
         className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4"
       >
         <Metric label="Water restored" value={litersDisplay} accent />
@@ -690,8 +708,10 @@ function DemoPanel({
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
         <Cpu size={14} /> Agent console
       </div>
-      <AgentSessionPanel />
-      <div className="mt-4 space-y-3">
+      <div data-guide="agent-session">
+        <AgentSessionPanel />
+      </div>
+      <div className="mt-4 space-y-3" data-guide="agent-section">
         <label className="text-[11px] uppercase tracking-wider text-slate-500">
           Agent
         </label>
@@ -732,6 +752,7 @@ function DemoPanel({
             <button
               onClick={() => onRun(1)}
               disabled={running}
+              data-guide="send-query"
               className="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-md border border-hydro-400/50 bg-hydro-500/15 px-3 py-2 text-xs font-medium text-hydro-200 transition hover:bg-hydro-500/25 disabled:opacity-60"
             >
               {running ? (
@@ -748,6 +769,7 @@ function DemoPanel({
             <button
               onClick={() => onRun(100)}
               disabled={running}
+              data-guide="burst-mode"
               className="inline-flex items-center justify-center gap-1 rounded-md border border-hydro-400/50 bg-hydro-500/20 px-3 py-2 text-xs font-medium text-hydro-100 hover:bg-hydro-500/30 disabled:opacity-60"
             >
               <Layers size={14} /> Burst 100 → flush
@@ -755,6 +777,7 @@ function DemoPanel({
           </div>
           <button
             onClick={onTopUp}
+            data-guide="top-up"
             className="rounded-md border border-edge bg-panel/60 px-3 py-2 text-xs text-slate-300 transition hover:border-hydro-500/30 hover:text-white"
           >
             +$100 USDC (top up agent wallet)
@@ -959,7 +982,11 @@ function Mini({
   );
 }
 
-function Footer() {
+interface FooterProps {
+  onRestartTour?: () => void;
+}
+
+function Footer({ onRestartTour }: FooterProps) {
   return (
     <footer className="mt-20 border-t border-edge/60 pt-8 text-[11px] text-slate-500">
       <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
@@ -971,6 +998,14 @@ function Footer() {
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <button
+            onClick={onRestartTour}
+            className="inline-flex items-center gap-1 text-slate-400 hover:text-hydro-300 transition"
+            title="Restart onboarding tour"
+          >
+            <HelpCircle size={10} /> Tour
+          </button>
+          <span className="hidden md:inline text-slate-700">|</span>
           <span>x402 + XRPL + HydroCoin</span>
           <span className="hidden md:inline text-slate-700">|</span>
           <a

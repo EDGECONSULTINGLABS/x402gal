@@ -250,39 +250,42 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
         <motion.div
           key={currentStep}
           ref={tooltipRef}
-          initial={{ opacity: 0, y: isCentered ? 20 : tooltipPos.placement === "above" ? 10 : -10 }}
+          drag
+          dragMomentum={false}
+          dragElastic={0}
+          initial={{ opacity: 0, y: isCentered ? 20 : 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="fixed z-[70] pointer-events-auto"
+          className="fixed z-[70] pointer-events-auto cursor-grab active:cursor-grabbing touch-none"
           style={isCentered ? {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "min(calc(100% - 2rem), 28rem)",
-          } : isMobileView ? {
-            bottom: 0,
-            left: 0,
-            right: 0,
-            top: "auto",
           } : {
-            top: tooltipPos.top,
-            left: "1rem",
-            right: "1rem",
+            bottom: "1rem",
+            left: "0.5rem",
+            right: "0.5rem",
+            top: "auto",
             maxWidth: "28rem",
             marginLeft: "auto",
             marginRight: "auto",
           }}
         >
-          <div className={`glass-strong shadow-glow-lg ${isMobileView ? "rounded-t-2xl border-t border-hydro-400/30 px-4 pt-4 pb-6" : "mx-auto rounded-2xl border border-hydro-400/30 p-5"}`} style={isMobileView ? { paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" } : undefined}>
+          <div className="glass-strong rounded-2xl border border-hydro-400/30 p-4 shadow-glow-lg sm:p-5" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
+            {/* Drag handle */}
+            <div className="mb-3 flex justify-center">
+              <div className="h-1 w-10 rounded-full bg-slate-600" />
+            </div>
             {/* Header */}
-            <div className="mb-4 flex items-start justify-between">
+            <div className="mb-3 flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-hydro-400/30 bg-hydro-500/10">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-hydro-400/30 bg-hydro-500/10 sm:h-10 sm:w-10">
                   {currentStepData.icon}
                 </div>
                 <div>
-                  <h3 className="font-display text-base font-semibold text-white">
+                  <h3 className="font-display text-sm font-semibold text-white sm:text-base">
                     {currentStepData.title}
                   </h3>
                   <p className="text-[10px] uppercase tracking-wider text-slate-500">

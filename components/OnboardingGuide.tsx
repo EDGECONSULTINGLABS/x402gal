@@ -100,11 +100,17 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setIsMobileView(window.innerWidth < 640);
+    const onResize = () => setIsMobileView(window.innerWidth < 640);
+    window.addEventListener("resize", onResize);
     // Always start in tour mode on first load
     const timer = setTimeout(() => {
       setShowGuide(true);
     }, 800);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", onResize);
+    };
   }, [forceShow]);
 
   const positionTooltip = useCallback(() => {
@@ -250,34 +256,39 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
         <motion.div
           key={currentStep}
           ref={tooltipRef}
-          drag
-          dragMomentum={false}
-          dragElastic={0}
-          initial={{ opacity: 0, y: isCentered ? 20 : 10 }}
+          {...(!isMobileView && { drag: true, dragMomentum: false, dragElastic: 0 })}
+          initial={{ opacity: 0, y: isMobileView ? 40 : (isCentered ? 20 : 10) }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: isMobileView ? 40 : 0 }}
           transition={{ duration: 0.25 }}
-          className="fixed z-[70] pointer-events-auto cursor-grab active:cursor-grabbing touch-none"
-          style={isCentered ? {
+          className={`fixed z-[70] pointer-events-auto ${!isMobileView ? "cursor-grab active:cursor-grabbing touch-none" : ""}`}
+          style={isMobileView ? {
+            bottom: 0,
+            left: 0,
+            right: 0,
+            top: "auto",
+          } : isCentered ? {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "min(calc(100% - 2rem), 28rem)",
           } : {
             bottom: "1rem",
-            left: "0.5rem",
-            right: "0.5rem",
-            top: "auto",
-            maxWidth: "28rem",
-            marginLeft: "auto",
-            marginRight: "auto",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "min(calc(100% - 2rem), 28rem)",
           }}
         >
-          <div className="glass-strong rounded-2xl border border-hydro-400/30 p-4 shadow-glow-lg sm:p-5" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
-            {/* Drag handle */}
-            <div className="mb-3 flex justify-center">
-              <div className="h-1 w-10 rounded-full bg-slate-600" />
-            </div>
+          <div
+            className={`glass-strong border border-hydro-400/30 p-4 shadow-glow-lg sm:p-5 ${isMobileView ? "rounded-t-2xl rounded-b-none" : "rounded-2xl"}`}
+            style={{ paddingBottom: isMobileView ? "max(1.25rem, env(safe-area-inset-bottom))" : undefined }}
+          >
+            {/* Drag handle — mobile only */}
+            {isMobileView && (
+              <div className="mb-3 flex justify-center">
+                <div className="h-1 w-10 rounded-full bg-slate-600" />
+              </div>
+            )}
             {/* Header */}
             <div className="mb-3 flex items-start justify-between">
               <div className="flex items-center gap-3">

@@ -37,13 +37,13 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "x402GAL — Water-offset rails for AI agents",
   description:
-    "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin, settled cross-chain through Wire's Universal Transaction Layer.",
+    "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin with cross-chain settlement.",
   icons: {
     icon: "/favicon.svg",
   },
   openGraph: {
     title: "x402GAL — Water-offset rails for AI agents",
-    description: "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin, settled cross-chain through Wire's Universal Transaction Layer.",
+    description: "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin with cross-chain settlement.",
     type: "website",
     url: "https://xx402gal.vercel.app",
     siteName: "x402GAL",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "x402GAL — Water-offset rails for AI agents",
-    description: "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin, settled cross-chain through Wire's Universal Transaction Layer.",
+    description: "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin with cross-chain settlement.",
     images: ["https://xx402gal.vercel.app/og-image"],
   },
   metadataBase: new URL("https://xx402gal.vercel.app"),

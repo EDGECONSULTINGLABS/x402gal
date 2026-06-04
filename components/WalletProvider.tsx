@@ -4,7 +4,7 @@ import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { ReactNode, useEffect } from "react";
-import { wagmiConfig } from "@/lib/walletConfig";
+import { getWagmiConfig } from "@/lib/walletConfig";
 
 function makeQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } });
@@ -50,7 +50,7 @@ function WcErrorSuppressor() {
 export function WalletProvider({ children }: { children: ReactNode }) {
   const queryClient = getQueryClient();
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={getWagmiConfig()}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({

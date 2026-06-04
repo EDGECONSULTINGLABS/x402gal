@@ -6,8 +6,10 @@ module.exports = {
     serverComponentsExternalPackages: ["xrpl", "@solana/web3.js"],
   },
   webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // pino-pretty is an optional CLI dep of @walletconnect/logger — not needed in browser
+    // pino-pretty / lokijs / encoding are optional deps of WalletConnect — not needed anywhere
+    if (isServer) {
+      config.externals = [...(config.externals ?? []), "pino-pretty", "lokijs", "encoding"];
+    } else {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         "pino-pretty": false,

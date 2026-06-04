@@ -1,6 +1,6 @@
 import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import dynamic from "next/dynamic";
 const WalletProvider = dynamic(
@@ -27,6 +27,13 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: "x402GAL — Water-offset rails for AI agents",
   description:
@@ -34,6 +41,28 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
   },
+  openGraph: {
+    title: "x402GAL — Water-offset rails for AI agents",
+    description: "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin, settled cross-chain through Wire's Universal Transaction Layer.",
+    type: "website",
+    url: "https://xx402gal.vercel.app",
+    siteName: "x402GAL",
+    images: [
+      {
+        url: "https://xx402gal.vercel.app/og-image",
+        width: 1200,
+        height: 630,
+        alt: "x402GAL - Water-offset rails for AI agents",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "x402GAL — Water-offset rails for AI agents",
+    description: "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin, settled cross-chain through Wire's Universal Transaction Layer.",
+    images: ["https://xx402gal.vercel.app/og-image"],
+  },
+  metadataBase: new URL("https://xx402gal.vercel.app"),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

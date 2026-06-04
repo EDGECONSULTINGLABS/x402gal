@@ -8,8 +8,10 @@ import {
   coinbaseWallet,
   injectedWallet,
   trustWallet,
+  walletConnectWallet,
+  rainbowWallet,
 } from "@rainbow-me/rainbowkit/wallets";
-import { createConfig, http } from "wagmi";
+import { createConfig, http, cookieStorage, createStorage } from "wagmi";
 import { base, mainnet, polygon, avalanche } from "wagmi/chains";
 
 export const projectId =
@@ -19,7 +21,7 @@ const connectors = connectorsForWallets(
   [
     {
       groupName: "Popular",
-      wallets: [metaMaskWallet, coinbaseWallet, trustWallet, injectedWallet],
+      wallets: [metaMaskWallet, coinbaseWallet, trustWallet, rainbowWallet, walletConnectWallet, injectedWallet],
     },
   ],
   {
@@ -37,5 +39,6 @@ export const wagmiConfig = createConfig({
     [polygon.id]: http(),
     [avalanche.id]: http(),
   },
-  ssr: false,
+  ssr: true,
+  storage: createStorage({ storage: cookieStorage }),
 });

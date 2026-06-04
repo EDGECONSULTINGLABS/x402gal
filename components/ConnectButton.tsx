@@ -28,10 +28,11 @@ export function ConnectButton() {
               <button
                 onClick={openConnectModal}
                 type="button"
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-hydro-400/50 bg-hydro-500/15 px-4 py-2.5 text-sm font-semibold text-hydro-200 shadow-glow transition active:scale-95 hover:bg-hydro-500/25 hover:border-hydro-300"
+                className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-hydro-400/50 bg-hydro-500/15 px-3 py-2 text-sm font-semibold text-hydro-200 shadow-glow transition active:scale-95 hover:bg-hydro-500/25 hover:border-hydro-300 sm:px-4 sm:py-2.5"
+                aria-label="Connect Wallet"
               >
                 <Wallet size={16} />
-                <span>Connect Wallet</span>
+                <span className="hidden sm:inline">Connect Wallet</span>
               </button>
             ) : chain.unsupported ? (
               <button

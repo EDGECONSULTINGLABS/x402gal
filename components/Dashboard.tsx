@@ -352,20 +352,22 @@ export function Dashboard() {
 function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; retired: number; xrplLive: boolean; onRestartTour?: () => void }) {
   return (
     <header className="sticky top-0 z-40 border-b border-edge/60 bg-abyss/70 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2 sm:gap-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:px-6 lg:px-8">
+        {/* Logo — always visible */}
+        <div className="flex min-w-0 items-center gap-2">
           <Logo size={30} />
-          <div>
-            <div className="font-display text-sm font-semibold tracking-tight sm:text-base">
+          <div className="min-w-0">
+            <div className="font-display text-sm font-semibold tracking-tight">
               x402GAL
             </div>
-            <div className="hidden text-[10px] uppercase tracking-[0.22em] text-slate-500 sm:block">
+            <div className="hidden text-[10px] uppercase tracking-[0.22em] text-slate-500 md:block">
               Water-offset rails for AI agents
             </div>
           </div>
         </div>
 
-        <div className="hidden items-center gap-2 md:flex">
+        {/* Pills — desktop only */}
+        <div className="hidden items-center gap-2 lg:flex">
           <Pill>
             <Activity size={11} className="text-hydro-300 animate-pulse" />
             HYDRO ${price ? price.toFixed(4) : "—"}
@@ -386,16 +388,19 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Right actions */}
+        <div className="flex shrink-0 items-center gap-2">
+          {/* Tour — icon only on mobile, label on md+ */}
           <button
             onClick={onRestartTour}
-            className="inline-flex items-center gap-1 rounded-lg border-2 border-cyan-400 bg-cyan-500/30 px-2 py-1.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/50 hover:bg-cyan-500/50"
+            className="inline-flex items-center gap-1 rounded-lg border-2 border-cyan-400 bg-cyan-500/30 px-2 py-1.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/50 hover:bg-cyan-500/50 md:gap-1.5 md:px-3 md:py-2"
             aria-label="Restart tour"
           >
             <HelpCircle size={14} />
-            <span className="hidden sm:inline">Tour</span>
+            <span className="hidden md:inline">Tour</span>
           </button>
-          <nav className="hidden items-center gap-1 text-xs md:flex">
+          {/* Nav links — desktop only */}
+          <nav className="hidden items-center gap-1 text-xs lg:flex">
             <NavLink href="https://www.x402.org/">x402</NavLink>
             <NavLink href="https://xrpl.org/">XRPL</NavLink>
             <NavLink href="https://www.hydrocoin.com/" highlight>

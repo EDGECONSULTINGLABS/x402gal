@@ -351,7 +351,7 @@ export function Dashboard() {
 
 function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; retired: number; xrplLive: boolean; onRestartTour?: () => void }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-edge/60 bg-abyss/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-[65] border-b border-edge/60 bg-abyss/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:px-6 lg:px-8">
         {/* Logo — always visible */}
         <div className="flex min-w-0 items-center gap-2">

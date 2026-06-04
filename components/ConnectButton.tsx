@@ -14,16 +14,10 @@ export function ConnectButton() {
         openConnectModal,
         mounted,
       }) => {
-        const ready = mounted;
-        const connected = ready && account && chain;
+        const connected = mounted && account && chain;
 
         return (
-          <div
-            {...(!ready && {
-              "aria-hidden": true,
-              style: { opacity: 0, pointerEvents: "none", userSelect: "none" },
-            })}
-          >
+          <div>
             {!connected ? (
               <button
                 onClick={openConnectModal}

@@ -253,49 +253,32 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
         )}
       </div>
 
-      {/* Tooltip */}
+      {/* Tooltip — always a bottom sheet, centered on larger screens */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep}
           ref={tooltipRef}
-          {...(!isMobileView && { drag: true, dragMomentum: false, dragElastic: 0 })}
-          initial={{ opacity: 0, y: isMobileView ? 40 : (isCentered ? 20 : 10) }}
+          initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: isMobileView ? 40 : 0 }}
-          transition={{ duration: 0.25 }}
-          className={`fixed z-[70] pointer-events-auto ${!isMobileView ? "cursor-grab active:cursor-grabbing touch-none" : ""}`}
-          style={isMobileView ? {
+          exit={{ opacity: 0, y: 24 }}
+          transition={{ duration: 0.22 }}
+          className="fixed z-[70] pointer-events-auto"
+          style={{
             bottom: 0,
             left: 0,
             right: 0,
-            top: "auto",
-          } : isCentered ? {
-            top: "50%",
-            left: "1rem",
-            right: "1rem",
-            maxWidth: "28rem",
-            marginLeft: "auto",
-            marginRight: "auto",
-            transform: "translateY(-50%)",
-          } : {
-            bottom: "1rem",
-            left: "1rem",
-            right: "1rem",
-            maxWidth: "28rem",
-            marginLeft: "auto",
-            marginRight: "auto",
           }}
         >
-          <div
-            className={`glass-strong border border-hydro-400/30 p-4 shadow-glow-lg sm:p-5 ${isMobileView ? "rounded-t-2xl rounded-b-none" : "rounded-2xl"}`}
-            style={{ paddingBottom: isMobileView ? "max(1.25rem, env(safe-area-inset-bottom))" : undefined }}
-          >
-            {/* Drag handle — mobile only */}
-            {isMobileView && (
-              <div className="mb-3 flex justify-center">
+          {/* Inner wrapper constrains width on tablet/desktop */}
+          <div className="mx-auto w-full sm:max-w-md sm:mb-6 sm:rounded-2xl sm:mx-auto">
+            <div
+              className="glass-strong border border-hydro-400/30 p-4 shadow-glow-lg rounded-t-2xl rounded-b-none sm:rounded-2xl"
+              style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
+            >
+              {/* Drag handle */}
+              <div className="mb-3 flex justify-center sm:hidden">
                 <div className="h-1 w-10 rounded-full bg-slate-600" />
               </div>
-            )}
             {/* Header */}
             <div className="mb-3 flex items-start justify-between">
               <div className="flex items-center gap-3">
@@ -363,6 +346,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
                   {!isLastStep && <ArrowRight size={12} />}
                 </button>
               </div>
+            </div>
             </div>
           </div>
         </motion.div>

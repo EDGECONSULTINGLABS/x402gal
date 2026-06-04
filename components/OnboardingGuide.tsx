@@ -96,7 +96,9 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
   const [currentStep, setCurrentStep] = useState(0);
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; placement: "above" | "below" | "center" }>({ top: 0, left: 0, placement: "center" });
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
-  const [isMobileView, setIsMobileView] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 640 : false
+  );
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -269,14 +271,19 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
             top: "auto",
           } : isCentered ? {
             top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "min(calc(100% - 2rem), 28rem)",
+            left: "1rem",
+            right: "1rem",
+            maxWidth: "28rem",
+            marginLeft: "auto",
+            marginRight: "auto",
+            transform: "translateY(-50%)",
           } : {
             bottom: "1rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "min(calc(100% - 2rem), 28rem)",
+            left: "1rem",
+            right: "1rem",
+            maxWidth: "28rem",
+            marginLeft: "auto",
+            marginRight: "auto",
           }}
         >
           <div

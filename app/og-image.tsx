@@ -35,10 +35,7 @@ export async function GET() {
               fontSize: '72px',
               fontWeight: '800',
               marginBottom: '24px',
-              background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              color: '#60a5fa',
               letterSpacing: '-2px',
             }}
           >

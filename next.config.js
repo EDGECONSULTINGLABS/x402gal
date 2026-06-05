@@ -2,6 +2,14 @@
 module.exports = {
   reactStrictMode: true,
   eslint: { ignoreDuringBuilds: true },
+  async rewrites() {
+    return [
+      {
+        source: "/infiltrateETHConf2026",
+        destination: "/infiltrateETHConf2026.html",
+      },
+    ];
+  },
   experimental: {
     serverComponentsExternalPackages: ["xrpl", "@solana/web3.js"],
   },

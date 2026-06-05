@@ -35,17 +35,17 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "x402GAL — Water-offset rails for AI agents",
+  title: "x402GAL — Every AI query has a water footprint",
   description:
-    "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin with cross-chain settlement.",
+    "Pay it back in real time. x402GAL settles water offsets on XRPL for every inference.",
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",
   },
   metadataBase: new URL("https://x402gal.com"),
   openGraph: {
-    title: "x402GAL — Water-offset rails for AI agents",
-    description: "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin with cross-chain settlement.",
+    title: "x402GAL — Every AI query has a water footprint",
+    description: "Pay it back in real time. x402GAL settles water offsets on XRPL for every inference.",
     type: "website",
     url: "https://x402gal.com",
     siteName: "x402GAL",
@@ -54,14 +54,14 @@ export const metadata: Metadata = {
         url: "https://x402gal.com/og-image",
         width: 1200,
         height: 630,
-        alt: "x402GAL - Water-offset rails for AI agents",
+        alt: "x402GAL - Water for the age of AI",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "x402GAL — Water-offset rails for AI agents",
-    description: "x402GAL is an x402-native water sustainability layer. AI agents pay per inference in HydroCoin with cross-chain settlement.",
+    title: "x402GAL — Every AI query has a water footprint",
+    description: "Pay it back in real time. x402GAL settles water offsets on XRPL for every inference.",
     images: ["https://x402gal.com/og-image"],
   },
 };
@@ -84,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="x402GAL - Water-offset rails for AI agents" />
+        <meta property="og:image:alt" content="x402GAL - Every AI query has a water footprint" />
         <meta name="twitter:image:src" content="https://x402gal.com/og-image" />
       </head>
       <body className="font-body antialiased selection:bg-hydro-500/40 selection:text-white">

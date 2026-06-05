@@ -390,6 +390,18 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
 
         {/* Right actions */}
         <div className="flex shrink-0 items-center gap-2">
+          {/* Infiltrate ETHConf — always visible */}
+          <a
+            href="/infiltrateETHConf2026"
+            className="inline-flex items-center gap-1.5 rounded-md border border-cyan-400/50 bg-cyan-500/10 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-cyan-300 transition hover:border-cyan-300 hover:bg-cyan-500/20 sm:px-2.5 sm:tracking-[0.18em]"
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-300" />
+            </span>
+            <span className="hidden sm:inline">Infiltrate ETHConf</span>
+            <span className="sm:hidden">Infiltrate</span>
+          </a>
           {/* Tour — icon only on mobile, label on md+ */}
           <button
             onClick={onRestartTour}
@@ -401,16 +413,6 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
           </button>
           {/* Nav links — desktop only */}
           <nav className="hidden items-center gap-1 text-xs lg:flex">
-            <a
-              href="/infiltrateETHConf2026"
-              className="inline-flex items-center gap-1.5 rounded-md border border-cyan-400/50 bg-cyan-500/10 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-cyan-300 transition hover:border-cyan-300 hover:bg-cyan-500/20"
-            >
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-300" />
-              </span>
-              Infiltrate ETHConf
-            </a>
             <NavLink href="https://www.x402.org/">x402</NavLink>
             <NavLink href="https://xrpl.org/">XRPL</NavLink>
             <NavLink href="https://www.hydrocoin.com/" highlight>

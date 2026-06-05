@@ -22,7 +22,7 @@ import {
   ExternalLink,
   Activity,
   Wallet,
-  HelpCircle,
+  Map,
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { ChainBadge } from "./ChainBadge";
@@ -406,10 +406,10 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
           {/* Tour — icon only on mobile, label on md+ */}
           <button
             onClick={onRestartTour}
-            className="inline-flex items-center gap-1 rounded-lg border-2 border-cyan-400 bg-cyan-500/30 px-2 py-1.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/50 hover:bg-cyan-500/50 md:gap-1.5 md:px-3 md:py-2"
+            className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-1.5 text-xs text-slate-300 transition hover:border-edge hover:bg-panel/50 hover:text-white"
             aria-label="Restart tour"
           >
-            <HelpCircle size={14} />
+            <Map size={11} className="opacity-60" />
             <span className="hidden md:inline">Tour</span>
           </button>
           {/* Nav links — desktop only */}

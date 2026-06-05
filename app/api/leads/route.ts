@@ -27,7 +27,9 @@ export async function OPTIONS() {
 
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get("secret") || req.headers.get("x-leads-secret") || "";
-  if (LEADS_SECRET && secret !== LEADS_SECRET) {
+  // Fail closed: if LEADS_SECRET is unset, reject everything rather than
+  // exposing attendee records. Never run this endpoint without the secret set.
+  if (!LEADS_SECRET || secret !== LEADS_SECRET) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

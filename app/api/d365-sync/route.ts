@@ -121,7 +121,8 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   const secret = req.headers.get("x-leads-secret") || "";
-  if (LEADS_SECRET && secret !== LEADS_SECRET) {
+  // Fail closed: an unset LEADS_SECRET must not leave this endpoint open.
+  if (!LEADS_SECRET || secret !== LEADS_SECRET) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401, headers: CORS });
   }
 

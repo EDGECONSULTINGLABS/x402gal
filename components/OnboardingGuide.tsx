@@ -166,7 +166,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
           {/* Inner wrapper constrains width on tablet/desktop */}
           <div className="mx-auto w-full sm:max-w-md sm:mb-6 sm:rounded-2xl sm:mx-auto">
             <div
-              className="glass-strong border border-hydro-400/30 p-4 shadow-glow-lg rounded-t-2xl rounded-b-none sm:rounded-2xl"
+              className="bg-slate-900/95 border border-slate-700 p-4 rounded-t-2xl rounded-b-none sm:rounded-2xl"
               style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
             >
               {/* Drag handle */}
@@ -197,7 +197,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
                 <div
                   key={index}
                   className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                    index <= currentStep ? "bg-hydro-400" : "bg-hydro-400/20"
+                    index <= currentStep ? "bg-cyan-500" : "bg-slate-700"
                   }`}
                 />
               ))}
@@ -222,7 +222,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
                 )}
                 <button
                   onClick={handleNext}
-                  className="inline-flex items-center gap-1 rounded-lg bg-hydro-gradient px-4 py-1.5 text-xs font-semibold text-abyss shadow-glow transition hover:brightness-110"
+                  className="inline-flex items-center gap-1 rounded-lg bg-cyan-500 px-4 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-cyan-400"
                 >
                   {isLastStep ? "Got it!" : "Next"}
                   {!isLastStep && <ArrowRight size={12} />}

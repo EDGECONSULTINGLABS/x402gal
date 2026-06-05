@@ -253,9 +253,7 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
             </div>
           </motion.div>
         )}
-        <div className={`mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3 ${
-          isConnected ? "" : "pointer-events-none select-none opacity-40"
-        }`}>
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <div data-guide="price-chart">
               <PriceChart history={history} />

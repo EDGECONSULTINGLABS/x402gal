@@ -166,7 +166,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
           {/* Inner wrapper constrains width on tablet/desktop */}
           <div className="mx-auto w-full sm:max-w-md sm:mb-6 sm:rounded-2xl sm:mx-auto">
             <div
-              className="bg-slate-900 border border-slate-700 p-4 rounded-t-2xl rounded-b-none sm:rounded-2xl"
+              className="bg-slate-900/90 border border-slate-700/80 p-4 rounded-t-2xl rounded-b-none sm:rounded-2xl backdrop-blur-md"
               style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
             >
               {/* Drag handle */}

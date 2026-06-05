@@ -56,12 +56,29 @@ export async function POST(req: NextRequest) {
   const email = body.email as string;
 
   if (!event) return Response.json({ ok: false, error: "missing event" }, { status: 400, headers: CORS });
+
+  const ts = (body.ts as string) || new Date().toISOString();
+
+  // -------- FUNNEL TRACKING (no email required) --------
+  if (event.startsWith("funnel:")) {
+    const parts = event.split(":");              // ["funnel","view"|"abandon", screenName]
+    const action = parts[1] || "view";
+    const screen = parts[2] || "unknown";
+    const funnelKey = validEmail(email)
+      ? `event:${eventId}:agent:${email.toLowerCase()}`
+      : `event:${eventId}:anon:${ts}`;
+    try {
+      await redis.hset(funnelKey, { [`funnel_${action}_${screen}`]: ts });
+      await redis.incr(`event:${eventId}:funnel:${action}:${screen}`);
+    } catch { /* fire-and-forget, never fail the client */ }
+    return Response.json({ ok: true }, { headers: CORS });
+  }
+
   if (!validEmail(email)) return Response.json({ ok: false, error: "invalid email" }, { status: 400, headers: CORS });
 
   const agentKey = `event:${eventId}:agent:${email.toLowerCase()}`;
   const cohortKey = `event:${eventId}:agents`;
   const counterKey = `event:${eventId}:agent_count`;
-  const ts = (body.ts as string) || new Date().toISOString();
 
   try {
     // -------- REGISTER --------

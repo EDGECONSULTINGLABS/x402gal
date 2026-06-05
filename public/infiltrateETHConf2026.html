@@ -464,10 +464,26 @@
   function liveCount(){ return state._live || (CONFIG.baseAgents + (state.agentNumber ? 1 : 0)); }
   $("liveCount").textContent = liveCount().toLocaleString("en-US");
 
+  /* ===================== FUNNEL TRACKING ===================== */
+  var SCREEN_NAMES = { "s-entry":"entry", "s-capture":"capture", "s-missions":"missions", "s-badge":"badge" };
+  function showTracked(screenId){
+    show(screenId);
+    postCapture("funnel:view:" + (SCREEN_NAMES[screenId] || screenId));
+  }
+  // Fire on initial page load
+  postCapture("funnel:view:entry");
+  // Track unload while on capture screen (drop-off signal)
+  window.addEventListener("pagehide", function(){
+    var active = document.querySelector(".screen.on");
+    if(active && active.id === "s-capture" && !state.captured){
+      postCapture("funnel:abandon:capture");
+    }
+  });
+
   /* ===================== ENTRY ===================== */
   $("startBtn").addEventListener("click", function(){
-    if(state.captured){ show("s-missions"); renderMissions(); }
-    else { show("s-capture"); }
+    if(state.captured){ showTracked("s-missions"); renderMissions(); }
+    else { showTracked("s-capture"); }
   });
 
   /* ===================== CAPTURE ===================== */
@@ -502,7 +518,7 @@
     var btn=$("captureBtn"); btn.disabled=true; var btnLabel=btn.textContent; btn.textContent="Checking you in\u2026";
     assignAgentNumber().then(function(){
       btn.disabled=false; btn.textContent=btnLabel;
-      show("s-missions");
+      showTracked("s-missions");
       renderMissions();
     });
   });
@@ -642,7 +658,7 @@
   }
 
   /* ===================== BADGE ===================== */
-  function goBadge(){ show("s-badge"); renderBadge(); }
+  function goBadge(){ showTracked("s-badge"); renderBadge(); }
   function renderBadge(){
     updateAgentTag();
     var stage=$("badgeStage"), c=doneCount();
@@ -821,7 +837,7 @@
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 
   /* ===================== TAB NAV ===================== */
-  function goMissions(){ show("s-missions"); renderMissions(); }
+  function goMissions(){ showTracked("s-missions"); renderMissions(); }
   $("tab-missions").addEventListener("click", goMissions);
   $("tab-badge").addEventListener("click", goBadge);
   $("tab-missions-2").addEventListener("click", goMissions);

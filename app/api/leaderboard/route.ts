@@ -17,7 +17,7 @@ const DEFAULT_EVENT_ID = process.env.EVENT_ID || "ethconf-nyc-2026";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
@@ -50,12 +50,11 @@ export async function GET() {
     const missions = (data.missions_completed || "").split(",").filter(Boolean);
     const points = Number(data.points) || 0;
     const holo = missions.length >= 6;
-    const visible = data.leaderboard_visible === "true";
 
     agents.push({
       rank: 0, // assigned after sort
       agentNumber: String(data.agentNumber).padStart(4, "0"),
-      name: visible ? (data.name || "Agent") : null,
+      name: null, // names are always hidden
       points,
       missions: missions.length,
       tier: holo ? "Genesis Holo" : missions.length >= 4 ? "Verified Agent" : "In Progress",
@@ -74,33 +73,3 @@ export async function GET() {
   return Response.json({ agents, total: agents.length }, { headers: CORS });
 }
 
-export async function POST(req: Request) {
-  let body: Record<string, unknown>;
-  try {
-    body = await req.json();
-  } catch {
-    return Response.json({ ok: false, error: "invalid json" }, { status: 400, headers: CORS });
-  }
-
-  const email = body.email as string | undefined;
-  const visible = body.visible as boolean | undefined;
-
-  if (!email || typeof visible !== "boolean") {
-    return Response.json(
-      { ok: false, error: "requires { email, visible: true|false }" },
-      { status: 400, headers: CORS }
-    );
-  }
-
-  const eventId = DEFAULT_EVENT_ID;
-  const agentKey = `event:${eventId}:agent:${email.toLowerCase()}`;
-
-  const exists = await redis.exists(agentKey);
-  if (!exists) {
-    return Response.json({ ok: false, error: "agent not found" }, { status: 404, headers: CORS });
-  }
-
-  await redis.hset(agentKey, { leaderboard_visible: String(visible) });
-
-  return Response.json({ ok: true, visible }, { headers: CORS });
-}

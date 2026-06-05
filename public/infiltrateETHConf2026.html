@@ -824,29 +824,6 @@
       });
     }
 
-    // ----- Leaderboard visibility toggle -----
-    var lbDiv=document.createElement("div");
-    lbDiv.style.cssText="width:100%;border:1px solid var(--line);border-radius:14px;background:rgba(4,22,42,0.5);padding:18px;margin-top:16px;text-align:left";
-    var isVisible=state.leaderboardVisible||false;
-    lbDiv.innerHTML=
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">'+
-        '<div>'+
-          '<div style="font-family:\'Space Mono\',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:4px">Leaderboard</div>'+
-          '<div style="font-size:13px;color:var(--body)">Show your name on the public leaderboard?</div>'+
-        '</div>'+
-        '<button id="lbToggle" class="btn sm" style="margin:0;white-space:nowrap">'+(isVisible?'Visible \u2713':'Hidden')+'</button>'+
-      '</div>';
-    stage.appendChild(lbDiv);
-    $("lbToggle").addEventListener("click",function(){
-      isVisible=!isVisible;
-      state.leaderboardVisible=isVisible; save();
-      this.textContent=isVisible?'Visible \u2713':'Hidden';
-      if(state.email){
-        fetch("/api/leaderboard",{method:"POST",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({email:state.email,visible:isVisible}),keepalive:true}).catch(function(){});
-      }
-    });
-
   }
 
   function doMint(wallet){

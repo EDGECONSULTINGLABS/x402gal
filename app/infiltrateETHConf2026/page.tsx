@@ -1,7 +1,6 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import type { Metadata } from "next";
-import { URL } from "url";
 
 export const dynamic = "force-dynamic";
 

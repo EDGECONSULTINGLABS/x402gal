@@ -52,7 +52,8 @@
     --line:rgba(0,229,255,0.18); --line-soft:rgba(0,229,255,0.10);
     --cyan:#00E5FF; --cyan-2:#00B8E5; --cyan-3:#62F1FF;
     --teal:#34E0C9; --blue:#1E90FF;
-    --paper:#FFFFFF; --body:#B8D4E8; --muted:#6E92AB; --muted-2:#4A6B82;
+    --paper:#FFFFFF; --body:#B8D4E8; --muted:#6E92AB; --muted-2:#5E8299;
+    --placeholder:#8AA9C1;
     --green:#46E08C; --consume:#FFA94D; --gold:#FFD37A; --red:#FF6B6B;
     --glow:0 0 22px rgba(0,229,255,0.55); --glow-soft:0 0 14px rgba(0,229,255,0.35);
   }
@@ -128,6 +129,13 @@
   .lede{font-size:16.5px;color:var(--body);line-height:1.55;margin-bottom:8px}
   .lede b{color:var(--paper);font-weight:600}
 
+  /* back link (step navigation) */
+  .backlink{background:none;border:none;cursor:pointer;font-family:'Space Mono',monospace;font-size:11px;
+    letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding:6px 0;margin:0 0 10px;
+    display:inline-flex;align-items:center;gap:7px;transition:.16s}
+  .backlink:hover{color:var(--cyan)}
+  .backlink:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:4px}
+
   /* entry hero card */
   .hero{margin-top:30px;border:1px solid var(--line);border-radius:16px;
     background:linear-gradient(180deg,#041a31,#020d1a);padding:26px 22px 24px;position:relative;overflow:hidden}
@@ -135,6 +143,17 @@
     text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:10px;
     border-top:1px dashed var(--line-soft);margin-top:22px;padding-top:16px}
   .hero .meta b{color:var(--cyan)}
+
+  /* how it works (inside hero) */
+  .howto{border-top:1px dashed var(--line-soft);margin-top:20px;padding-top:18px}
+  .howto-h{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;
+    color:var(--cyan);margin-bottom:15px}
+  .steps{list-style:none;display:flex;flex-direction:column;gap:14px}
+  .steps li{display:flex;gap:13px;align-items:flex-start;font-size:13.5px;color:var(--body);line-height:1.48}
+  .steps .n{flex-shrink:0;width:25px;height:25px;border-radius:50%;border:1px solid var(--cyan);color:var(--cyan);
+    font-family:'Share Tech Mono','Space Mono',monospace;font-size:13px;display:flex;align-items:center;justify-content:center;
+    background:rgba(0,229,255,0.08);box-shadow:var(--glow-soft);margin-top:1px}
+  .steps b{color:var(--paper);font-weight:600}
 
   .btn{display:flex;width:100%;align-items:center;justify-content:center;gap:9px;
     font-family:'Hanken Grotesk';font-weight:700;font-size:15px;cursor:pointer;
@@ -154,7 +173,7 @@
     text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
   .field input{width:100%;background:rgba(0,8,20,0.6);border:1px solid var(--line);border-radius:10px;
     padding:14px;color:var(--paper);font-family:'Hanken Grotesk';font-size:15px}
-  .field input::placeholder{color:var(--muted-2)}
+  input::placeholder{color:var(--placeholder);opacity:1}
   .roles{display:grid;grid-template-columns:1fr 1fr;gap:9px}
   .role{font-family:'Hanken Grotesk';font-weight:600;font-size:13.5px;cursor:pointer;
     border:1px solid var(--line);border-radius:11px;padding:13px 10px;background:rgba(4,22,42,0.5);
@@ -165,6 +184,10 @@
   .role.sel .dot{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 8px var(--cyan)}
   .err{color:var(--red);font-size:12.5px;margin-top:4px;min-height:16px;font-family:'Space Mono',monospace}
   .fineprint{font-size:11.5px;color:var(--muted-2);margin-top:14px;line-height:1.45}
+
+  /* missions orientation line */
+  .m-intro{font-size:13.5px;color:var(--body);line-height:1.5;margin:2px 0 16px}
+  .m-intro b{color:var(--paper);font-weight:600}
 
   /* progress */
   .progress-wrap{margin:6px 0 22px}
@@ -197,6 +220,7 @@
   .m-desc a,.claim a.link,.small a{color:var(--cyan);text-decoration:underline;text-underline-offset:2px;font-weight:600;word-break:break-word}
   .m-desc a:hover,.small a:hover{color:var(--cyan-3)}
   .m-action{margin-top:14px}
+  .m-hint{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:0.04em;color:var(--muted);margin-top:9px;line-height:1.45}
   .code-row{display:flex;gap:8px}
   .code-row input{flex:1;background:rgba(0,8,20,0.6);border:1px solid var(--line);border-radius:10px;
     padding:12px;color:var(--paper);font-family:'Space Mono',monospace;font-size:14px;letter-spacing:0.18em;text-transform:uppercase}
@@ -245,7 +269,7 @@
     padding:40px 24px;text-align:center;background:rgba(4,22,42,0.4)}
   .locked-card .lk{width:46px;height:46px;margin:0 auto 14px;border-radius:50%;border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;color:var(--muted);background:rgba(0,8,20,0.5)}
-  .locked-card p{color:var(--muted);font-size:14px}
+  .locked-card p{color:var(--body);font-size:14px}
 
   footer{text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--line-soft);
     font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:0.1em;color:var(--muted-2)}
@@ -285,6 +309,16 @@
     <div class="hero hud">
       <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
       <p class="lede" style="margin:0;font-size:15px">Six missions. One badge. The agents who finish all six pull the rare holo edition, minted one-for-one with the genesis drop.</p>
+
+      <div class="howto">
+        <div class="howto-h">How it works</div>
+        <ol class="steps">
+          <li><span class="n">1</span><div><b>Check in.</b> Fifteen seconds, so we can score your run and route your badge to you.</div></li>
+          <li><span class="n">2</span><div><b>Work six missions on the floor.</b> Find the team, run the water meter, follow the signal. A few open in a new tab, then you come right back here to log them.</div></li>
+          <li><span class="n">3</span><div><b>Claim your badge.</b> Four missions unlocks it, all six pulls the rare holo, minted to your wallet on XRPL.</div></li>
+        </ol>
+      </div>
+
       <div class="meta">
         <span>Agents on the floor</span>
         <span><b id="liveCount">—</b></span>
@@ -296,7 +330,8 @@
 
   <!-- ===== SCREEN 2: CAPTURE ===== -->
   <section class="screen" id="s-capture">
-    <span class="eyebrow">Register your agent</span>
+    <button class="backlink" id="captureBack" type="button">&larr; Back</button>
+    <span class="eyebrow">Step 1 of 3 · Register your agent</span>
     <h1 style="font-size:clamp(32px,9vw,44px)">Sign in to<br>the <span class="g">field.</span></h1>
     <p class="lede" style="margin-bottom:22px">Quick check-in so we can score your run and get your badge to the right person.</p>
 
@@ -336,6 +371,8 @@
       <button class="active" id="tab-missions">Missions</button>
       <button id="tab-badge">Your badge</button>
     </div>
+
+    <p class="m-intro">Work these as you move around the floor. A few open in a new tab, just come back here to log each one. <b>Four unlocks your badge, all six pulls the holo.</b></p>
 
     <div class="progress-wrap hud" style="border:1px solid var(--line);border-radius:14px;padding:18px;background:rgba(4,22,42,0.5)">
       <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
@@ -390,26 +427,32 @@
     { id:"team",  type:"code", points:25, code:"VERIFIED",
       title:"Find the team",
       desc:"Track down <a href=\"https://www.linkedin.com/in/joseph-kramer-52b181323/\" target=\"_blank\" rel=\"noopener\">Joe</a> or <a href=\"https://www.linkedin.com/in/alulaz/\" target=\"_blank\" rel=\"noopener\">Alula</a> on the floor. Ask what makes a gallon \u201cverified.\u201d They'll hand you the word.",
+      hint:"At the booth. Type the word they give you below.",
       icon:'<path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6h5M18.5 3.5v5"/>' },
     { id:"calc",  type:"link", points:15, url:CALC_URL,
       title:"Run the water meter",
       desc:"Open the live Agent Payment Terminal and run a workload. Watch one AI action turn into gallons returned underground.",
+      hint:"Opens in a new tab. Come back here when you're done.",
       icon:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>' },
     { id:"paper", type:"link", points:15, url:WHITEPAPER_URL,
       title:"Read the white paper",
       desc:"One HydroCoin = one verified gallon. See how the methodology is signed by a PE, attested by a CPA, and fingerprinted.",
+      hint:"Opens in a new tab. Come back here when you're done.",
       icon:'<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>' },
     { id:"follow", type:"link", points:15, urls:["https://x.com/HydroCoinHQ","https://x.com/MyCrypt0world"],
       title:"Follow the signal",
       desc:"Follow <a href=\"https://x.com/HydroCoinHQ\" target=\"_blank\" rel=\"noopener\">@HydroCoinHQ</a> and <a href=\"https://x.com/MyCrypt0world\" target=\"_blank\" rel=\"noopener\">@MyCrypt0world</a> for the genesis drop, live x402GAL updates, and the leaderboard.",
+      hint:"Opens X in a new tab. Come back here when you're done.",
       icon:'<path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.6" fill="currentColor"/>' },
     { id:"drop",  type:"proof", points:20, url:DROP_TWEET_URL,
       title:"Find the drop",
       desc:"The drop is a post on <a href=\"https://x.com/HydroCoinHQ\" target=\"_blank\" rel=\"noopener\">@HydroCoinHQ</a>. Open it, repost it, then paste the link to your repost or quote to prove it.",
+      hint:"Open it, repost, then come back and paste your repost link below.",
       icon:'<path d="M12 3 C12 3, 19 11, 19 16 A7 7 0 1 1 5 16 C5 11, 12 3, 12 3 Z"/><path d="M9 14l2 2 4-4"/>' },
     { id:"share", type:"share", points:20,
       title:"Make some noise",
       desc:"Post your run on X and tag us. The louder the signal, the bigger the splash \u2014 and it counts toward your badge.",
+      hint:"We'll pre-fill the post. Come back here after you send it.",
       icon:'<path d="M4 4l16 16M20 4 4 20" opacity="0.25"/><path d="M3 3h5l9 12 4-12h-3l-3 9L6 3H3Z"/>' }
   ];
 
@@ -505,6 +548,9 @@
 
   function validEmail(s){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
 
+  // Back button on the capture screen -> return to entry (clearer step navigation)
+  $("captureBack").addEventListener("click", function(){ showTracked("s-entry"); });
+
   $("captureBtn").addEventListener("click", function(){
     var name=$("f-name").value.trim(), email=$("f-email").value.trim(),
         company=$("f-company").value.trim(), squad=$("f-squad").value.trim(), err=$("captureErr");
@@ -566,13 +612,16 @@
                    '<input type="text" id="code-'+m.id+'" placeholder="ENTER CODE" autocapitalize="characters" autocomplete="off">'+
                    '<button class="btn primary sm" data-code="'+m.id+'">Verify</button>'+
                  '</div>'+
+                 (m.hint?'<div class="m-hint">'+m.hint+'</div>':'')+
                  '<div class="m-msg" id="msg-'+m.id+'"></div>'+
                '</div>';
       } else if(m.type==="link"){
         var linkLabel = m.urls ? "I followed both" : "Open &amp; complete";
-        action='<div class="m-action"><button class="btn sm" data-link="'+m.id+'">'+linkLabel+' &nbsp;&rarr;</button></div>';
+        action='<div class="m-action"><button class="btn sm" data-link="'+m.id+'">'+linkLabel+' &nbsp;&rarr;</button>'+
+                 (m.hint?'<div class="m-hint">'+m.hint+'</div>':'')+'</div>';
       } else if(m.type==="share"){
-        action='<div class="m-action"><button class="btn sm" data-share="'+m.id+'">Post on X &nbsp;&rarr;</button></div>';
+        action='<div class="m-action"><button class="btn sm" data-share="'+m.id+'">Post on X &nbsp;&rarr;</button>'+
+                 (m.hint?'<div class="m-hint">'+m.hint+'</div>':'')+'</div>';
       } else if(m.type==="proof"){
         action='<div class="m-action">'+
                  '<button class="btn sm" data-open="'+m.id+'" style="margin-bottom:9px">Open the drop on X &nbsp;&rarr;</button>'+
@@ -580,6 +629,7 @@
                    '<input type="text" id="code-'+m.id+'" placeholder="paste your repost / quote link" autocapitalize="none" autocomplete="off" style="text-transform:none;letter-spacing:0">'+
                    '<button class="btn primary sm" data-proof="'+m.id+'">Verify</button>'+
                  '</div>'+
+                 (m.hint?'<div class="m-hint">'+m.hint+'</div>':'')+
                  '<div class="m-msg" id="msg-'+m.id+'"></div>'+
                '</div>';
       }
@@ -638,7 +688,9 @@
     state.done[id]=true; save();
     postCapture("mission:"+id);
     renderMissions();
-    if(doneCount()===CONFIG.badgeThreshold){ // first unlock — jump them to the reward
+    // Auto-route to the badge on a milestone: the first unlock (badgeThreshold)
+    // and the final mission (holoThreshold = all six, rare holo edition).
+    if(doneCount()===CONFIG.badgeThreshold || doneCount()===CONFIG.holoThreshold){
       setTimeout(function(){ goBadge(); }, 450);
     }
   }

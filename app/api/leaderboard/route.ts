@@ -58,7 +58,7 @@ export async function GET() {
       points,
       missions: missions.length,
       tier: holo ? "Genesis Holo" : missions.length >= 4 ? "Verified Agent" : "In Progress",
-      squad: data.squad || null,
+      squad: null, // hidden — no identity info on leaderboard
       holo,
       minted: !!(data.nft_id),
     });

@@ -10,7 +10,6 @@
 //   D365_CLIENT_ID       — App registration client ID
 //   D365_CLIENT_SECRET   — App registration client secret
 //   D365_ORG_URL         — e.g. https://yourorg.crm.dynamics.com
-//   LEADS_SECRET         — shared secret to protect this endpoint
 
 import { Redis } from "@upstash/redis";
 import { NextRequest } from "next/server";
@@ -19,7 +18,6 @@ export const runtime = "nodejs";
 
 const redis = Redis.fromEnv();
 const DEFAULT_EVENT_ID = process.env.EVENT_ID || "ethconf-nyc-2026";
-const LEADS_SECRET = process.env.LEADS_SECRET || "";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -120,12 +118,6 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get("x-leads-secret") || "";
-  // Fail closed: an unset LEADS_SECRET must not leave this endpoint open.
-  if (!LEADS_SECRET || secret !== LEADS_SECRET) {
-    return Response.json({ ok: false, error: "unauthorized" }, { status: 401, headers: CORS });
-  }
-
   // Check D365 config
   const orgUrl = process.env.D365_ORG_URL;
   if (!process.env.D365_TENANT_ID || !process.env.D365_CLIENT_ID || !process.env.D365_CLIENT_SECRET || !orgUrl) {

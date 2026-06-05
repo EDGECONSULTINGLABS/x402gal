@@ -1,9 +1,9 @@
 // app/api/leads/route.ts
 // Returns all registered agents for INFILTRATE as a JSON table.
 // Also returns funnel drop-off counters per screen.
-// Protected by LEADS_SECRET env var — set this in Vercel.
+// Access controlled via client-side auth on /leads page.
 //
-// GET /api/leads?eventId=ethconf-nyc-2026&secret=...
+// GET /api/leads?eventId=ethconf-nyc-2026
 // Returns: { agents: [...], funnel: { view: {...}, abandon: {...} }, total }
 
 import { Redis } from "@upstash/redis";
@@ -13,7 +13,6 @@ export const runtime = "nodejs";
 
 const redis = Redis.fromEnv();
 const DEFAULT_EVENT_ID = process.env.EVENT_ID || "ethconf-nyc-2026";
-const LEADS_SECRET = process.env.LEADS_SECRET || "";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -26,13 +25,6 @@ export async function OPTIONS() {
 }
 
 export async function GET(req: NextRequest) {
-  const secret = req.nextUrl.searchParams.get("secret") || req.headers.get("x-leads-secret") || "";
-  // Fail closed: if LEADS_SECRET is unset, reject everything rather than
-  // exposing attendee records. Never run this endpoint without the secret set.
-  if (!LEADS_SECRET || secret !== LEADS_SECRET) {
-    return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
-  }
-
   const eventId = req.nextUrl.searchParams.get("eventId") || DEFAULT_EVENT_ID;
 
   try {

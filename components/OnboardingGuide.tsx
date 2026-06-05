@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight, ArrowLeft, Zap, Layers, Wallet, Droplets, Bot, Globe, Beaker, BarChart3 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, Layers, Wallet, Droplets, Bot, Globe, Beaker, BarChart3 } from "lucide-react";
 
 interface OnboardingGuideProps {
   isConnected: boolean;
@@ -85,7 +85,7 @@ const steps: Step[] = [
   {
     id: "complete",
     title: "You\u2019re All Set!",
-    description: "Now you understand how x402GAL turns AI water consumption into verifiable restoration credits. Explore the dashboard, or click Tour again anytime to revisit this guide.",
+    description: "Now you understand how x402GAL turns AI water consumption into verifiable restoration credits. Click 'Next' to enter the INFILTRATE ETHConf scavenger hunt.",
     icon: <Zap className="text-hydro-300" size={24} />,
     position: "center",
   },
@@ -177,16 +177,12 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
     }
   }, [showGuide, currentStep, positionTooltip]);
 
-  const handleSkip = () => {
-    localStorage.setItem("x402gal-guide-skipped", "true");
-    setShowGuide(false);
-    onComplete();
-  };
-
   const handleComplete = () => {
     localStorage.setItem("x402gal-guide-completed", "true");
     setShowGuide(false);
     onComplete();
+    // Send user back to the scavenger hunt at end of tour
+    window.location.href = "/infiltrateETHConf2026";
   };
 
   const handleNext = () => {
@@ -234,8 +230,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
             x="0" y="0" width="100%" height="100%"
             fill="rgba(0,4,9,0.85)"
             mask="url(#spotlight-mask)"
-            className="pointer-events-auto cursor-pointer"
-            onClick={handleSkip}
+            className="pointer-events-none"
           />
         </svg>
 
@@ -294,13 +289,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
                   </p>
                 </div>
               </div>
-              <button
-                onClick={handleSkip}
-                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-panel/50 hover:text-white"
-                title="Close tour"
-              >
-                <X size={16} />
-              </button>
+              {/* No close button — tour must be completed */}
             </div>
 
             {/* Progress bar */}
@@ -321,13 +310,7 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
             </p>
 
             {/* Navigation */}
-            <div className="flex items-center justify-between">
-              <button
-                onClick={handleSkip}
-                className="text-[11px] text-slate-500 transition hover:text-slate-300"
-              >
-                End tour
-              </button>
+            <div className="flex items-center justify-end">
               <div className="flex items-center gap-2">
                 {!isFirstStep && (
                   <button

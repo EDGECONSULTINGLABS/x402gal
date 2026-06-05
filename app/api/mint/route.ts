@@ -18,7 +18,7 @@ import { Redis } from "@upstash/redis";
 export const runtime = "nodejs";
 
 const ENDPOINT  = process.env.XRPL_ENDPOINT  || "wss://s.altnet.rippletest.net:51233";
-const META_BASE = process.env.BADGE_META_BASE || "https://www.hydrocoin.com/infiltrate/badge";
+const META_BASE = process.env.BADGE_META_BASE || "https://www.x402gal.com/api/badge-meta";
 const EXPLORER  = "https://testnet.xrpl.org/nft/";
 const TAXON     = 402;
 

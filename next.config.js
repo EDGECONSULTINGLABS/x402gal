@@ -8,6 +8,10 @@ module.exports = {
         source: "/infiltrateETHConf2026",
         destination: "/infiltrateETHConf2026.html",
       },
+      {
+        source: "/leaderboard",
+        destination: "/leaderboard.html",
+      },
     ];
   },
   experimental: {

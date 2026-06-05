@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Leaderboard · x402GAL @ ETHConf</title>
+<meta name="description" content="Live field rankings for INFILTRATE at ETHConf NYC. See who's leading the run.">
+<meta name="theme-color" content="#000814">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.x402gal.com/leaderboard">
+<meta property="og:title" content="Leaderboard · x402GAL @ ETHConf">
+<meta property="og:description" content="Live field rankings for INFILTRATE at ETHConf NYC.">
+<meta property="og:image" content="https://www.x402gal.com/og-image">
+<link rel="icon" type="image/png" href="/infiltrate-favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Share+Tech+Mono&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#000814; --ink-2:#020E1C; --panel:#04162A;
+    --line:rgba(0,229,255,0.18); --line-soft:rgba(0,229,255,0.10);
+    --cyan:#00E5FF; --cyan-2:#00B8E5; --cyan-3:#62F1FF;
+    --teal:#34E0C9; --blue:#1E90FF;
+    --paper:#FFFFFF; --body:#B8D4E8; --muted:#6E92AB; --muted-2:#5E8299;
+    --green:#46E08C; --gold:#FFD37A;
+    --glow:0 0 22px rgba(0,229,255,0.55); --glow-soft:0 0 14px rgba(0,229,255,0.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink); color:var(--body);
+    font-family:'Hanken Grotesk',sans-serif; font-size:16px; line-height:1.55;
+    overflow-x:hidden; -webkit-font-smoothing:antialiased;
+    min-height:100dvh;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-3;
+    background:
+      radial-gradient(700px 480px at 80% -8%,rgba(0,229,255,0.13),transparent 60%),
+      radial-gradient(560px 420px at 10% 30%,rgba(30,144,255,0.09),transparent 60%),
+      linear-gradient(180deg,#000814,#01060F 60%,#000814);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:0.45;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.045) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,229,255,0.045) 1px,transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(circle at 50% 30%,black 20%,transparent 78%);
+  }
+  .rain{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .rain i{position:absolute;top:-12vh;width:1.5px;height:50px;border-radius:2px;
+    background:linear-gradient(180deg,transparent,rgba(0,229,255,0.5));
+    animation:fall linear infinite;opacity:0.5}
+  @keyframes fall{to{transform:translateY(118vh)}}
+
+  .app{max-width:520px;margin:0 auto;padding:0 18px 56px;position:relative}
+
+  header.bar{display:flex;align-items:center;justify-content:space-between;
+    padding:18px 2px 14px;position:sticky;top:0;z-index:40;
+    background:linear-gradient(180deg,var(--ink) 70%,transparent)}
+  .brand{display:flex;align-items:center;gap:9px;color:var(--paper);font-weight:700}
+  .brand .drop{width:18px;height:23px}
+  .brand .drop svg{width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(0,229,255,0.7))}
+  .brand b{font-family:'Space Mono',monospace;font-size:15px;letter-spacing:-0.01em}
+  .brand span{color:var(--muted);font-weight:500;font-size:12px}
+
+  .eyebrow{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:0.24em;
+    text-transform:uppercase;color:var(--cyan);display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--cyan);padding:6px 14px;border-radius:30px;
+    background:rgba(0,229,255,0.06);box-shadow:var(--glow-soft);margin-bottom:22px}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:blink 1.7s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.35}}
+
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(32px,10vw,46px);
+    line-height:0.95;letter-spacing:-0.02em;color:var(--paper);margin-bottom:14px}
+  h1 .g{background:linear-gradient(120deg,var(--cyan),var(--blue));-webkit-background-clip:text;
+    background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 40px rgba(0,229,255,0.4)}
+
+  .intro{font-size:14px;color:var(--body);line-height:1.5;margin-bottom:20px}
+  .intro b{color:var(--paper);font-weight:600}
+
+  .stats-bar{display:flex;gap:16px;margin-bottom:24px}
+  .stat{flex:1;border:1px solid var(--line);border-radius:12px;background:rgba(4,22,42,0.5);padding:14px;text-align:center}
+  .stat .val{font-family:'Share Tech Mono',monospace;font-size:24px;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,0.5)}
+  .stat .lab{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+
+  .agent-row{display:flex;align-items:center;gap:14px;padding:14px 16px;
+    border:1px solid var(--line);border-radius:12px;background:rgba(4,22,42,0.5);margin-bottom:8px;transition:.16s}
+  .agent-row:hover{border-color:var(--cyan-2)}
+  .agent-row.holo{border-color:rgba(255,211,122,0.4);background:rgba(255,211,122,0.04)}
+  .rank{font-family:'Share Tech Mono',monospace;font-size:18px;min-width:36px;text-align:center;color:var(--cyan)}
+  .agent-info{flex:1;min-width:0}
+  .agent-name{font-size:14px;color:var(--paper);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .agent-tier{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px}
+  .agent-pts{text-align:right}
+  .agent-pts .val{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--cyan)}
+  .agent-pts .lab{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px}
+  .loading{text-align:center;padding:50px 20px;color:var(--cyan);font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.1em}
+
+  .join-cta{margin-top:28px;text-align:center;border-top:1px solid var(--line-soft);padding-top:24px}
+  .join-cta a{display:inline-flex;align-items:center;gap:8px;font-family:'Hanken Grotesk';font-weight:700;font-size:15px;
+    border-radius:12px;padding:14px 24px;border:none;text-decoration:none;
+    background:linear-gradient(120deg,var(--cyan),var(--cyan-2));color:#001824;
+    box-shadow:0 0 0 1px rgba(0,229,255,0.5),0 12px 30px -12px rgba(0,229,255,0.7);transition:.18s}
+  .join-cta a:hover{filter:brightness(1.07)}
+
+  footer{text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--line-soft);
+    font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:0.1em;color:var(--muted-2)}
+  footer b{color:var(--muted)}
+
+  @media(prefers-reduced-motion:reduce){
+    .rain i,.pulse{animation:none!important}
+    .rain{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="rain" id="rain" aria-hidden="true"></div>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <span class="drop" aria-hidden="true"><svg viewBox="0 0 24 32" fill="none"><path d="M12 1 C12 1, 22 14, 22 22 A10 10 0 1 1 2 22 C2 14, 12 1, 12 1 Z" fill="url(#dg)"/><defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#62F1FF"/><stop offset="1" stop-color="#00B8E5"/></linearGradient></defs></svg></span>
+      <b>x402GAL</b><span>· INFILTRATE</span>
+    </div>
+  </header>
+
+  <span class="eyebrow"><span class="pulse"></span> Live leaderboard</span>
+  <h1>Field <span class="g">rankings.</span></h1>
+  <p class="intro">Agents who opt in show their name. Everyone else appears as <b>Agent #XXXX</b>. Rankings update live.</p>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="val" id="totalAgents">—</div><div class="lab">Agents</div></div>
+    <div class="stat"><div class="val" id="totalHolo">—</div><div class="lab">Holo</div></div>
+    <div class="stat"><div class="val" id="totalMinted">—</div><div class="lab">Minted</div></div>
+  </div>
+
+  <div id="lbList"><div class="loading">Loading rankings…</div></div>
+
+  <div class="join-cta">
+    <a href="/infiltrateETHConf2026">Join the mission &nbsp;&rarr;</a>
+  </div>
+
+  <footer>
+    <b>x402GAL</b> · WATER FOR THE AGE OF AI · ETHCONF NYC · GENESIS 2026
+  </footer>
+</div>
+
+<script>
+(function(){
+  // Rain
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!reduce){
+    var r=document.getElementById("rain"), html="";
+    for(var i=0;i<18;i++){
+      var left=Math.random()*100, dur=(2.4+Math.random()*2.6).toFixed(2), delay=(Math.random()*4).toFixed(2), h=(30+Math.random()*40).toFixed(0);
+      html+='<i style="left:'+left+'%;height:'+h+'px;animation-duration:'+dur+'s;animation-delay:-'+delay+'s"></i>';
+    }
+    r.innerHTML=html;
+  }
+
+  function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  function fetchBoard(){
+    fetch("/api/leaderboard").then(function(r){return r.json();}).then(function(d){
+      render(d);
+    }).catch(function(){
+      document.getElementById("lbList").innerHTML='<div class="empty">Could not load leaderboard. Try refreshing.</div>';
+    });
+  }
+
+  function render(d){
+    var list=document.getElementById("lbList");
+    var agents=d.agents||[];
+
+    // Stats
+    document.getElementById("totalAgents").textContent=d.total||agents.length;
+    var holoCount=0, mintCount=0;
+    for(var i=0;i<agents.length;i++){
+      if(agents[i].holo) holoCount++;
+      if(agents[i].minted) mintCount++;
+    }
+    document.getElementById("totalHolo").textContent=holoCount;
+    document.getElementById("totalMinted").textContent=mintCount;
+
+    if(!agents.length){
+      list.innerHTML='<div class="empty">No agents on the board yet. Be the first.</div>';
+      return;
+    }
+
+    var html="";
+    for(var i=0;i<agents.length;i++){
+      var a=agents[i];
+      var label=a.name||('Agent #'+a.agentNumber);
+      var tierColor=a.holo?'var(--gold)':a.tier==='Verified Agent'?'var(--cyan)':'var(--muted)';
+      var rankBadge=a.rank<=3?['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'][a.rank-1]:'#'+a.rank;
+      html+='<div class="agent-row'+(a.holo?' holo':'')+'">';
+      html+='<div class="rank">'+rankBadge+'</div>';
+      html+='<div class="agent-info">';
+      html+='<div class="agent-name">'+escapeHtml(label)+'</div>';
+      html+='<div class="agent-tier" style="color:'+tierColor+'">'+escapeHtml(a.tier)+(a.squad?' \u00b7 '+escapeHtml(a.squad):'')+'</div>';
+      html+='</div>';
+      html+='<div class="agent-pts">';
+      html+='<div class="val">'+a.points+'</div>';
+      html+='<div class="lab">PTS</div>';
+      html+='</div></div>';
+    }
+    list.innerHTML=html;
+  }
+
+  fetchBoard();
+  // Auto-refresh every 30s
+  setInterval(fetchBoard, 30000);
+})();
+</script>
+</body>
+</html>

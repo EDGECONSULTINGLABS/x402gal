@@ -94,88 +94,28 @@ const steps: Step[] = [
 export function OnboardingGuide({ isConnected, onComplete, forceShow }: OnboardingGuideProps) {
   const [showGuide, setShowGuide] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; placement: "above" | "below" | "center" }>({ top: 0, left: 0, placement: "center" });
-  const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
-  const [isMobileView, setIsMobileView] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < 640 : false
-  );
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setIsMobileView(window.innerWidth < 640);
-    const onResize = () => setIsMobileView(window.innerWidth < 640);
-    window.addEventListener("resize", onResize);
     // Always start in tour mode on first load
     const timer = setTimeout(() => {
       setShowGuide(true);
     }, 800);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("resize", onResize);
-    };
+    return () => clearTimeout(timer);
   }, [forceShow]);
 
-  const positionTooltip = useCallback(() => {
+  const scrollToTarget = useCallback(() => {
     const step = steps[currentStep];
-    if (!step.targetSelector || step.position === "center") {
-      setSpotlightRect(null);
-      setTooltipPos({ top: 0, left: 0, placement: "center" });
-      return;
-    }
-
+    if (!step.targetSelector || step.position === "center") return;
     const el = document.querySelector(step.targetSelector);
-    if (!el) {
-      setSpotlightRect(null);
-      setTooltipPos({ top: 0, left: 0, placement: "center" });
-      return;
-    }
-
-    // Scroll element into view
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-
-    // Wait for scroll to finish before measuring
-    setTimeout(() => {
-      const rect = el.getBoundingClientRect();
-      setSpotlightRect(rect);
-
-      const vh = window.innerHeight;
-      const vw = window.innerWidth;
-      const mobile = vw < 640;
-      setIsMobileView(mobile);
-      const tooltipHeight = 300;
-      const padding = 12;
-
-      // On mobile, tooltip is fixed to bottom via CSS — just set placement
-      if (mobile) {
-        setTooltipPos({ top: 0, left: 0, placement: "below" });
-        return;
-      }
-
-      // Desktop: position near the element
-      if (step.position === "top" || rect.bottom + tooltipHeight + padding > vh) {
-        setTooltipPos({
-          top: Math.max(padding, rect.top - tooltipHeight - padding),
-          left: 0,
-          placement: "above",
-        });
-      } else {
-        setTooltipPos({
-          top: rect.bottom + padding,
-          left: 0,
-          placement: "below",
-        });
-      }
-    }, 400);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [currentStep]);
 
   useEffect(() => {
     if (showGuide) {
-      positionTooltip();
-      const handleResize = () => positionTooltip();
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
+      scrollToTarget();
     }
-  }, [showGuide, currentStep, positionTooltip]);
+  }, [showGuide, currentStep, scrollToTarget]);
 
   const handleComplete = () => {
     localStorage.setItem("x402gal-guide-completed", "true");
@@ -204,51 +144,10 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
   const currentStepData = steps[currentStep];
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === steps.length - 1;
-  const isCentered = tooltipPos.placement === "center";
 
   return (
     <>
-      {/* Spotlight overlay with cutout */}
-      <div className="fixed inset-0 z-[60] pointer-events-none">
-        <svg className="absolute inset-0 h-full w-full">
-          <defs>
-            <mask id="spotlight-mask">
-              <rect x="0" y="0" width="100%" height="100%" fill="white" />
-              {spotlightRect && (
-                <rect
-                  x={spotlightRect.left - 8}
-                  y={spotlightRect.top - 8}
-                  width={spotlightRect.width + 16}
-                  height={spotlightRect.height + 16}
-                  rx="12"
-                  fill="black"
-                />
-              )}
-            </mask>
-          </defs>
-          <rect
-            x="0" y="0" width="100%" height="100%"
-            fill="rgba(0,4,9,0.85)"
-            mask="url(#spotlight-mask)"
-            className="pointer-events-none"
-          />
-        </svg>
-
-        {/* Spotlight border ring */}
-        {spotlightRect && (
-          <div
-            className="absolute rounded-xl border-2 border-hydro-400/70 shadow-glow pointer-events-none transition-all duration-400"
-            style={{
-              top: spotlightRect.top - 8,
-              left: spotlightRect.left - 8,
-              width: spotlightRect.width + 16,
-              height: spotlightRect.height + 16,
-            }}
-          />
-        )}
-      </div>
-
-      {/* Tooltip — always a bottom sheet, centered on larger screens */}
+      {/* Tooltip — clean bottom sheet guide without spotlight overlay */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep}

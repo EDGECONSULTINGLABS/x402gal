@@ -369,10 +369,6 @@
   var MINT_ENDPOINT    = "/api/mint";                       // testnet NFT mint (see api/mint.js). "" = reserve only, no mint
   var DROP_TWEET_URL   = "https://x.com/HydroCoinHQ";       // TODO: point at the exact @HydroCoinHQ "drop" tweet
   var EXPLORER_NFT     = "https://testnet.xrpl.org/nft/";   // testnet NFT explorer prefix
-  // PointJournal handoff: where INFILTRATE passes the captured profile + opt-in to provision the
-  // cross-event HCS identity. PJ is a separate product on its own backend. "" = handoff disabled.
-  var PJ_HANDOFF_ENDPOINT = "/api/pj-handoff";              // INFILTRATE-side relay that forwards to PointJournal intake
-  var PJ_REDIRECT_URL     = "https://pointjournal.app/claim"; // optional: send the user to PJ to finish (HashPack, confirm). "" = stay in-app
 
   var CONFIG = {
     shareHandle: "@HydroCoinHQ and @MyCrypt0world",   // handles tagged inline in shareText below
@@ -754,68 +750,6 @@
       });
     }
 
-    // ----- PointJournal handoff (the cross-event identity + networking layer) -----
-    if(PJ_HANDOFF_ENDPOINT){
-      var pjDone = !!(state.pj && state.pj.activated);
-      var pj=document.createElement("div");
-      pj.style.cssText="width:100%;border:1px solid rgba(199,240,60,0.4);border-radius:14px;background:rgba(199,240,60,0.06);padding:20px;margin-top:20px;text-align:left";
-      if(pjDone){
-        pj.innerHTML=
-          '<div style="font-family:\'Space Mono\',monospace;font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F03C;margin-bottom:10px">PointJournal</div>'+
-          '<div class="ok" style="color:#C7F03C">'+CHECK+' Agent identity claimed</div>'+
-          '<p class="small" style="margin-top:10px">'+(state.pj.networkMode
-              ? "Network mode is on. Your agent is discoverable and will propose connections for you to approve."
-              : "Your identity is yours across every event. Flip on network mode anytime to let it network for you.")+'</p>';
-      } else {
-        pj.innerHTML=
-          '<div style="font-family:\'Space Mono\',monospace;font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F03C;margin-bottom:8px">PointJournal</div>'+
-          '<div style="font-family:\'Fraunces\',serif;font-size:21px;color:var(--paper);line-height:1.2;margin-bottom:8px">Your agent doesn\u2019t clock out at ETHConf.</div>'+
-          '<p style="font-size:13.5px;color:var(--body);line-height:1.5;margin-bottom:14px">INFILTRATE got you a badge. PointJournal gives your agent a permanent identity it carries to every conference. Turn on network mode and it works the room while you sleep, proposing connections for you to approve.</p>'+
-          '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--paper);margin-bottom:14px">'+
-            '<input type="checkbox" id="pjNet" style="width:18px;height:18px;accent-color:#C7F03C">'+
-            'Turn on network mode'+
-          '</label>'+
-          '<div id="pjMsg" class="m-msg" style="margin-top:0;margin-bottom:6px"></div>'+
-          '<button class="btn" id="pjActivate" style="background:#C7F03C;color:#0B0B0B;border:none;font-weight:700;margin-top:0">Claim my agent identity &nbsp;&rarr;</button>';
-      }
-      stage.appendChild(pj);
-      if(!pjDone){
-        $("pjActivate").addEventListener("click",function(){
-          activatePJ(!!$("pjNet").checked);
-        });
-      }
-    }
-  }
-
-  // Map INFILTRATE role to PointJournal intent enum and hand the profile off.
-  var INTENT = { investor:"INVESTOR", builder:"BUILDER", operator:"CUSTOMER", curious:"OTHER" };
-  function activatePJ(networkMode){
-    var btn=$("pjActivate"), msg=$("pjMsg");
-    if(btn){ btn.disabled=true; btn.textContent="Creating your agent\u2026"; }
-    var payload={
-      source:"infiltrate", event:"ethconf-2026",
-      profile:{ name:state.name, email:state.email, company:state.company,
-                role:state.role, intent:INTENT[state.role]||"OTHER", wallet:state.wallet||null },
-      badge:{ agentNumber:state.agentNumber, points:totalPoints(),
-              nft:state.nft||null, missions:Object.keys(state.done) },
-      consent:{ createIdentity:true, networkMode:!!networkMode },
-      ts:new Date().toISOString()
-    };
-    var finish=function(){
-      state.pj={ activated:true, networkMode:!!networkMode }; save();
-      if(PJ_REDIRECT_URL){
-        var sep=PJ_REDIRECT_URL.indexOf("?")>=0?"&":"?";
-        window.open(PJ_REDIRECT_URL+sep+"email="+encodeURIComponent(state.email)+"&src=infiltrate","_blank","noopener");
-      }
-      renderBadge();
-    };
-    fetch(PJ_HANDOFF_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
-      .then(function(){ finish(); })
-      .catch(function(){
-        // Even if the relay is down, capture intent locally so nothing is lost.
-        if(msg){ msg.className="m-msg"; msg.style.color="#C7F03C"; msg.textContent="Saved. Your agent identity is being created."; }
-        finish();
-      });
   }
 
   function doMint(wallet){

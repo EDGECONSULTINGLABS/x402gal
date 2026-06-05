@@ -1,19 +1,23 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import type { Metadata } from "next";
+import { URL } from "url";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://x402gal.com"),
   title: "INFILTRATE · x402GAL @ ETHConf",
   description: "Become a field agent. Pay water back. Claim your Genesis badge.",
   openGraph: {
     type: "website",
+    locale: "en_US",
     url: "https://x402gal.com/infiltrateETHConf2026",
+    siteName: "x402GAL",
     title: "INFILTRATE · x402GAL @ ETHConf",
     description: "Become a field agent. Pay water back. Claim your Genesis badge.",
     images: [{
-      url: "https://x402gal.com/og-image",
+      url: "/og-image",
       width: 1200,
       height: 630,
       alt: "INFILTRATE · x402GAL @ ETHConf",
@@ -21,9 +25,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@x402gal",
+    creator: "@x402gal",
     title: "INFILTRATE · x402GAL @ ETHConf",
     description: "Become a field agent. Pay water back. Claim your Genesis badge.",
-    images: ["https://x402gal.com/og-image"],
+    images: ["/og-image"],
   },
   icons: {
     icon: "/infiltrate-favicon.png",

@@ -36,6 +36,7 @@ import { AgentSessionPanel } from "./AgentSessionPanel";
 import { OnboardingGuide } from "./OnboardingGuide";
 import { useAccount } from "wagmi";
 import { Agent, Settlement } from "@/lib/types";
+import { DashboardState } from "@/lib/getState";
 
 interface State {
   agents: Agent[];
@@ -78,12 +79,12 @@ function useSafeAccount() {
   }
 }
 
-export function Dashboard() {
+export function Dashboard({ initialState }: { initialState?: DashboardState }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const { isConnected: walletConnected } = useSafeAccount();
   const isConnected = mounted && walletConnected;
-  const [state, setState] = useState<State | null>(null);
+  const [state, setState] = useState<State | null>(initialState ?? null);
   const [selected, setSelected] = useState<string>("agent_meridian_v3");
   const [prompt, setPrompt] = useState(
     "How should I price autonomous AI inference?",

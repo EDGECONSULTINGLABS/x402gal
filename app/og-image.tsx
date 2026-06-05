@@ -70,35 +70,17 @@ export async function GET() {
               marginBottom: '40px',
             }}
           >
-            x402-native water sustainability layer enabling AI agents to pay per inference in HydroCoin with cross-chain settlement
+            Pay it back in real time. Settle water offsets on XRPL for every inference.
           </div>
           
           {/* Water Drop Icon */}
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '80px',
-              height: '80px',
+              fontSize: '72px',
               marginBottom: '20px',
             }}
           >
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2.69l5.66 5.66a8 8 0 1 1-11.32 0z"
-                fill="#60a5fa"
-                stroke="#3b82f6"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M12 7v6"
-                stroke="#1e3a5f"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <circle cx="12" cy="13" r="2" fill="#1e3a5f" />
-            </svg>
+            💧
           </div>
           
           {/* URL */}

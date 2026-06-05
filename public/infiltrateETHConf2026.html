@@ -743,7 +743,14 @@
         else { postCapture("claim:wallet"); renderBadge(); }
       });
       $("skipClaim").addEventListener("click",function(){
-        state.wallet="email:"+state.email; save(); postCapture("claim:email"); renderBadge();
+        state.wallet="email:"+state.email; save(); postCapture("claim:email");
+        if(MINT_ENDPOINT){
+          var reserveBody={ email:state.email, name:state.name, agentNumber:state.agentNumber,
+                            holo:doneCount()>=CONFIG.holoThreshold, role:state.role,
+                            points:totalPoints(), missions:Object.keys(state.done) };
+          fetch(MINT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(reserveBody),keepalive:true}).catch(function(){});
+        }
+        renderBadge();
       });
     }
 
@@ -815,7 +822,7 @@
     var btn=$("claimBtn"), msg=$("mintMsg");
     if(btn){ btn.disabled=true; btn.textContent="Minting on testnet\u2026"; }
     if(msg){ msg.className="m-msg"; msg.style.color="var(--cyan)"; msg.textContent="Talking to XRPL testnet, hang tight."; }
-    var body={ wallet:wallet, name:state.name, agentNumber:state.agentNumber, role:state.role,
+    var body={ wallet:wallet, email:state.email, name:state.name, agentNumber:state.agentNumber, role:state.role,
                points:totalPoints(), missions:Object.keys(state.done), holo:doneCount()>=CONFIG.holoThreshold };
     fetch(MINT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
       .then(function(r){ return r.json(); })

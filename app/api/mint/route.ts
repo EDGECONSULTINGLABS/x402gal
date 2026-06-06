@@ -91,14 +91,25 @@ async function sendBadgeEmail(opts: {
   offerIndex?: string | null;
   holo: boolean;
   reserved: boolean;
+  eventId?: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) { console.warn("[mint] RESEND_API_KEY not set — skipping email"); return; }
+
+  // Check if user has unsubscribed
+  const normalizedEmail = opts.to.toLowerCase().trim();
+  const eventId = opts.eventId || DEFAULT_EVENT_ID;
+  const existing = await redis.hgetall(`event:${eventId}:agent:${normalizedEmail}`);
+  if (existing?.unsubscribed === "true") {
+    console.log(`[mint] Skipping email to ${normalizedEmail} — user unsubscribed`);
+    return;
+  }
 
   const resend = new Resend(apiKey);
   const from = process.env.EMAIL_FROM || "INFILTRATE · Do Not Reply <onboarding@resend.dev>";
   const tier = opts.holo ? "Genesis Holo" : "Verified Agent";
   const explorerUrl = opts.nftokenID ? `${EXPLORER}${encodeURIComponent(opts.nftokenID)}` : null;
+  const unsubscribeUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://x402gal.com"}/api/unsubscribe?email=${encodeURIComponent(opts.to)}`;
 
   const subject = opts.reserved
     ? `Your INFILTRATE badge is reserved — Agent #${String(opts.agentNumber).padStart(4, "0")}`
@@ -137,7 +148,7 @@ async function sendBadgeEmail(opts: {
     <p style="font-size:11px;color:#4A6B82;margin:0;line-height:1.6">
       x402GAL · Water for the age of AI · Every AI query has a water footprint. x402GAL settles it in real time on XRPL.<br>
       <a href="https://www.hydrocoin.com" style="color:#00E5FF">hydrocoin.com</a> · <a href="https://x402gal.com" style="color:#00E5FF">x402gal.com</a><br><br>
-      This is an automated message — please do not reply to this email.
+      <a href="${unsubscribeUrl}" style="color:#6E92AB;text-decoration:underline">Unsubscribe</a> · This is an automated message — please do not reply to this email.
     </p>
   </div>
 </body>
@@ -189,7 +200,7 @@ export async function POST(req: Request) {
   // ---- Email-reserve path (no wallet) ----
   if (!recipient && email) {
     try {
-      await sendBadgeEmail({ to: email, name, agentNumber: agentNumber ?? "0000", holo, reserved: true });
+      await sendBadgeEmail({ to: email, name, agentNumber: agentNumber ?? "0000", holo, reserved: true, eventId });
       // Persist reserve record
       if (email) {
         await redis.hset(`event:${eventId}:agent:${email.toLowerCase()}`, {
@@ -265,7 +276,7 @@ export async function POST(req: Request) {
 
     // Send confirmation email (fire-and-forget — don't fail the mint if email fails)
     if (email) {
-      sendBadgeEmail({ to: email, name, agentNumber: agentNumber ?? "0000", nftokenID, txHash: minted.result.hash, offerIndex, holo, reserved: false })
+      sendBadgeEmail({ to: email, name, agentNumber: agentNumber ?? "0000", nftokenID, txHash: minted.result.hash, offerIndex, holo, reserved: false, eventId })
         .catch(err => console.error("[mint] email send error:", err));
     }
 

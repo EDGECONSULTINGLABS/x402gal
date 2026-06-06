@@ -424,8 +424,6 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
           </button>
           {/* Nav links — desktop only */}
           <nav className="hidden items-center gap-1 text-xs lg:flex">
-            <NavLink href="https://www.x402.org/">x402</NavLink>
-            <NavLink href="https://xrpl.org/">XRPL</NavLink>
             <NavLink href="https://www.hydrocoin.com/" highlight>
               HydroCoin
             </NavLink>
@@ -443,8 +441,6 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
       {mobileMenuOpen && (
         <div className="border-t border-edge/60 bg-abyss/95 px-3 py-4 lg:hidden">
           <nav className="flex flex-col gap-2">
-            <MobileNavLink href="https://www.x402.org/">x402</MobileNavLink>
-            <MobileNavLink href="https://xrpl.org/">XRPL</MobileNavLink>
             <MobileNavLink href="https://www.hydrocoin.com/" highlight>
               HydroCoin
             </MobileNavLink>

@@ -310,7 +310,7 @@
   <section class="screen on" id="s-entry">
     <span class="eyebrow"><span class="pulse"></span> Field mission · ETHConf NYC</span>
     <h1>Every AI run<br>drinks water.<br><span class="g">Pay it back.</span></h1>
-    <p class="lede">You're a field agent now. Complete the run across the floor, and <b>every step puts verified water back into the ground.</b> Finish, and your Genesis badge is yours to keep.</p>
+    <p class="lede">You're a field agent now. Complete the run across the floor to learn how AI can pay water back. <b>This activation raises awareness for verified stormwater infiltration</b> recorded on XRPL under HydroCoin's methodology. Finish, and your Genesis badge is yours to keep.</p>
 
     <div class="hero hud">
       <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
@@ -366,9 +366,25 @@
         <button class="role" data-role="curious"><span class="dot"></span>Just curious</button>
       </div>
     </div>
+    <!-- Consent checkboxes (GDPR-compliant, not pre-checked) -->
+    <div class="consent-wrap" style="margin:18px 0 14px">
+      <label class="consent-box" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:12px">
+        <input type="checkbox" id="consent-terms" style="margin-top:3px;accent-color:var(--cyan)">
+        <span style="font-size:12.5px;color:var(--body);line-height:1.5">I am 18 or older and I agree to the <a href="#terms" class="link" style="color:var(--cyan);text-decoration:underline">Terms of Participation</a> and <a href="#privacy" class="link" style="color:var(--cyan);text-decoration:underline">Privacy Policy</a>. <span style="color:var(--red)">*</span></span>
+      </label>
+      <label class="consent-box" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+        <input type="checkbox" id="consent-marketing" style="margin-top:3px;accent-color:var(--cyan)">
+        <span style="font-size:12.5px;color:var(--body);line-height:1.5">I would like Edge Consulting Labs LLC to email me about x402GAL and HydroCoin. I can unsubscribe anytime.</span>
+      </label>
+    </div>
+
     <div class="err" id="captureErr"></div>
     <button class="btn primary" id="captureBtn">Get my missions &nbsp;&rarr;</button>
-    <p class="fineprint">We'll only reach out about x402GAL and HydroCoin. No list-selling, ever.</p>
+
+    <!-- Form-level privacy notice -->
+    <div class="privacy-notice" style="margin-top:16px;padding:14px;border:1px solid var(--line-soft);border-radius:10px;background:rgba(4,22,42,0.4)">
+      <p style="font-size:11.5px;color:var(--muted-2);line-height:1.55;margin:0">We collect the details you enter to score your run, deliver your badge, run the leaderboard, and, with your consent, to contact you about x402GAL and HydroCoin. We use service providers including Vercel for hosting, Microsoft Dynamics 365 for our CRM, and Google Analytics for usage analytics. We do not sell your information. You can request access to or deletion of your data at <a href="mailto:legal@x402gal.com" style="color:var(--cyan);text-decoration:underline">legal@x402gal.com</a>. Full policy: <a href="#privacy" style="color:var(--cyan);text-decoration:underline">Privacy Policy</a>.</p>
+    </div>
   </section>
 
   <!-- ===== SCREEN 3: MISSIONS ===== -->
@@ -582,6 +598,7 @@
     if(!validName(name)){ err.textContent="Name can only contain letters, spaces, hyphens and apostrophes."; return; }
     if(!validEmail(email)){ err.textContent="Need a valid email to score your run."; return; }
     if(!selRole){ err.textContent="Pick what brings you here."; return; }
+    if(!$("consent-terms").checked){ err.textContent="Please agree to the Terms of Participation and Privacy Policy to continue."; return; }
 
     state.captured=true; state.name=name; state.email=email;
     state.company=company; state.squad=squad; state.role=selRole;
@@ -780,7 +797,7 @@
         'Green AI · verified'+
       '</div>'+
       '<div style="font-family:\'Fraunces\',serif;font-size:19px;color:var(--paper);line-height:1.25;margin-bottom:8px">You ran AI today. Now it pays the water back.</div>'+
-      '<div style="font-size:13.5px;color:var(--body);line-height:1.5">Every action you logged maps to verified gallons returned underground: measured by sensors, signed by a licensed engineer, attested by a CPA, recorded on XRPL. That is what makes an AI workload <b style="color:var(--paper)">green</b>, not a claim, a verified offset.</div>';
+      '<div style="font-size:13.5px;color:var(--body);line-height:1.5">How the water claim works: "verified gallons" means stormwater infiltration confirmed under HydroCoin\'s measurement, verification, and reporting methodology and recorded on the XRP Ledger. This activation raises awareness; verified infiltration is performed and recorded separately and is not caused by completing missions. <a href="https://www.hydrocoin.com/methodology" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:underline">Methodology</a>.</div>';
     stage.appendChild(green);
 
     var minted = !!(state.nft && state.nft.nftokenID);
@@ -808,7 +825,9 @@
         '<div id="mintMsg" class="m-msg" style="margin-top:2px"></div>'+
         '<button class="btn primary" id="claimBtn" style="margin-top:12px">'+(MINT_ENDPOINT?"Mint my badge (testnet)":"Reserve my badge")+'</button>'+
         '<p class="small">No wallet yet? Skip it \u2014 we\u2019ll hold it against your email and help you set one up.</p>'+
-        '<button class="btn sm" id="skipClaim" style="margin:10px auto 0">Reserve to my email instead</button>';
+        '<button class="btn sm" id="skipClaim" style="margin:10px auto 0">Reserve to my email instead</button>'+
+        '<div class="nft-disclaimer" style="margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:10px;background:rgba(4,22,42,0.3)">'+
+        '<p style="font-size:11px;color:var(--muted-2);line-height:1.5;margin:0">The Genesis badge is a free, commemorative digital collectible minted on the XRP Ledger testnet. It has no monetary, investment, or resale value, is not a security or financial product, and grants no rights to HydroCoin, water credits, gallons, tokens, profits, or returns of any kind. You are responsible for your own wallet and any network fees. On-chain mints are irreversible and lost keys cannot be recovered.</p></div>';
     }
     stage.appendChild(claim);
 
@@ -939,5 +958,65 @@
   }
 })();
 </script>
+
+<!-- Terms of Participation Modal -->
+<div id="termsModal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,8,20,0.92);overflow-y:auto;padding:20px">
+  <div style="max-width:680px;margin:40px auto;background:linear-gradient(180deg,#041a31,#020d1a);border:1px solid var(--line);border-radius:16px;padding:28px 26px;position:relative">
+    <button onclick="document.getElementById('termsModal').style.display='none'" style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:4px 8px">&times;</button>
+    <h2 style="font-family:'Fraunces',serif;font-size:26px;color:var(--paper);margin-bottom:18px">INFILTRATE Terms of Participation</h2>
+    <div style="font-size:13px;color:var(--body);line-height:1.7;max-height:60vh;overflow-y:auto;padding-right:10px">
+      <p style="margin-bottom:14px"><strong>1. Eligibility.</strong> You must be 18 or older and legally able to participate. Void where prohibited, and not open to residents of sanctioned or restricted jurisdictions.</p>
+      <p style="margin-bottom:14px"><strong>2. The activation.</strong> INFILTRATE is a promotional field mission operated by Edge Consulting Labs LLC in connection with x402GAL and HydroCoin. Completing missions may earn a commemorative Genesis badge. Badges, including the holo edition, are limited and offered while supplies last.</p>
+      <p style="margin-bottom:14px"><strong>3. Not an investment.</strong> The badge and this activation are for engagement and promotional purposes only. Nothing here is an offer to sell or a solicitation to buy any security, token, or financial product, and nothing here is financial, investment, legal, or tax advice.</p>
+      <p style="margin-bottom:14px"><strong>4. No affiliation.</strong> This activation is independently operated and is not sponsored or endorsed by, or affiliated with, ETHConf, its organizers, or the venue.</p>
+      <p style="margin-bottom:14px"><strong>5. Your wallet.</strong> You are responsible for your wallet, keys, and any network fees. On-chain transactions are irreversible and we cannot recover lost assets or keys.</p>
+      <p style="margin-bottom:14px"><strong>6. Acceptable use.</strong> Do not submit false information, manipulate the leaderboard or missions, or interfere with the service. We may disqualify or remove any participant at our discretion.</p>
+      <p style="margin-bottom:14px"><strong>7. Changes.</strong> We may modify, suspend, or end the activation, the missions, or the rewards at any time without notice.</p>
+      <p style="margin-bottom:14px"><strong>8. As is.</strong> The service and the badge are provided "as is" and "as available" without warranties of any kind. To the maximum extent permitted by law, Edge Consulting Labs LLC is not liable for any indirect, incidental, or consequential damages, and total liability is limited to USD $100.</p>
+      <p style="margin-bottom:14px"><strong>9. Intellectual property.</strong> x402GAL, INFILTRATE, HydroCoin, and related names, marks, and content belong to their respective owners. Participation grants you no rights in them.</p>
+      <p style="margin-bottom:14px"><strong>10. Privacy.</strong> Your information is handled under our Privacy Policy at <a href="mailto:legal@x402gal.com" style="color:var(--cyan);text-decoration:underline">legal@x402gal.com</a>.</p>
+      <p style="margin-bottom:14px"><strong>11. Governing law.</strong> These terms are governed by the laws of Texas, USA, and any disputes are subject to the courts located there.</p>
+      <p style="margin-bottom:14px"><strong>12. Contact.</strong> <a href="mailto:legal@x402gal.com" style="color:var(--cyan);text-decoration:underline">legal@x402gal.com</a></p>
+    </div>
+    <button onclick="document.getElementById('termsModal').style.display='none'" class="btn primary" style="margin-top:18px">Close</button>
+  </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div id="privacyModal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,8,20,0.92);overflow-y:auto;padding:20px">
+  <div style="max-width:680px;margin:40px auto;background:linear-gradient(180deg,#041a31,#020d1a);border:1px solid var(--line);border-radius:16px;padding:28px 26px;position:relative">
+    <button onclick="document.getElementById('privacyModal').style.display='none'" style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:4px 8px">&times;</button>
+    <h2 style="font-family:'Fraunces',serif;font-size:26px;color:var(--paper);margin-bottom:18px">Privacy Policy</h2>
+    <div style="font-size:13px;color:var(--body);line-height:1.7;max-height:60vh;overflow-y:auto;padding-right:10px">
+      <p style="margin-bottom:14px"><strong>1. Information we collect.</strong> We collect your name, email, company, squad name, and role preference when you register. We also record which missions you complete, your XRPL wallet address (if provided), and any NFT minted to your address.</p>
+      <p style="margin-bottom:14px"><strong>2. How we use it.</strong> We use this information to score your run, deliver your badge, run the leaderboard, and contact you about x402GAL and HydroCoin (with your consent).</p>
+      <p style="margin-bottom:14px"><strong>3. Service providers.</strong> We use Vercel for hosting, Microsoft Dynamics 365 for CRM, and Google Analytics for usage analytics.</p>
+      <p style="margin-bottom:14px"><strong>4. No sale.</strong> We do not sell your personal information.</p>
+      <p style="margin-bottom:14px"><strong>5. Your rights.</strong> You can request access to or deletion of your data by contacting <a href="mailto:legal@x402gal.com" style="color:var(--cyan);text-decoration:underline">legal@x402gal.com</a>.</p>
+      <p style="margin-bottom:14px"><strong>6. Marketing.</strong> With your consent, we may email you about x402GAL and HydroCoin. You can unsubscribe anytime.</p>
+      <p style="margin-bottom:14px"><strong>7. Data retention.</strong> We retain your data as long as necessary for the purposes described above or as required by law.</p>
+      <p style="margin-bottom:14px"><strong>8. Contact.</strong> Edge Consulting Labs LLC. Email: <a href="mailto:legal@x402gal.com" style="color:var(--cyan);text-decoration:underline">legal@x402gal.com</a></p>
+    </div>
+    <button onclick="document.getElementById('privacyModal').style.display='none'" class="btn primary" style="margin-top:18px">Close</button>
+  </div>
+</div>
+
+<script>
+// Show terms modal when clicking terms links
+document.querySelectorAll('a[href="#terms"]').forEach(function(link){
+  link.addEventListener('click', function(e){
+    e.preventDefault();
+    document.getElementById('termsModal').style.display='block';
+  });
+});
+// Show privacy modal when clicking privacy links
+document.querySelectorAll('a[href="#privacy"]').forEach(function(link){
+  link.addEventListener('click', function(e){
+    e.preventDefault();
+    document.getElementById('privacyModal').style.display='block';
+  });
+});
+</script>
+
 </body>
 </html>

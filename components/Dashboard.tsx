@@ -417,6 +417,9 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
             <NavLink href="https://www.hydrocoin.com/" highlight>
               HydroCoin
             </NavLink>
+            <NavLink href="https://github.com/EDGECONSULTINGLABS/x402gal">
+              GitHub
+            </NavLink>
           </nav>
           <ConnectButton />
         </div>

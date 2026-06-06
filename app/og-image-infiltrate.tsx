@@ -13,13 +13,13 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#000814',
-          backgroundImage: 'linear-gradient(135deg, #000814 0%, #0a1628 50%, #0d2847 100%)',
+          backgroundColor: '#e0f7ff',
+          backgroundImage: 'linear-gradient(135deg, #e0f7ff 0%, #b8e6ff 50%, #90d5ff 100%)',
           fontFamily: 'Inter, system-ui, sans-serif',
           position: 'relative',
         }}
       >
-        {/* Animated grid background effect */}
+        {/* Subtle water pattern */}
         <div
           style={{
             position: 'absolute',
@@ -27,23 +27,23 @@ export async function GET() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: 'linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px)',
-            backgroundSize: '50px 50px',
+            backgroundImage: 'radial-gradient(circle, rgba(0, 150, 255, 0.08) 2px, transparent 2px)',
+            backgroundSize: '40px 40px',
           }}
         />
         
-        {/* Glowing orb effect */}
+        {/* Light glow effect */}
         <div
           style={{
             position: 'absolute',
-            top: '40%',
+            top: '35%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '500px',
-            height: '500px',
-            background: 'radial-gradient(circle, rgba(0, 229, 255, 0.2) 0%, transparent 60%)',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(0, 150, 255, 0.3) 0%, transparent 70%)',
             borderRadius: '50%',
-            filter: 'blur(60px)',
+            filter: 'blur(40px)',
           }}
         />
         
@@ -54,18 +54,18 @@ export async function GET() {
             alignItems: 'center',
             justifyContent: 'center',
             textAlign: 'center',
-            padding: '45px',
+            padding: '50px',
             width: '100%',
             position: 'relative',
             zIndex: 1,
           }}
         >
-          {/* Agent/Robot Icon with glow */}
+          {/* Small Robot Icon with dark contrast */}
           <div
             style={{
-              fontSize: '90px',
-              marginBottom: '15px',
-              filter: 'drop-shadow(0 0 40px rgba(0, 229, 255, 0.8))',
+              fontSize: '60px',
+              marginBottom: '20px',
+              filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))',
             }}
           >
             🤖
@@ -77,8 +77,8 @@ export async function GET() {
               fontSize: '72px',
               fontWeight: '900',
               marginBottom: '12px',
-              color: '#00E5FF',
-              textShadow: '0 0 50px rgba(0, 229, 255, 0.6), 0 0 100px rgba(0, 229, 255, 0.3)',
+              color: '#004d7a',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
               letterSpacing: '4px',
             }}
           >
@@ -91,7 +91,7 @@ export async function GET() {
               fontSize: '28px',
               fontWeight: '700',
               marginBottom: '24px',
-              color: '#FFD700',
+              color: '#0066aa',
               letterSpacing: '2px',
             }}
           >
@@ -103,7 +103,7 @@ export async function GET() {
             style={{
               fontSize: '30px',
               fontWeight: '600',
-              color: '#ffffff',
+              color: '#003d66',
               maxWidth: '900px',
               lineHeight: '1.4',
               marginBottom: '20px',
@@ -117,7 +117,7 @@ export async function GET() {
             style={{
               fontSize: '22px',
               fontWeight: '400',
-              color: '#94a3b8',
+              color: '#005a94',
               maxWidth: '800px',
               lineHeight: '1.5',
               marginBottom: '35px',
@@ -133,9 +133,9 @@ export async function GET() {
               alignItems: 'center',
               gap: '12px',
               padding: '16px 36px',
-              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+              background: 'linear-gradient(135deg, #0077cc 0%, #005a94 100%)',
               borderRadius: '50px',
-              boxShadow: '0 8px 32px rgba(255, 215, 0, 0.4)',
+              boxShadow: '0 8px 32px rgba(0, 119, 204, 0.3)',
             }}
           >
             <span style={{ fontSize: '28px' }}>🏅</span>
@@ -143,7 +143,7 @@ export async function GET() {
               style={{
                 fontSize: '22px',
                 fontWeight: '800',
-                color: '#000000',
+                color: '#ffffff',
               }}
             >
               JOIN THE MISSION

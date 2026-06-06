@@ -1097,7 +1097,7 @@ function Footer() {
           <Logo size={20} />
           <span>
             <span className="text-slate-300">x402GAL</span> · Built for Consensus
-            Hackathon Miami 2026 · ECL × Parjana
+            Hackathon Miami 2026 · ECL
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">

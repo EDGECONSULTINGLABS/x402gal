@@ -44,7 +44,7 @@ const ROLE_LABEL: Record<string, string> = {
 
 // Approved emails: @edgeconsultinglabs.com domain or specific addresses
 const APPROVED_DOMAINS = ["edgeconsultinglabs.com"];
-const APPROVED_EMAILS = ["joe@parjanaeng.com", "ty@digitalstormwater.com"];
+const APPROVED_EMAILS = ["ty@digitalstormwater.com"];
 
 function isApprovedEmail(email: string): boolean {
   const normalized = email.toLowerCase().trim();

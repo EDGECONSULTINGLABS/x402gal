@@ -203,7 +203,7 @@ Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc
 
 - **x402GAL** is an open-source reference implementation of HydroCoin's XRPL settlement rails.
 - The code in this repository is released under the MIT license.
-- **HydroCoin (HYD)** and the associated MRV framework are the core protocol. [Parjana Engineering](https://parjanaengineering.com) is one qualifying infrastructure provider for the water restoration methodology.
+- **HydroCoin (HYD)** and the associated MRV framework are the core protocol.
 - Commercial use of HydroCoin branding or methodology requires permission from the HydroCoin project.
 
 ---
@@ -214,4 +214,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for open tasks including full XRPL signat
 
 ## License
 
-[MIT](LICENSE) © 2026 HydroCoin & Parjana Engineering
+[MIT](LICENSE) © 2026 HydroCoin

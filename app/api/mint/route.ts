@@ -96,7 +96,7 @@ async function sendBadgeEmail(opts: {
   if (!apiKey) { console.warn("[mint] RESEND_API_KEY not set — skipping email"); return; }
 
   const resend = new Resend(apiKey);
-  const from = process.env.EMAIL_FROM || "INFILTRATE <onboarding@resend.dev>";
+  const from = process.env.EMAIL_FROM || "INFILTRATE · Do Not Reply <onboarding@resend.dev>";
   const tier = opts.holo ? "Genesis Holo" : "Verified Agent";
   const explorerUrl = opts.nftokenID ? `${EXPLORER}${encodeURIComponent(opts.nftokenID)}` : null;
 
@@ -136,7 +136,8 @@ async function sendBadgeEmail(opts: {
     <hr style="border:none;border-top:1px solid rgba(0,229,255,0.1);margin:24px 0">
     <p style="font-size:11px;color:#4A6B82;margin:0;line-height:1.6">
       x402GAL · Water for the age of AI · Every AI query has a water footprint. x402GAL settles it in real time on XRPL.<br>
-      <a href="https://www.hydrocoin.com" style="color:#00E5FF">hydrocoin.com</a> · <a href="https://x402gal.com" style="color:#00E5FF">x402gal.com</a>
+      <a href="https://www.hydrocoin.com" style="color:#00E5FF">hydrocoin.com</a> · <a href="https://x402gal.com" style="color:#00E5FF">x402gal.com</a><br><br>
+      This is an automated message — please do not reply to this email.
     </p>
   </div>
 </body>

@@ -380,12 +380,13 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
             <span className="text-[10px]">{retired.toFixed(3)} gal</span>
           </Pill>
           {xrplLive ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-0.5 font-mono text-[9px] text-emerald-300">
-              <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10px] text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               live
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] text-amber-300/80">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] text-amber-300/80">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60" />
               sim
             </span>
           )}

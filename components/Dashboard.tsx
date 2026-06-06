@@ -358,35 +358,35 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:px-6 lg:px-8">
         {/* Logo — always visible */}
         <div className="flex min-w-0 items-center gap-2">
-          <Logo size={30} />
+          <Logo size={28} />
           <div className="min-w-0">
             <div className="font-display text-sm font-semibold tracking-tight">
               x402GAL
             </div>
-            <div className="hidden text-[10px] uppercase tracking-[0.22em] text-slate-500 md:block">
+            <div className="hidden text-[10px] uppercase tracking-[0.18em] text-slate-500 lg:block">
               Water-offset rails for AI agents
             </div>
           </div>
         </div>
 
         {/* Pills — desktop only */}
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-1.5 xl:flex">
           <Pill>
-            <Activity size={11} className="text-hydro-300 animate-pulse" />
-            HYDRO ${price ? price.toFixed(4) : "—"}
+            <Activity size={10} className="text-hydro-300 animate-pulse" />
+            <span className="text-[10px]">HYDRO ${price ? price.toFixed(4) : "—"}</span>
           </Pill>
           <Pill>
-            <Droplets size={11} className="text-hydro-300" />
-            {retired.toFixed(3)} gal restored
+            <Droplets size={10} className="text-hydro-300" />
+            <span className="text-[10px]">{retired.toFixed(3)} gal</span>
           </Pill>
           {xrplLive ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10px] text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              XRPL live
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-0.5 font-mono text-[9px] text-emerald-300">
+              <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" />
+              live
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] text-amber-300/80">
-              ◆ simulated
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] text-amber-300/80">
+              sim
             </span>
           )}
         </div>
@@ -396,7 +396,7 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
           {/* Infiltrate ETHConf — always visible */}
           <a
             href="/infiltrateETHConf2026"
-            className="inline-flex items-center gap-1.5 rounded-md border border-cyan-400/50 bg-cyan-500/10 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-cyan-300 transition hover:border-cyan-300 hover:bg-cyan-500/20 sm:px-2.5 sm:tracking-[0.18em]"
+            className="inline-flex items-center gap-1.5 rounded-md border border-cyan-400/50 bg-cyan-500/10 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan-300 transition hover:border-cyan-300 hover:bg-cyan-500/20 md:px-3"
           >
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
@@ -423,7 +423,7 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
             {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
           {/* Nav links — desktop only */}
-          <nav className="hidden items-center gap-1 text-xs lg:flex">
+          <nav className="hidden items-center gap-0.5 text-[11px] lg:flex">
             <NavLink href="https://www.hydrocoin.com/" highlight>
               HydroCoin
             </NavLink>
@@ -459,7 +459,7 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-edge bg-panel/60 px-3 py-1 font-mono text-[11px] text-slate-300">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-edge bg-panel/60 px-2 py-0.5 font-mono text-slate-300">
       {children}
     </span>
   );
@@ -479,7 +479,7 @@ function NavLink({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 transition ${
+      className={`inline-flex items-center gap-1 rounded-md px-2 py-1 transition ${
         highlight
           ? "border border-hydro-400/40 bg-hydro-500/10 text-hydro-200 hover:border-hydro-300 hover:bg-hydro-500/20"
           : "border border-transparent text-slate-300 hover:border-edge hover:bg-panel/50 hover:text-white"

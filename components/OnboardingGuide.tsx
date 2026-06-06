@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Zap, Layers, Wallet, Droplets, Bot, Globe, Beaker, BarChart3 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, Layers, Wallet, Droplets, Bot, Globe, Beaker, BarChart3, X } from "lucide-react";
 
 interface OnboardingGuideProps {
   isConnected: boolean;
@@ -125,6 +125,12 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
     window.location.href = "/infiltrateETHConf2026";
   };
 
+  const handleSkip = () => {
+    localStorage.setItem("x402gal-guide-skipped", "true");
+    setShowGuide(false);
+    onComplete();
+  };
+
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1);
@@ -188,7 +194,14 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
                   </p>
                 </div>
               </div>
-              {/* No close button — tour must be completed */}
+              {/* Close button */}
+              <button
+                onClick={handleSkip}
+                className="inline-flex items-center justify-center rounded-lg border border-edge bg-panel/50 p-2 text-slate-400 transition hover:border-hydro-400/30 hover:text-white"
+                aria-label="Skip tour"
+              >
+                <X size={16} />
+              </button>
             </div>
 
             {/* Progress bar */}

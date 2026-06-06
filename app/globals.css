@@ -104,7 +104,21 @@ body {
   animation: sheen 6s ease-in-out infinite;
 }
 
-.drop { filter: drop-shadow(0 0 14px rgba(34,211,238,0.65)); }
+.drop {
+  filter: drop-shadow(0 0 14px rgba(34,211,238,0.65));
+  animation: pulse-blue 2s ease-in-out infinite;
+}
+
+@keyframes pulse-blue {
+  0%, 100% {
+    filter: drop-shadow(0 0 14px rgba(34,211,238,0.65));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(34,211,238,0.95));
+    transform: scale(1.05);
+  }
+}
 
 .gridline {
   background-image:

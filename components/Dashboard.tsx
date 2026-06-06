@@ -23,6 +23,7 @@ import {
   Activity,
   Wallet,
   Map,
+  Github,
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { ChainBadge } from "./ChainBadge";
@@ -400,6 +401,16 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
             </span>
             <span className="hidden sm:inline">Infiltrate ETHConf</span>
             <span className="sm:hidden">Infiltrate</span>
+          </a>
+          {/* GitHub — icon only on mobile, link on lg+ */}
+          <a
+            href="https://github.com/EDGECONSULTINGLABS/x402gal"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-1.5 text-xs text-slate-300 transition hover:border-edge hover:bg-panel/50 hover:text-white lg:hidden"
+            aria-label="GitHub"
+          >
+            <Github size={14} />
           </a>
           {/* Tour — icon only on mobile, label on md+ */}
           <button

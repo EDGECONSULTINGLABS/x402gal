@@ -14,10 +14,39 @@ export async function GET() {
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#000814',
-          backgroundImage: 'linear-gradient(135deg, #000814 0%, #04162a 50%, #0a1f3d 100%)',
+          backgroundImage: 'linear-gradient(135deg, #000814 0%, #0a1628 50%, #0d2847 100%)',
           fontFamily: 'Inter, system-ui, sans-serif',
+          position: 'relative',
         }}
       >
+        {/* Animated grid background effect */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px)',
+            backgroundSize: '50px 50px',
+          }}
+        />
+        
+        {/* Glowing orb effect */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '40%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '500px',
+            height: '500px',
+            background: 'radial-gradient(circle, rgba(0, 229, 255, 0.2) 0%, transparent 60%)',
+            borderRadius: '50%',
+            filter: 'blur(60px)',
+          }}
+        />
+        
         <div
           style={{
             display: 'flex',
@@ -25,81 +54,99 @@ export async function GET() {
             alignItems: 'center',
             justifyContent: 'center',
             textAlign: 'center',
-            padding: '50px',
+            padding: '45px',
             width: '100%',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
-          {/* Robot/Agent Icon */}
+          {/* Agent/Robot Icon with glow */}
           <div
             style={{
-              fontSize: '80px',
-              marginBottom: '20px',
+              fontSize: '90px',
+              marginBottom: '15px',
+              filter: 'drop-shadow(0 0 40px rgba(0, 229, 255, 0.8))',
             }}
           >
             🤖
           </div>
           
-          {/* Title */}
+          {/* Main Title - INFILTRATE */}
           <div
             style={{
-              fontSize: '56px',
-              fontWeight: '800',
-              marginBottom: '16px',
+              fontSize: '72px',
+              fontWeight: '900',
+              marginBottom: '12px',
               color: '#00E5FF',
-              textShadow: '0 0 30px rgba(0, 229, 255, 0.5)',
-              letterSpacing: '-1px',
+              textShadow: '0 0 50px rgba(0, 229, 255, 0.6), 0 0 100px rgba(0, 229, 255, 0.3)',
+              letterSpacing: '4px',
             }}
           >
             INFILTRATE
           </div>
           
-          {/* Subtitle */}
+          {/* ETHConf Badge */}
           <div
             style={{
-              fontSize: '32px',
-              fontWeight: '600',
+              fontSize: '28px',
+              fontWeight: '700',
               marginBottom: '24px',
-              color: '#e2e8f0',
+              color: '#FFD700',
+              letterSpacing: '2px',
             }}
           >
-            x402GAL @ ETHConf
+            ETHConf 2026 🎯
           </div>
           
-          {/* Description */}
+          {/* Mission Statement */}
           <div
             style={{
-              fontSize: '24px',
+              fontSize: '30px',
+              fontWeight: '600',
+              color: '#ffffff',
+              maxWidth: '900px',
+              lineHeight: '1.4',
+              marginBottom: '20px',
+            }}
+          >
+            Become a Field Agent. Pay Water Back.
+          </div>
+          
+          {/* Subtext */}
+          <div
+            style={{
+              fontSize: '22px',
               fontWeight: '400',
               color: '#94a3b8',
               maxWidth: '800px',
-              lineHeight: '1.4',
-              marginBottom: '30px',
+              lineHeight: '1.5',
+              marginBottom: '35px',
             }}
           >
-            Become a field agent. Complete missions. Claim your Genesis badge.
+            Complete 6 missions. Claim your Genesis badge on XRPL.
           </div>
           
-          {/* Mission badge */}
+          {/* CTA Button */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              padding: '14px 28px',
-              border: '2px solid #00E5FF',
-              borderRadius: '30px',
-              backgroundColor: 'rgba(0, 229, 255, 0.1)',
+              padding: '16px 36px',
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+              borderRadius: '50px',
+              boxShadow: '0 8px 32px rgba(255, 215, 0, 0.4)',
             }}
           >
-            <span style={{ fontSize: '24px' }}>🏅</span>
+            <span style={{ fontSize: '28px' }}>🏅</span>
             <span
               style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#00E5FF',
+                fontSize: '22px',
+                fontWeight: '800',
+                color: '#000000',
               }}
             >
-              6 Missions • Holo Badge • XRPL
+              JOIN THE MISSION
             </span>
           </div>
         </div>

@@ -14,10 +14,25 @@ export async function GET() {
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#0a1628',
-          backgroundImage: 'linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%)',
+          backgroundImage: 'linear-gradient(135deg, #0a1628 0%, #0d2137 50%, #1e3a5f 100%)',
           fontFamily: 'Inter, system-ui, sans-serif',
+          position: 'relative',
         }}
       >
+        {/* Background glow effect */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '600px',
+            height: '600px',
+            background: 'radial-gradient(circle, rgba(96, 165, 250, 0.15) 0%, transparent 70%)',
+            borderRadius: '50%',
+          }}
+        />
+        
         <div
           style={{
             display: 'flex',
@@ -25,21 +40,35 @@ export async function GET() {
             alignItems: 'center',
             justifyContent: 'center',
             textAlign: 'center',
-            padding: '60px',
+            padding: '50px',
             width: '100%',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
+          {/* Water Drop Icon */}
+          <div
+            style={{
+              fontSize: '100px',
+              marginBottom: '10px',
+              filter: 'drop-shadow(0 0 30px rgba(0, 229, 255, 0.6))',
+            }}
+          >
+            💧
+          </div>
+          
           {/* Main Logo/Title */}
           <div
             style={{
-              fontSize: '72px',
-              fontWeight: '800',
-              marginBottom: '24px',
+              fontSize: '80px',
+              fontWeight: '900',
+              marginBottom: '16px',
               background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              letterSpacing: '-2px',
+              letterSpacing: '-3px',
+              textShadow: '0 0 40px rgba(59, 130, 246, 0.3)',
             }}
           >
             x402GAL
@@ -48,44 +77,52 @@ export async function GET() {
           {/* Tagline */}
           <div
             style={{
-              fontSize: '32px',
-              fontWeight: '600',
-              marginBottom: '32px',
-              color: '#e2e8f0',
-              maxWidth: '800px',
-              lineHeight: '1.2',
+              fontSize: '36px',
+              fontWeight: '700',
+              marginBottom: '20px',
+              color: '#ffffff',
+              letterSpacing: '-1px',
             }}
           >
-            Water for the age of AI
+            Every AI query has a water footprint
           </div>
           
-          {/* Description */}
+          {/* Sub-description */}
           <div
             style={{
-              fontSize: '20px',
+              fontSize: '22px',
               fontWeight: '400',
               color: '#94a3b8',
-              maxWidth: '700px',
+              maxWidth: '800px',
               lineHeight: '1.5',
-              marginBottom: '40px',
+              marginBottom: '35px',
             }}
           >
-            Every AI query has a water footprint. Pay it back in real time. x402GAL settles water offsets on XRPL for every inference.
+            Pay it back in real time. Verified water offsets settled on XRPL.
           </div>
           
-          {/* URL */}
+          {/* XRPL Badge */}
           <div
             style={{
-              fontSize: '18px',
-              fontWeight: '500',
-              color: '#60a5fa',
-              padding: '12px 24px',
-              border: '2px solid #60a5fa',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(96, 165, 250, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              padding: '14px 28px',
+              background: 'linear-gradient(135deg, #00E5FF 0%, #00B8D4 100%)',
+              borderRadius: '50px',
+              boxShadow: '0 8px 32px rgba(0, 229, 255, 0.3)',
             }}
           >
-            x402gal.com
+            <span style={{ fontSize: '24px' }}>⚡</span>
+            <span
+              style={{
+                fontSize: '20px',
+                fontWeight: '700',
+                color: '#000814',
+              }}
+            >
+              Powered by XRPL
+            </span>
           </div>
         </div>
       </div>

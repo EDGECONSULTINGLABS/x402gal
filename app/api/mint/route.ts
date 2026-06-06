@@ -169,6 +169,23 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "invalid XRPL address" }, { status: 400, headers: CORS });
   }
 
+  // ---- Deduplication: one NFT per email ----
+  if (email) {
+    const existing = await redis.hgetall(`event:${eventId}:agent:${email.toLowerCase()}`);
+    if (existing?.nft_id) {
+      return Response.json({
+        ok: false,
+        error: "NFT already minted for this email",
+        existing: {
+          nftokenID: existing.nft_id,
+          txHash: existing.nft_tx,
+          offerIndex: existing.nft_offer || null,
+          mintedAt: existing.minted_at,
+        }
+      }, { status: 409, headers: CORS });
+    }
+  }
+
   // ---- Email-reserve path (no wallet) ----
   if (!recipient && email) {
     try {

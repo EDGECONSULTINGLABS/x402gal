@@ -23,7 +23,8 @@ import {
   Activity,
   Wallet,
   Map,
-  Github,
+  Menu,
+  X,
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { ChainBadge } from "./ChainBadge";
@@ -350,6 +351,8 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
 /* ─────────────────────────────────────────────────────── */
 
 function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; retired: number; xrplLive: boolean; onRestartTour?: () => void }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-[65] border-b border-edge/60 bg-abyss/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:px-6 lg:px-8">
@@ -402,16 +405,6 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
             <span className="hidden sm:inline">Infiltrate ETHConf</span>
             <span className="sm:hidden">Infiltrate</span>
           </a>
-          {/* GitHub — icon only on mobile, link on lg+ */}
-          <a
-            href="https://github.com/EDGECONSULTINGLABS/x402gal"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-1.5 text-xs text-slate-300 transition hover:border-edge hover:bg-panel/50 hover:text-white lg:hidden"
-            aria-label="GitHub"
-          >
-            <Github size={14} />
-          </a>
           {/* Tour — icon only on mobile, label on md+ */}
           <button
             onClick={onRestartTour}
@@ -420,6 +413,14 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
           >
             <Map size={11} className="opacity-60" />
             <span className="hidden md:inline">Tour</span>
+          </button>
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="inline-flex items-center justify-center rounded-md border border-edge bg-panel/60 p-2 text-slate-300 transition hover:border-hydro-400/50 hover:text-white lg:hidden"
+            aria-label="Menu"
+          >
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
           {/* Nav links — desktop only */}
           <nav className="hidden items-center gap-1 text-xs lg:flex">
@@ -432,9 +433,30 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
               GitHub
             </NavLink>
           </nav>
-          <ConnectButton />
+          <div className="hidden lg:block">
+            <ConnectButton />
+          </div>
         </div>
       </div>
+
+      {/* Mobile menu dropdown */}
+      {mobileMenuOpen && (
+        <div className="border-t border-edge/60 bg-abyss/95 px-3 py-4 lg:hidden">
+          <nav className="flex flex-col gap-2">
+            <MobileNavLink href="https://www.x402.org/">x402</MobileNavLink>
+            <MobileNavLink href="https://xrpl.org/">XRPL</MobileNavLink>
+            <MobileNavLink href="https://www.hydrocoin.com/" highlight>
+              HydroCoin
+            </MobileNavLink>
+            <MobileNavLink href="https://github.com/EDGECONSULTINGLABS/x402gal">
+              GitHub
+            </MobileNavLink>
+          </nav>
+          <div className="mt-4 border-t border-edge/60 pt-4">
+            <ConnectButton />
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -469,6 +491,32 @@ function NavLink({
     >
       {children}
       <ExternalLink size={11} className="opacity-60" />
+    </a>
+  );
+}
+
+function MobileNavLink({
+  href,
+  children,
+  highlight,
+}: {
+  href: string;
+  children: React.ReactNode;
+  highlight?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={`flex items-center justify-between rounded-md px-3 py-2.5 text-sm transition ${
+        highlight
+          ? "border border-hydro-400/40 bg-hydro-500/10 text-hydro-200"
+          : "border border-edge/60 bg-panel/40 text-slate-300 hover:border-edge hover:bg-panel/60 hover:text-white"
+      }`}
+    >
+      <span>{children}</span>
+      <ExternalLink size={14} className="opacity-60" />
     </a>
   );
 }

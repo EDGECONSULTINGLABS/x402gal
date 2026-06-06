@@ -569,6 +569,7 @@
   })();
 
   function validEmail(s){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
+  function validName(s){ return /^[a-zA-Z\s\-'\.]+$/.test(s) && /[a-zA-Z]/.test(s); }
 
   // Back button on the capture screen -> return to entry (clearer step navigation)
   $("captureBack").addEventListener("click", function(){ showTracked("s-entry"); });
@@ -578,6 +579,7 @@
         company=$("f-company").value.trim(), squad=$("f-squad").value.trim(), err=$("captureErr");
     err.textContent="";
     if(!name){ err.textContent="Drop a name or handle first."; return; }
+    if(!validName(name)){ err.textContent="Name can only contain letters, spaces, hyphens and apostrophes."; return; }
     if(!validEmail(email)){ err.textContent="Need a valid email to score your run."; return; }
     if(!selRole){ err.textContent="Pick what brings you here."; return; }
 

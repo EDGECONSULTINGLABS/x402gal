@@ -1,9 +1,9 @@
 // scripts/test-email.ts
 // Send a test badge email to verify the template and unsubscribe functionality
-// Usage: npx ts-node scripts/test-email.ts
+// Usage: npx tsx scripts/test-email.ts
 
 import { Resend } from "resend";
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 

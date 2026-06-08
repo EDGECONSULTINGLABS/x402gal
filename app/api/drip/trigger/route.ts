@@ -323,11 +323,14 @@ export async function POST(req: NextRequest) {
   const DRIP_API_KEY = process.env.DRIP_API_KEY;
   const authHeader = req.headers.get("Authorization");
   
-  // Debug logging
+  // Debug logging - log ALL headers
   console.log("[drip] DRIP_API_KEY exists:", !!DRIP_API_KEY);
   console.log("[drip] DRIP_API_KEY value:", DRIP_API_KEY ? DRIP_API_KEY.substring(0, 10) + "..." : "undefined");
   console.log("[drip] authHeader:", authHeader);
-  console.log("[drip] expected:", DRIP_API_KEY ? `Bearer ${DRIP_API_KEY.substring(0, 10)}...` : "undefined");
+  console.log("[drip] All headers:");
+  req.headers.forEach((value, key) => {
+    console.log(`  ${key}: ${value}`);
+  });
   
   if (!DRIP_API_KEY || authHeader !== `Bearer ${DRIP_API_KEY}`) {
     return Response.json({ ok: false, error: "Unauthorized", debug: { hasKey: !!DRIP_API_KEY, hasAuth: !!authHeader } }, { status: 401, headers: CORS });

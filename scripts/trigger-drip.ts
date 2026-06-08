@@ -18,7 +18,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
-const BASE = process.env.BASE_URL || "http://localhost:3000";
+const BASE = process.env.BASE || "http://localhost:3000";
 const DRIP_API_KEY = process.env.DRIP_API_KEY;
 
 async function main() {
@@ -39,11 +39,13 @@ async function main() {
   console.log("");
 
   try {
+    console.log(`   URL: ${BASE}/api/drip/trigger`);
+    console.log(`   Auth: Bearer ${DRIP_API_KEY?.substring(0, 15)}...`);
     const res = await fetch(`${BASE}/api/drip/trigger`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${DRIP_API_KEY}`,
+        "X-API-Key": DRIP_API_KEY,
       },
       body: JSON.stringify({ stage, dryRun }),
     });

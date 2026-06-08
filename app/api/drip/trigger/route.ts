@@ -319,21 +319,12 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
-  // Check authorization - read env var inside function for Vercel compatibility
+  // Check authorization using X-API-Key header (Authorization header is stripped by Vercel)
   const DRIP_API_KEY = process.env.DRIP_API_KEY;
-  const authHeader = req.headers.get("Authorization");
+  const apiKey = req.headers.get("X-API-Key");
   
-  // Debug logging - log ALL headers
-  console.log("[drip] DRIP_API_KEY exists:", !!DRIP_API_KEY);
-  console.log("[drip] DRIP_API_KEY value:", DRIP_API_KEY ? DRIP_API_KEY.substring(0, 10) + "..." : "undefined");
-  console.log("[drip] authHeader:", authHeader);
-  console.log("[drip] All headers:");
-  req.headers.forEach((value, key) => {
-    console.log(`  ${key}: ${value}`);
-  });
-  
-  if (!DRIP_API_KEY || authHeader !== `Bearer ${DRIP_API_KEY}`) {
-    return Response.json({ ok: false, error: "Unauthorized", debug: { hasKey: !!DRIP_API_KEY, hasAuth: !!authHeader } }, { status: 401, headers: CORS });
+  if (!DRIP_API_KEY || apiKey !== DRIP_API_KEY) {
+    return Response.json({ ok: false, error: "Unauthorized" }, { status: 401, headers: CORS });
   }
 
   let body: Record<string, unknown>;

@@ -320,11 +320,23 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   // Check authorization using X-API-Key header (Authorization header is stripped by Vercel)
+  // For cron jobs, skip auth check
   const DRIP_API_KEY = process.env.DRIP_API_KEY;
   const apiKey = req.headers.get("X-API-Key");
+  const isCron = req.headers.get("X-Vercel-CRON") === "true";
   
-  if (!DRIP_API_KEY || apiKey !== DRIP_API_KEY) {
+  if (!isCron && (!DRIP_API_KEY || apiKey !== DRIP_API_KEY)) {
     return Response.json({ ok: false, error: "Unauthorized" }, { status: 401, headers: CORS });
+  }
+  
+  // Only run drip campaign between 6/8/2026 and 6/10/2026
+  const today = new Date();
+  const startDate = new Date("2026-06-08");
+  const endDate = new Date("2026-06-10");
+  endDate.setHours(23, 59, 59, 999);
+  
+  if (today < startDate || today > endDate) {
+    return Response.json({ ok: false, error: "Campaign not active. Runs 6/8/2026 - 6/10/2026" }, { status: 403, headers: CORS });
   }
 
   let body: Record<string, unknown>;

@@ -322,8 +322,15 @@ export async function POST(req: NextRequest) {
   // Check authorization - read env var inside function for Vercel compatibility
   const DRIP_API_KEY = process.env.DRIP_API_KEY;
   const authHeader = req.headers.get("Authorization");
+  
+  // Debug logging
+  console.log("[drip] DRIP_API_KEY exists:", !!DRIP_API_KEY);
+  console.log("[drip] DRIP_API_KEY value:", DRIP_API_KEY ? DRIP_API_KEY.substring(0, 10) + "..." : "undefined");
+  console.log("[drip] authHeader:", authHeader);
+  console.log("[drip] expected:", DRIP_API_KEY ? `Bearer ${DRIP_API_KEY.substring(0, 10)}...` : "undefined");
+  
   if (!DRIP_API_KEY || authHeader !== `Bearer ${DRIP_API_KEY}`) {
-    return Response.json({ ok: false, error: "Unauthorized" }, { status: 401, headers: CORS });
+    return Response.json({ ok: false, error: "Unauthorized", debug: { hasKey: !!DRIP_API_KEY, hasAuth: !!authHeader } }, { status: 401, headers: CORS });
   }
 
   let body: Record<string, unknown>;

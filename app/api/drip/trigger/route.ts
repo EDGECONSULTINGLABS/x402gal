@@ -254,7 +254,8 @@ async function sendDripEmail(
   agentNumber: string,
   stage: number,
   data: Record<string, string>,
-  dryRun: boolean
+  dryRun: boolean,
+  force: boolean = false
 ): Promise<{ success: boolean; error?: string }> {
   const stageConfig = STAGES[stage as keyof typeof STAGES];
   if (!stageConfig) {
@@ -348,6 +349,7 @@ export async function POST(req: NextRequest) {
 
   const dryRun = !!body.dryRun;
   const targetStage = body.stage as string || "all";
+  const force = !!body.force;
 
   try {
     // Get all agents
@@ -376,7 +378,8 @@ export async function POST(req: NextRequest) {
         String(data.agentNumber).padStart(4, "0"),
         stage,
         data,
-        dryRun
+        dryRun,
+        force
       );
 
       results.push({

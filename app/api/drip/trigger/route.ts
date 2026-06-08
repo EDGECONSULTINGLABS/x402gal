@@ -271,9 +271,9 @@ async function sendDripEmail(
   const infiltrateUrl = `${baseUrl}/infiltrateETHConf2026.html`;
   const unsubscribeUrl = `${baseUrl}/api/unsubscribe?email=${encodeURIComponent(email)}`;
 
-  // Check if already sent this drip
+  // Check if already sent this drip (skip if force=true)
   const dripKey = `drip_${stageConfig.name}_sent_at`;
-  if (data[dripKey]) {
+  if (data[dripKey] && !data.force) {
     return { success: false, error: "Drip already sent" };
   }
 

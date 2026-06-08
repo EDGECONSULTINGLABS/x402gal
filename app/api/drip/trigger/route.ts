@@ -23,7 +23,6 @@ const redis = Redis.fromEnv();
 const DEFAULT_EVENT_ID = process.env.EVENT_ID || "ethconf-nyc-2026";
 const BADGE_THRESHOLD = 4;
 const HOLO_THRESHOLD = 6;
-const DRIP_API_KEY = process.env.DRIP_API_KEY;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -320,7 +319,8 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
-  // Check authorization
+  // Check authorization - read env var inside function for Vercel compatibility
+  const DRIP_API_KEY = process.env.DRIP_API_KEY;
   const authHeader = req.headers.get("Authorization");
   if (!DRIP_API_KEY || authHeader !== `Bearer ${DRIP_API_KEY}`) {
     return Response.json({ ok: false, error: "Unauthorized" }, { status: 401, headers: CORS });

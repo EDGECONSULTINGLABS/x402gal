@@ -274,7 +274,7 @@ async function sendDripEmail(
 
   // Check if already sent this drip (skip if force=true)
   const dripKey = `drip_${stageConfig.name}_sent_at`;
-  if (data[dripKey] && !data.force) {
+  if (data[dripKey] && !force) {
     return { success: false, error: "Drip already sent" };
   }
 

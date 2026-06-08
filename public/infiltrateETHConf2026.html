@@ -1016,6 +1016,43 @@ document.querySelectorAll('a[href="#privacy"]').forEach(function(link){
     document.getElementById('privacyModal').style.display='block';
   });
 });
+
+/* ===================== EMAIL LINK HANDLER ===================== */
+// Handle ?action= and ?agent= parameters from drip email links
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const action = params.get('action');
+  const agent = params.get('agent');
+  
+  // Auto-fill agent number if provided
+  if (agent) {
+    const agentInput = document.getElementById('agentNumber');
+    if (agentInput) agentInput.value = agent;
+  }
+  
+  // Auto-open appropriate section based on action
+  if (action === 'mint') {
+    // Scroll to badge/mint section
+    setTimeout(function(){
+      const badgeSection = document.getElementById('badgeSection');
+      if (badgeSection) {
+        badgeSection.scrollIntoView({ behavior: 'smooth' });
+        badgeSection.style.border = '2px solid var(--gold)';
+        setTimeout(function(){ badgeSection.style.border = ''; }, 3000);
+      }
+    }, 500);
+  } else if (action === 'claim') {
+    // Scroll to claim section
+    setTimeout(function(){
+      const claimSection = document.getElementById('badgeSection');
+      if (claimSection) {
+        claimSection.scrollIntoView({ behavior: 'smooth' });
+        claimSection.style.border = '2px solid var(--success)';
+        setTimeout(function(){ claimSection.style.border = ''; }, 3000);
+      }
+    }, 500);
+  }
+})();
 </script>
 
 </body>

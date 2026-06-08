@@ -58,7 +58,7 @@ const STAGES = {
       <strong>Complete 4 missions</strong> to unlock your badge. Finish all 6 to earn the rare <strong style="color:#FFD37A">Holo edition</strong>.
     </p>
 
-    <a href="${link}" style="display:inline-block;background:linear-gradient(120deg,#00E5FF,#00B8E5);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Start Your Mission →</a>
+    <a href="${link}?agent=${agentNumber}" style="display:inline-block;background:linear-gradient(120deg,#00E5FF,#00B8E5);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Start Your Mission →</a>
 
     <hr style="border:none;border-top:1px solid rgba(0,229,255,0.1);margin:24px 0">
     <p style="font-size:11px;color:#4A6B82;margin:0;line-height:1.6">
@@ -97,7 +97,7 @@ const STAGES = {
       You've started strong with ${data.missions} mission${data.missions === 1 ? "" : "s"} completed. <strong>${BADGE_THRESHOLD - data.missions} more</strong> to unlock your Genesis badge.
     </p>
 
-    <a href="${link}" style="display:inline-block;background:linear-gradient(120deg,#00E5FF,#00B8E5);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Continue Mission →</a>
+    <a href="${link}?agent=${agentNumber}" style="display:inline-block;background:linear-gradient(120deg,#00E5FF,#00B8E5);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Continue Mission →</a>
 
     <hr style="border:none;border-top:1px solid rgba(0,229,255,0.1);margin:24px 0">
     <p style="font-size:11px;color:#4A6B82;margin:0;line-height:1.6">
@@ -135,7 +135,7 @@ const STAGES = {
       <strong style="color:#FFD37A">Going for Holo?</strong> Complete all 6 missions to earn the rare Holo edition — minted one-for-one with the genesis drop.
     </p>
 
-    <a href="${link}" style="display:inline-block;background:linear-gradient(120deg,#00E5FF,#00B8E5);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Claim Your Badge →</a>
+    <a href="${link}?action=claim&agent=${agentNumber}" style="display:inline-block;background:linear-gradient(120deg,#00E5FF,#00B8E5);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Claim Your Badge →</a>
 
     <hr style="border:none;border-top:1px solid rgba(0,229,255,0.1);margin:24px 0">
     <p style="font-size:11px;color:#4A6B82;margin:0;line-height:1.6">
@@ -173,7 +173,7 @@ const STAGES = {
       The mainnet genesis mint follows this summer, but your testnet badge is ready today.
     </p>
 
-    <a href="${link}" style="display:inline-block;background:linear-gradient(120deg,#00E5FF,#00B8E5);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Mint Your NFT →</a>
+    <a href="${link}?action=mint&agent=${agentNumber}" style="display:inline-block;background:linear-gradient(120deg,#00E5FF,#00B8E5);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Mint Your NFT →</a>
 
     <hr style="border:none;border-top:1px solid rgba(0,229,255,0.1);margin:24px 0">
     <p style="font-size:11px;color:#4A6B82;margin:0;line-height:1.6">
@@ -214,7 +214,7 @@ const STAGES = {
       Mint it now before the holo supply runs out.
     </p>
 
-    <a href="${link}" style="display:inline-block;background:linear-gradient(120deg,#FFD37A,#FF9D00);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Mint Holo Badge →</a>
+    <a href="${link}?action=mint&agent=${agentNumber}" style="display:inline-block;background:linear-gradient(120deg,#FFD37A,#FF9D00);color:#001824;text-decoration:none;font-weight:700;font-size:15px;padding:16px 32px;border-radius:12px;margin-bottom:24px">Mint Holo Badge →</a>
 
     <hr style="border:none;border-top:1px solid rgba(0,229,255,0.1);margin:24px 0">
     <p style="font-size:11px;color:#4A6B82;margin:0;line-height:1.6">

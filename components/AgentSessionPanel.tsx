@@ -50,11 +50,12 @@ export function AgentSessionPanel() {
       await fetch("/api/agents", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId, chain, balanceUsdc: 100_000_000 }),
+        body: JSON.stringify({ agentId, chain, balanceUsdc: 100_000_000, walletAddress: address }),
       });
 
-      // Fire the x402 round-trip
-      const res = await fetch("/api/ai/chat", {
+      // Fire the x402 round-trip: first call returns 402 with requirements,
+      // then we sign a payment payload and retry with the X-PAYMENT header.
+      let res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,12 +65,45 @@ export function AgentSessionPanel() {
         body: JSON.stringify({ prompt, agentId, chain }),
       });
 
-      const data = await res.json();
+      let data = await res.json();
+
+      if (res.status === 402 && data?.accepts?.[0]) {
+        const req = data.accepts[0];
+        const sigHex = Array.from(`${agentId}|${req.nonce}`)
+          .map((c) => c.charCodeAt(0).toString(16))
+          .join("")
+          .slice(0, 48);
+        const payload = {
+          x402Version: 1,
+          scheme: "exact",
+          network: req.network,
+          asset: "USDC",
+          amountUsdc: req.amountUsdc,
+          offsetHydroDrops: req.offsetHydroDrops,
+          payer: agentId,
+          recipient: req.recipient,
+          nonce: req.nonce,
+          signature: `sig_${sigHex}`,
+          sourceChain: chain,
+        };
+        res = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-agent-id": agentId,
+            "x-agent-chain": chain,
+            "X-PAYMENT": btoa(JSON.stringify(payload)),
+          },
+          body: JSON.stringify({ prompt, agentId, chain }),
+        });
+        data = await res.json();
+      }
+
       setResult({
         status: res.status,
         completion: data.completion ?? data.response ?? data.message,
-        footprintMl: data.footprintMl,
-        usdcCharged: data.usdcCharged,
+        footprintMl: data.pricing?.water_ml ?? data.footprintMl,
+        usdcCharged: data.pricing?.amountUsdc ?? data.usdcCharged,
         error: data.error,
       });
     } catch (e) {
@@ -137,17 +171,17 @@ export function AgentSessionPanel() {
             <div className="mt-2 space-y-2">
               <p className="font-medium text-hydro-300">Payment Required</p>
               <p className="leading-relaxed text-slate-400">
-                This is the x402 protocol working as designed. The AI endpoint requires a micro-payment to offset the water footprint of each inference.
+                The endpoint returned 402 and the auto-signed x402 payment was not accepted — usually an expired requirement or an out-of-funds agent.
               </p>
               <div className="rounded-md border border-hydro-400/20 bg-hydro-500/5 p-3 space-y-1.5">
-                <p className="text-[10px] uppercase tracking-wider text-hydro-200/80">To test with real payments:</p>
+                <p className="text-[10px] uppercase tracking-wider text-hydro-200/80">What normally happens:</p>
                 <ol className="list-decimal list-inside space-y-1 text-slate-300">
-                  <li>Fund your wallet with testnet USDC on Base Sepolia</li>
-                  <li>The agent auto-signs an x402 payment header</li>
-                  <li>Payment is verified → inference runs → water offset settles</li>
+                  <li>The endpoint replies 402 with a water-footprint price</li>
+                  <li>Your agent auto-signs an x402 payment header and retries</li>
+                  <li>Payment verifies → inference runs → offset settles live on XRPL testnet</li>
                 </ol>
                 <p className="mt-2 text-slate-500">
-                  Use the <span className="text-slate-300">demo buttons</span> on the left panel to simulate the full pipeline without a funded wallet.
+                  Hit <span className="text-slate-300">+$100 USDC</span> to top up the agent and try again, or use the demo buttons on the left panel.
                 </p>
               </div>
             </div>

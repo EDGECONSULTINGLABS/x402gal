@@ -5,6 +5,7 @@
 
 import { NextRequest } from "next/server";
 import { build402Response, buildRequirement, decodePayment, verifyPayment } from "@/lib/x402";
+import { decodeEvmExactPayment, settleEvmExact } from "@/lib/x402evm";
 import { addToBatch, drainBatch, ledger } from "@/lib/ledger";
 import { settleBatch } from "@/lib/settlement";
 import { BATCH_SIZE } from "@/lib/constants";
@@ -40,7 +41,95 @@ export async function POST(req: NextRequest) {
 
   // Token counts shape the price; we surface the full methodology in 402.
   const requirement = buildRequirement(RESOURCE, { tokens_in, tokens_out });
-  const payload = decodePayment(req.headers.get("x-payment"));
+  const rawPayment = req.headers.get("x-payment");
+
+  // Fuji "exact" rail: standard x402 v1 payload carrying an ERC-3009
+  // authorization. Settled on-chain immediately (USDC pulled to treasury),
+  // then the water offset joins the same XRPL batch as every other call.
+  const evmPay = decodeEvmExactPayment(rawPayment);
+  if (evmPay) {
+    const settled = await settleEvmExact(evmPay, requirement.amountUsdc);
+    if (!settled.ok) {
+      return new Response(
+        JSON.stringify({ error: "payment invalid", reason: settled.reason }),
+        { status: 402, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    const agentId = `agent_${evmPay.payer.slice(2, 10).toLowerCase()}`;
+    const l = ledger();
+    if (!l.agents.has(agentId)) {
+      l.agents.set(agentId, {
+        id: agentId,
+        label: `Fuji ${evmPay.payer.slice(0, 8)}`,
+        operator: "External x402 buyer",
+        chain: "avalanche",
+        walletAddress: evmPay.payer,
+        balanceUsdc: 0,
+        totalLitersOffset: 0,
+        totalQueries: 0,
+        joinedAt: Date.now(),
+      });
+    }
+
+    const { shouldFlush } = addToBatch({
+      agentId,
+      resource: RESOURCE,
+      amountUsdc: requirement.amountUsdc,
+      offsetDrops: requirement.offsetHydroDrops,
+      waterMl: requirement.estimatedMl,
+      sourceChain: "avalanche",
+      nonce: evmPay.auth.nonce,
+      ts: Date.now(),
+    });
+
+    let flushedSettlement = null;
+    if (shouldFlush) flushedSettlement = await settleBatch(drainBatch());
+
+    const pending = ledger().pendingTotals;
+    return new Response(
+      JSON.stringify({
+        completion: fakeCompletion(prompt || "your question"),
+        pricing: {
+          amountUsdc: requirement.amountUsdc,
+          offsetHydroDrops: requirement.offsetHydroDrops,
+          water_ml: requirement.estimatedMl,
+          water_l: requirement.estimatedLiters,
+          methodology_hash: requirement.footprint.methodology.methodology_hash,
+        },
+        evm_settlement: {
+          network: "avalanche-fuji",
+          txHash: settled.txHash,
+          explorer: settled.explorer,
+        },
+        batch: {
+          size_target: BATCH_SIZE,
+          pending_calls: pending.calls,
+          pending_usdc: pending.usdc,
+          pending_offset_drops: pending.offsetDrops,
+          pending_water_ml: pending.waterMl,
+          flushed: flushedSettlement?.id ?? null,
+        },
+        settlement: flushedSettlement,
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "X-PAYMENT-RESPONSE": Buffer.from(
+            JSON.stringify({
+              success: true,
+              network: "avalanche-fuji",
+              transaction: settled.txHash,
+              payer: evmPay.payer,
+            }),
+          ).toString("base64"),
+        },
+      },
+    );
+  }
+
+  const payload = decodePayment(rawPayment);
 
   if (!payload) return build402Response(requirement);
 

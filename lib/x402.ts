@@ -13,6 +13,7 @@ import {
   litersToDrops,
 } from "./constants";
 import { calculateFootprint } from "./footprint";
+import { buildFujiRequirement } from "./x402evm";
 import { ledger } from "./ledger";
 import { dropsToUsdcMicros } from "./amm";
 import { verifyOnChain } from "./chainVerifier";
@@ -120,18 +121,22 @@ export async function verifyPayment(
 }
 
 export function build402Response(req: PaymentRequirement): Response {
+  // Fuji "exact" (ERC-3009) rail is advertised first when the EVM treasury
+  // is configured; the XRPL entry always follows for the native demo agents.
+  const fuji = buildFujiRequirement(req.resource, req.amountUsdc, req.description);
+  const accepts: unknown[] = fuji ? [fuji, req] : [req];
   return new Response(
     JSON.stringify({
       x402Version: 1,
       error: "Payment Required",
-      accepts: [req],
+      accepts,
     }),
     {
       status: 402,
       headers: {
         "Content-Type": "application/json",
         "X-402GAL-Facilitator": FACILITATOR_URL,
-        "X-402GAL-Settlement": "xrpl",
+        "X-402GAL-Settlement": fuji ? "avalanche-fuji,xrpl" : "xrpl",
       },
     },
   );

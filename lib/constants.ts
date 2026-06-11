@@ -79,5 +79,5 @@ export const SEED_AGENTS = [
   { id: "agent_solace_alpha", label: "Solace-α", operator: "Helix Labs", chain: "solana", balanceUsdc: 350_000_000 },
   { id: "agent_orin_x7", label: "Orin-x7", operator: "OpenForge", chain: "ethereum", balanceUsdc: 220_000_000 },
   { id: "agent_kairo_pro", label: "Kairo-Pro", operator: "Drift Robotics", chain: "polygon", balanceUsdc: 640_000_000 },
-  { id: "agent_apex_av1", label: "Apex-av1", operator: "Avax Labs", chain: "avalanche", balanceUsdc: 400_000_000 },
+  { id: "agent_apex_av1", label: "Apex-av1", operator: "UltravioletaDAO", chain: "avalanche", balanceUsdc: 400_000_000 },
 ] as const;

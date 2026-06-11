@@ -256,7 +256,7 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
           </motion.div>
         )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
+          <div className="flex flex-col gap-6 lg:col-span-2">
             <div data-guide="price-chart">
               <PriceChart history={history} />
             </div>
@@ -788,8 +788,8 @@ function PriceChart({
 
 function SettlementsTable({ settlements }: { settlements: Settlement[] }) {
   return (
-    <div className="glass overflow-hidden rounded-2xl">
-      <div className="flex items-center justify-between gap-2 border-b border-edge px-3 py-3 sm:px-4">
+    <div className="glass flex flex-col overflow-hidden rounded-2xl lg:min-h-0 lg:flex-1">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-edge px-3 py-3 sm:px-4">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <ArrowRightLeft size={14} className="text-hydro-300" />
           <span className="font-display font-medium text-white">
@@ -803,7 +803,7 @@ function SettlementsTable({ settlements }: { settlements: Settlement[] }) {
           {settlements.length} recent
         </span>
       </div>
-      <div className="hidden grid-cols-12 gap-3 border-b border-edge/60 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-500 sm:grid">
+      <div className="hidden shrink-0 grid-cols-12 gap-3 border-b border-edge/60 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-500 sm:grid">
         <div className="col-span-2">Payer</div>
         <div className="col-span-2">Resource</div>
         <div className="col-span-1">Chain</div>
@@ -812,7 +812,7 @@ function SettlementsTable({ settlements }: { settlements: Settlement[] }) {
         <div className="col-span-2 text-right">Restored</div>
         <div className="col-span-1 text-right">Age</div>
       </div>
-      <div className="max-h-[420px] overflow-auto">
+      <div className="max-h-[420px] overflow-auto lg:max-h-none lg:flex-1 lg:basis-0">
         {settlements.length === 0 && (
           <div className="px-4 py-12 text-center text-xs text-slate-500">
             No settlements yet — kick off the demo on the right.

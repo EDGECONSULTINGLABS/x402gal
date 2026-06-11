@@ -11,7 +11,8 @@ import { ModelTier, InfraTier } from "./footprint";
 
 export const DROPS_PER_HYDRO = 1_000_000;
 export const LITERS_PER_GALLON = 3.785411784; // exact, US liquid gallon
-export const TREASURY_ADDRESS = "rX402GALTreasuryXRPLHydroCoinOffset0000";
+export const TREASURY_ADDRESS =
+  process.env.XRPL_TREASURY_ADDRESS || "racKPugSG4zH8qZczvcP2p3f1P9NRfLSjf";
 export const FACILITATOR_URL = "/api/x402/verify";
 
 // Settlement batching. x402 micropayments accumulate until the batch hits

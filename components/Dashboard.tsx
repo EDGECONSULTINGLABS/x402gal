@@ -281,27 +281,39 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
                 running={running}
               />
             </div>
-            <AnimatePresence>
-              {lastSettlement && (
-                <motion.div
-                  key={lastSettlement.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  data-guide="settlement"
-                  className="glass-strong rounded-2xl p-5"
-                >
-                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
-                    <ShieldCheck size={14} /> XRPL settlement
+            <div data-guide="methodology">
+              <SpecCard methodologyHash={state?.methodologyHash} />
+            </div>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {lastSettlement && (
+            <motion.div
+              key={lastSettlement.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              data-guide="settlement"
+              className="glass-strong mt-6 rounded-2xl p-5"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
+                  <ShieldCheck size={14} /> XRPL settlement
+                </div>
+                <span className="font-mono text-[10px] text-slate-500">
+                  {lastSettlement.id}
+                </span>
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Quadrant step={1} title="Inference served">
+                  <div className="text-xs leading-relaxed text-slate-300">
+                    {completion ||
+                      "x402-paid completion returned to the agent over HTTP 200."}
                   </div>
-                  <div className="mt-3">
-                    <RouteTrace hops={lastSettlement.hops} />
-                  </div>
-                  <div className="mt-3 space-y-2 text-xs">
-                    <HashRow label="Swap hash" hash={lastSettlement.settlementHash} explorerBase={state?.xrpl.explorerBase} />
-                    <HashRow label="Retirement receipt" hash={lastSettlement.retirementReceipt} explorerBase={state?.xrpl.explorerBase} accent />
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                </Quadrant>
+                <Quadrant step={2} title={"Batch settled \u00b7 x402 \u2192 XRPL"}>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
                     <Mini
                       label={`Aggregated calls`}
                       value={`${lastSettlement.callCount.toLocaleString()} \u00d7 \u22480.07 mL`}
@@ -319,28 +331,31 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
                       value={`${(lastSettlement.litersOffset * 1000).toFixed(2)} mL`}
                       accent
                     />
-                    <Mini
-                      label="Methodology hash"
-                      value={lastSettlement.methodologyHash}
-                      mono
-                    />
                   </div>
-                  {completion && (
-                    <div className="mt-4 rounded-md border border-edge bg-ink/60 p-3 text-xs leading-relaxed text-slate-300">
-                      <div className="mb-1 text-[10px] uppercase tracking-wider text-slate-500">
-                        Inference response
-                      </div>
-                      {completion}
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <div data-guide="methodology">
-              <SpecCard methodologyHash={state?.methodologyHash} />
-            </div>
-          </div>
-        </div>
+                </Quadrant>
+                <Quadrant step={3} title={"Swap \u2192 retire on XRPL"}>
+                  <RouteTrace hops={lastSettlement.hops} />
+                  <div className="mt-3 space-y-2 text-xs">
+                    <HashRow label="Swap hash" hash={lastSettlement.settlementHash} explorerBase={state?.xrpl.explorerBase} />
+                    <HashRow label="Retirement receipt" hash={lastSettlement.retirementReceipt} explorerBase={state?.xrpl.explorerBase} accent />
+                  </div>
+                </Quadrant>
+                <Quadrant step={4} title="Verifiable water credit">
+                  <Mini
+                    label="Methodology hash"
+                    value={lastSettlement.methodologyHash}
+                    mono
+                  />
+                  <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
+                    The retirement receipt above is the on-chain proof that the
+                    aggregated water footprint was offset. Auditors can re-derive
+                    the price independently from the pinned methodology hash.
+                  </p>
+                </Quadrant>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Footer />
       </main>
@@ -455,6 +470,30 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
         </div>
       )}
     </header>
+  );
+}
+
+function Quadrant({
+  step,
+  title,
+  children,
+}: {
+  step: number;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-edge bg-ink/30 p-4">
+      <div className="flex items-center gap-2">
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-hydro-400/40 bg-hydro-500/10 font-mono text-[10px] text-hydro-300">
+          {step}
+        </span>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">
+          {title}
+        </span>
+      </div>
+      <div className="mt-3">{children}</div>
+    </div>
   );
 }
 

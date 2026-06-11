@@ -44,7 +44,7 @@ const ROLE_LABEL: Record<string, string> = {
 
 // Approved emails: @edgeconsultinglabs.com domain or specific addresses
 const APPROVED_DOMAINS = ["edgeconsultinglabs.com"];
-const APPROVED_EMAILS = ["ty@digitalstormwater.com"];
+const APPROVED_EMAILS = ["ty@digitalstormwater.com", "joe@parjanaeng.com"];
 
 function isApprovedEmail(email: string): boolean {
   const normalized = email.toLowerCase().trim();
@@ -111,29 +111,32 @@ export default function LeadsPageClient() {
     }
   }, [authed, load]);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError(null);
-    
-    if (!isApprovedEmail(email)) {
-      setError("Unauthorized email address.");
-      return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/leads-auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.toLowerCase().trim(), password }),
+      });
+      const json = await res.json() as { ok: boolean; error?: string };
+      if (!json.ok) {
+        setError(json.error || "Login failed.");
+        return;
+      }
+      const normalized = email.toLowerCase().trim();
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+        email: normalized,
+        timestamp: Date.now(),
+      }));
+      setAuthed(true);
+      setAuthEmail(normalized);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
     }
-    
-    // Password check - simple length validation
-    const validPassword = password.length >= 4;
-    if (!validPassword) {
-      setError("Invalid password.");
-      return;
-    }
-
-    // Store auth in localStorage
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
-      email: email.toLowerCase().trim(),
-      timestamp: Date.now()
-    }));
-    
-    setAuthed(true);
-    setAuthEmail(email.toLowerCase().trim());
   };
 
   const handleLogout = () => {

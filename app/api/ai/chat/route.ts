@@ -58,6 +58,13 @@ export async function POST(req: NextRequest) {
 
     const agentId = `agent_${evmPay.payer.slice(2, 10).toLowerCase()}`;
     const l = ledger();
+    l.lastEvmSettlement = {
+      network: "avalanche-fuji",
+      txHash: settled.txHash!,
+      explorer: settled.explorer!,
+      amountUsdc: requirement.amountUsdc,
+      at: Date.now(),
+    };
     if (!l.agents.has(agentId)) {
       l.agents.set(agentId, {
         id: agentId,

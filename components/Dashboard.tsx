@@ -70,6 +70,13 @@ interface State {
     endpoint: string | null;
     explorerBase: string | null;
   };
+  lastEvmSettlement: {
+    network: string;
+    txHash: string;
+    explorer: string;
+    amountUsdc: number;
+    at: number;
+  } | null;
 }
 
 function useSafeAccount() {
@@ -212,7 +219,7 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
-      <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} onRestartTour={restartGuide} />
+      <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} onRestartTour={restartGuide} lastEvmSettlement={state?.lastEvmSettlement} />
 
       <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8">
         <Hero
@@ -365,7 +372,7 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
 
 /* ─────────────────────────────────────────────────────── */
 
-function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; retired: number; xrplLive: boolean; onRestartTour?: () => void }) {
+function Nav({ price, retired, xrplLive, onRestartTour, lastEvmSettlement }: { price?: number; retired: number; xrplLive: boolean; onRestartTour?: () => void; lastEvmSettlement?: { network: string; txHash: string; explorer: string; amountUsdc: number; at: number } | null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -404,6 +411,19 @@ function Nav({ price, retired, xrplLive, onRestartTour }: { price?: number; reti
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60" />
               sim
             </span>
+          )}
+          {lastEvmSettlement && (
+            <a
+              href={lastEvmSettlement.explorer}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/40 bg-cyan-500/10 px-2.5 py-1 font-mono text-[10px] text-cyan-300 transition hover:border-cyan-300 hover:bg-cyan-500/20"
+              title={`${lastEvmSettlement.network} — ${lastEvmSettlement.txHash}`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              {lastEvmSettlement.network}
+              <ExternalLink size={10} />
+            </a>
           )}
         </div>
 

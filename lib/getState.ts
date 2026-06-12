@@ -50,6 +50,7 @@ export function getDashboardState() {
           : "https://xrpscan.com/tx/"
         : null,
     },
+    lastEvmSettlement: l.lastEvmSettlement,
   };
 }
 

@@ -23,6 +23,8 @@ interface LedgerState {
     sinceFlushMs: number;
     lastFlushAt: number;
   };
+  // Most recent EVM settlement (Fuji, Base, etc.) for live dashboard display.
+  lastEvmSettlement: { network: string; txHash: string; explorer: string; amountUsdc: number; at: number } | null;
 }
 
 declare global {
@@ -127,6 +129,7 @@ function bootstrap(): LedgerState {
       sinceFlushMs: 0,
       lastFlushAt: now,
     },
+    lastEvmSettlement: null,
   };
 }
 

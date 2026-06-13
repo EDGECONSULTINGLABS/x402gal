@@ -139,8 +139,12 @@ export async function POST(req: NextRequest) {
     // ─ XRPL settlement
     txHash: settleResult.txHash,
     retirementTxHash: settleResult.retirementTxHash,
+    paymentTxHash: settleResult.paymentTxHash ?? null,
     network: "xrpl",
     simulated: settleResult.simulated ?? false,
+    explorerPayment: settleResult.paymentTxHash && !settleResult.simulated
+      ? `https://testnet.xrpscan.com/tx/${settleResult.paymentTxHash}`
+      : null,
     explorerSwap: settleResult.txHash && !settleResult.simulated
       ? `https://testnet.xrpscan.com/tx/${settleResult.txHash}`
       : null,
@@ -159,14 +163,14 @@ export async function GET() {
   return Response.json({
     facilitator: "402GAL XRPL Facilitator",
     version: 1,
-    supportedNetworks: ["xrpl"],
+    supportedNetworks: ["xrpl", "avalanche-fuji"],
     supportedSchemes: ["exact"],
     supportedAssets: ["USDC"],
-    settlementHops: ["swap", "retire"],
+    settlementHops: ["payment", "swap", "retire"],
     retirementAsset: "HYD",
     retirementRegistry: "XRPL",
     description:
-      "First XRPL network adapter for x402. Settles USDC micro-payments as HydroCoin water-restoration credits on the XRP Ledger.",
+      "Dual-rail x402 facilitator. XRPL native: pre-signed Payment tx settlement + HydroCoin retirement. Avalanche Fuji: ERC-3009 receiveWithAuthorization.",
     docs: "https://github.com/your-org/x402gal",
   });
 }

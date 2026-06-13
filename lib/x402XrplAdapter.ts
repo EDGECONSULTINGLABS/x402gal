@@ -51,8 +51,9 @@
  *   HYDROCOIN_CURRENCY     HYD      3-char currency code
  */
 
-import { isXrplConfigured } from "./xrplClient";
+import { isXrplConfigured, getClient } from "./xrplClient";
 import { swapAndRetireHydro } from "./xrplHydro";
+import { decode, verifySignature, type Client, type Transaction } from "xrpl";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 //
@@ -76,6 +77,8 @@ export interface X402Requirement {
   offsetHydroDrops?: number;  // HYDRO drops to retire for this payment
   estimatedMl?: number;       // site water footprint in mL
   footprint?: Record<string, unknown>;
+  // Native XRPL settlement binding
+  invoiceId?: string;        // 64-char hex (32 bytes) — quote binding hash
 }
 
 /** Payment payload sent by the agent in the X-PAYMENT header (base64 JSON). */
@@ -98,6 +101,10 @@ export interface X402Payload {
       s?: string;
     };
   };
+  // Native XRPL Payment tx settlement — when present, the facilitator
+  // validates the signed blob and submits it to XRPL on-chain.
+  xrplSignedTx?: string;     // hex-encoded signed Payment tx blob
+  invoiceId?: string;         // 64-char hex echoing the 402 quote
 }
 
 export interface VerifyResult {
@@ -107,11 +114,33 @@ export interface VerifyResult {
 
 export interface SettleResult {
   success: boolean;
-  txHash?: string;            // XRPL swap hop tx hash (issuer → treasury)
+  txHash?: string;            // XRPL Payment tx hash (native) OR swap hop hash
   retirementTxHash?: string;  // XRPL retirement hop tx hash (treasury → issuer = burn)
   errorReason?: string;
   network: "xrpl";
   simulated?: boolean;        // true when XRPL env vars are not configured
+  paymentTxHash?: string;   // native XRPL Payment tx hash (when xrplSignedTx path used)
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+/** Circle XRPL testnet USDC currency code (40-char hex). */
+const USDC_CURRENCY_XRPL = "5553444300000000000000000000000000000000";
+/** Circle XRPL testnet USDC issuer address. */
+const USDC_ISSUER_XRPL = "rHuGNhqTG32mfmAvWA8hUyWRLV3tCSwKQt";
+
+/** In-memory replay guard for InvoiceID / tx-hash (dev/testnet only).
+ *  Production should use Redis / Durable Object with short TTL. */
+const seenInvoices = new Set<string>();
+function isReplay(invoiceId: string): boolean {
+  if (seenInvoices.has(invoiceId)) return true;
+  seenInvoices.add(invoiceId);
+  // Cap size to prevent unbounded growth on long-running dev servers.
+  if (seenInvoices.size > 10_000) {
+    const iter = seenInvoices.values();
+    seenInvoices.delete(iter.next().value as string);
+  }
+  return false;
 }
 
 // ── verify() ─────────────────────────────────────────────────────────────────
@@ -119,15 +148,11 @@ export interface SettleResult {
 /**
  * Verify an x402 payment payload against the requirement.
  *
- * Checks performed:
- *   1. Network is "xrpl"
- *   2. Recipient address matches payTo
- *   3. Amount paid >= amount required
- *   4. Payment has not expired (validBefore)
- *   5. Signature field is present and non-trivial
- *
- * Full XRPL signature verification (ripple-keypairs) is the open contribution
- * described in CONTRIBUTING.md — add it here once agreed with x402 team.
+ * Two paths:
+ *   A) Native XRPL — payload.xrplSignedTx present.
+ *      Decodes the signed Payment blob, validates all fields against the quote,
+ *      verifies the signature offline, and checks for replay.
+ *   B) EVM-auth fallback — no xrplSignedTx. Checks authorization struct only.
  */
 export async function xrplVerify(
   payload: X402Payload,
@@ -140,6 +165,66 @@ export async function xrplVerify(
     };
   }
 
+  // ── Path A: Native XRPL Payment tx ────────────────────────────────────────
+  if (payload.xrplSignedTx) {
+    let decoded: Record<string, unknown>;
+    try {
+      decoded = decode(payload.xrplSignedTx) as Record<string, unknown>;
+    } catch {
+      return { isValid: false, invalidReason: "INVALID_TX_BLOB: could not decode xrplSignedTx" };
+    }
+
+    // 1. Transaction type
+    if (decoded.TransactionType !== "Payment") {
+      return { isValid: false, invalidReason: `INVALID_TX_TYPE: expected Payment, got ${decoded.TransactionType}` };
+    }
+
+    // 2. Destination
+    if (decoded.Destination !== requirement.payTo) {
+      return { isValid: false, invalidReason: `INVALID_DESTINATION: got ${decoded.Destination}, expected ${requirement.payTo}` };
+    }
+
+    // 3. Amount — must be issued-currency USDC
+    const amt = decoded.Amount as Record<string, unknown> | undefined;
+    if (!amt || typeof amt !== "object") {
+      return { isValid: false, invalidReason: "AMOUNT_MISMATCH: Amount is not an issued-currency object" };
+    }
+    if (amt.currency !== USDC_CURRENCY_XRPL) {
+      return { isValid: false, invalidReason: `AMOUNT_MISMATCH: currency ${amt.currency}, expected ${USDC_CURRENCY_XRPL}` };
+    }
+    if (amt.issuer !== USDC_ISSUER_XRPL) {
+      return { isValid: false, invalidReason: `AMOUNT_MISMATCH: issuer ${amt.issuer}, expected ${USDC_ISSUER_XRPL}` };
+    }
+    const requiredMicro = BigInt(requirement.maxAmountRequired ?? "0");
+    const actualMicro = BigInt(Math.round(parseFloat(amt.value as string) * 1_000_000));
+    if (actualMicro !== requiredMicro) {
+      return { isValid: false, invalidReason: `AMOUNT_MISMATCH: value ${amt.value} (${actualMicro} µUSDC), required ${requiredMicro} µUSDC` };
+    }
+
+    // 4. InvoiceID binding
+    const invoiceId = payload.invoiceId ?? requirement.invoiceId;
+    if (invoiceId && decoded.InvoiceID !== invoiceId) {
+      return { isValid: false, invalidReason: `INVOICE_MISMATCH: got ${decoded.InvoiceID}, expected ${invoiceId}` };
+    }
+
+    // 5. Offline signature verification (no RPC — rejects forged blobs)
+    try {
+      verifySignature(decoded as Transaction);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return { isValid: false, invalidReason: `INVALID_SIGNATURE: ${msg}` };
+    }
+
+    // 6. Replay guard
+    const replayKey = (decoded.InvoiceID as string | undefined) ?? payload.xrplSignedTx;
+    if (isReplay(replayKey)) {
+      return { isValid: false, invalidReason: "REPLAY_DETECTED: InvoiceID or tx blob already used" };
+    }
+
+    return { isValid: true };
+  }
+
+  // ── Path B: EVM-auth fallback (existing logic, unchanged) ────────────────
   const auth = payload.payload?.authorization;
   if (!auth) {
     return { isValid: false, invalidReason: "missing payload.authorization" };
@@ -175,11 +260,95 @@ export async function xrplVerify(
     return { isValid: false, invalidReason: "missing or malformed signature" };
   }
 
-  // TODO (open contribution): verify `sig` is a valid XRPL ed25519/secp256k1
-  // signature over sha512Half(canonicalAuthHash(auth)) using ripple-keypairs.
-  // See CONTRIBUTING.md for the exact signing scheme and test vectors.
-
   return { isValid: true };
+}
+
+// ── Native XRPL Payment settlement ────────────────────────────────────────────
+
+/**
+ * Submit a pre-signed XRPL Payment tx, then on `tesSUCCESS` execute the
+ * two-hop HYDRO swap + retire.
+ *
+ * Field validation + signature verification happen in xrplVerify() above.
+ * This function only does the ledger-sequence check, submission, and
+ * retirement hand-off.
+ */
+export async function xrplSettleNative(
+  xrplSignedTx: string,
+  usdcMicros: number,
+  hydroDrops: number,
+): Promise<SettleResult> {
+  if (!isXrplConfigured()) {
+    const rndHex = (n: number) =>
+      Array.from({ length: n }, () => "0123456789ABCDEF"[(Math.random() * 16) | 0]).join("");
+    return {
+      success: true,
+      paymentTxHash: rndHex(64),
+      txHash: rndHex(64),
+      retirementTxHash: rndHex(64),
+      network: "xrpl",
+      simulated: true,
+    };
+  }
+
+  const client = await getClient();
+
+  // Decode to inspect LastLedgerSequence before burning a submission.
+  let decoded: Record<string, unknown>;
+  try {
+    decoded = decode(xrplSignedTx) as Record<string, unknown>;
+  } catch {
+    return { success: false, errorReason: "INVALID_TX_BLOB: decode failed before submit", network: "xrpl" };
+  }
+
+  const lastLedgerSeq = decoded.LastLedgerSequence as number | undefined;
+  if (lastLedgerSeq !== undefined) {
+    const ledgerInfo = await client.getLedgerIndex();
+    if (ledgerInfo >= lastLedgerSeq) {
+      return { success: false, errorReason: `EXPIRED_LEDGER: LastLedgerSequence ${lastLedgerSeq}, current ${ledgerInfo}`, network: "xrpl" };
+    }
+  }
+
+  // Submit the pre-signed Payment tx.
+  let submitResult: Awaited<ReturnType<Client["submitAndWait"]>>;
+  try {
+    submitResult = await client.submitAndWait(xrplSignedTx);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { success: false, errorReason: `SUBMIT_ERROR: ${msg}`, network: "xrpl" };
+  }
+
+  const meta = submitResult.result.meta as { TransactionResult?: string } | undefined;
+  const resultCode = meta?.TransactionResult ?? "";
+  const paymentTxHash = (submitResult.result as { hash?: string }).hash ?? "";
+
+  if (resultCode !== "tesSUCCESS") {
+    return {
+      success: false,
+      errorReason: `XRPL_REJECTED: ${resultCode} — tx hash ${paymentTxHash}`,
+      network: "xrpl",
+    };
+  }
+
+  // Only on confirmed tesSUCCESS → proceed to HYDRO swap + retire.
+  try {
+    const { swapHash, retireHash } = await swapAndRetireHydro(usdcMicros, hydroDrops);
+    return {
+      success: true,
+      paymentTxHash,
+      txHash: swapHash,
+      retirementTxHash: retireHash,
+      network: "xrpl",
+      simulated: false,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      success: false,
+      errorReason: `RETIRE_FAILED_AFTER_PAYMENT: ${msg} — payment tx ${paymentTxHash}`,
+      network: "xrpl",
+    };
+  }
 }
 
 // ── settle() ─────────────────────────────────────────────────────────────────
@@ -201,6 +370,12 @@ export async function xrplSettle(
   const usdcMicros = parseInt(payload.payload?.authorization?.value ?? "0", 10);
   const hydroDrops = requirement.offsetHydroDrops ?? Math.max(1, Math.round(usdcMicros / 1_000));
 
+  // Native XRPL Payment path — the buyer submitted a pre-signed tx blob.
+  if (payload.xrplSignedTx) {
+    return xrplSettleNative(payload.xrplSignedTx, usdcMicros, hydroDrops);
+  }
+
+  // EVM-auth fallback path — no pre-signed XRPL tx; HYDRO retire only.
   if (!isXrplConfigured()) {
     const rndHex = (n: number) =>
       Array.from({ length: n }, () => "0123456789ABCDEF"[(Math.random() * 16) | 0]).join("");

@@ -86,7 +86,9 @@ async function main() {
   console.log("[trustline] USDC trustline set");
 
   // ── 4. Build the canonical Payment tx ──────────────────────────────────────
-  const invoiceId = "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899";
+  // Generate a fresh invoice ID for each run so round-trip tests don't
+  // collide with the in-memory replay guard across dev-server invocations.
+  const invoiceId = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString("hex").toUpperCase();
   const usdcValue = (amountUsdcMicros / 1_000_000).toString(); // decimal USDC for XRPL
 
   const unsignedPayment: Transaction = {

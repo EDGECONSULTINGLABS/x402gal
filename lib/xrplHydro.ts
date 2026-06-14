@@ -140,6 +140,17 @@ export async function swapAndRetireHydro(
   hydroDrops: number,
 ): Promise<HydroSwapResult> {
   void usdcMicros;
+
+  // ── Fault-injection hook (testing only) ────────────────────────────────────
+  // Deterministically fails the XRPL leg so a Level 2 fault-injection run can
+  // force the money-in/nothing-out desync (Fuji pull succeeds, retire fails) and
+  // observe the obligation capture + worker self-heal. Double-gated so a stray
+  // env var can NEVER force-fail real settlements: requires both a non-production
+  // NODE_ENV AND the explicit flag.
+  if (process.env.NODE_ENV !== "production" && process.env.XRPL_FORCE_FAIL === "1") {
+    throw new Error("XRPL_FORCE_FAIL: injected XRPL settlement failure (testing only)");
+  }
+
   const client = await getClient();
   const issuer = Wallet.fromSeed(process.env.HYDROCOIN_ISSUER_SEED!);
   const treasury = Wallet.fromSeed(process.env.XRPL_TREASURY_SEED!);

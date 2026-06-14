@@ -36,6 +36,7 @@ yarn-error.log*
 /test-results/
 /playwright-report/
 /coverage/
+.level2-state.json
 
 # ── Misc ──────────────────────────────────────────────────────────────────────
 *.tsbuildinfo

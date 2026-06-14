@@ -7,7 +7,7 @@
 [![Avalanche Fuji](https://img.shields.io/badge/Avalanche-Fuji%20USDC-ef4444)](https://testnet.avascan.info)
 [![tsc](https://img.shields.io/badge/tsc-clean-blue)](tsconfig.json)
 
-> Every AI inference consumes freshwater. x402GAL charges agents per call in USDC, swaps the proceeds for **HydroCoin (HYDRO)**, and retires it on **XRPL** as a verifiable water-restoration credit — fully on-chain, no intermediary.
+> Every AI inference consumes freshwater. x402GAL charges agents per call in USDC and retires **HydroCoin (HYDRO)** water-restoration credits on **XRPL** — fully on-chain, no intermediary.
 
 **1 billion AI calls/day = 68 L of freshwater** — currently with zero accountability. x402GAL makes that externality programmable using primitives that already exist: x402, USDC, and XRPL.
 
@@ -98,7 +98,7 @@ End-to-end run **live demo (updated May 2026)** — real funds, two chains:
 | # | Action | Chain | Transaction |
 |---|---|---|---|
 | 1 | USDC pulled via ERC-3009 | Avalanche Fuji | [0xb881…7032](https://testnet.avascan.info/blockchain/c/tx/0xb88104cab2344fe38f0e00fa1bcdb041e730a1f61f45928a6ed64b23c6f17032) |
-| 2 | HYD swap (issuer → treasury) | XRPL testnet | [5484EC…CB15](https://testnet.xrpscan.com/tx/5484EC649181ABE68DB1EE252F55A312520BC52C64162D5DEBEE9A5CF205CB15) |
+| 2 | HYD mint (issuer → treasury) | XRPL testnet | [5484EC…CB15](https://testnet.xrpscan.com/tx/5484EC649181ABE68DB1EE252F55A312520BC52C64162D5DEBEE9A5CF205CB15) |
 | 3 | HYD retirement (water credit) | XRPL testnet | [4E4795…DB41](https://testnet.xrpscan.com/tx/4E479597A44755318B938DC1432C478C38302440482BCB0CA5EFE8976BDADB41) |
 
 ---
@@ -147,9 +147,9 @@ Response 200:
 {
   usdcPulled: true,
   usdcTxHash: "0xb881...",          // Avalanche Fuji
-  txHash: "5484EC...",              // XRPL swap
+  txHash: "5484EC...",              // XRPL mint
   retirementTxHash: "4E4795...",    // XRPL water credit
-  simulated: false
+  simulated: false                    // false = on-chain tx submitted; does not imply a DEX swap occurred
 }
 ```
 
@@ -200,7 +200,7 @@ Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc
 | Batching / settlement state machine | ✅ |
 | Multi-chain RPC verification (EVM via viem) | ✅ |
 | EVM treasury `receiveWithAuthorization` | ✅ |
-| XRPL testnet swap + retire (real txs) | ✅ |
+| XRPL testnet mint + retire (real txs) | ✅ |
 | Avalanche Fuji ↔ mainnet network switching | ✅ |
 | Full ERC-3009 agent-side signing SDK | 🔄 |
 | Solana SPL token verification | 📋 |
@@ -232,9 +232,7 @@ Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc
 
 ## Intellectual Property
 
-x402GAL — the application, the brand, and the code in this repository — belongs to the HydroCoin project. HydroCoin (HYD) and the MRV framework are the core protocol and the property of the HydroCoin project. Commercial use of x402GAL, HydroCoin branding, the HYD token, or the MRV methodology requires permission from the HydroCoin project.
-
-x402GAL is built on a generic x402-over-XRPL settlement scheme (the agent-payment, facilitator-verification, and on-chain settlement layer) authored by Edge Consulting Labs. That underlying scheme is asset-agnostic, is published separately as an open standard, and is licensed to the HydroCoin project for use in x402GAL on a perpetual basis. HydroCoin's ownership of x402GAL is not affected by ECL's authorship of the underlying scheme.
+x402GAL — the application, the brand, and the code in this repository — belongs to the HydroCoin project. HydroCoin (HYD) and the MRV framework are the property of the HydroCoin project. Built by Edge Consulting Labs.
 
 The application code in this repository is released under the MIT license.
 
@@ -248,4 +246,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for open tasks including full XRPL signat
 
 x402GAL application: [MIT](LICENSE) © 2026 the HydroCoin project.
 
-Underlying x402-over-XRPL settlement scheme: authored by Edge Consulting Labs, published separately as an open standard and licensed to HydroCoin for use in x402GAL.
+Built by Edge Consulting Labs.

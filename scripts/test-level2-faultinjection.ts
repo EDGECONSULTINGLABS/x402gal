@@ -40,7 +40,8 @@ loadEnv({ path: ".env.local" });
 import { randomBytes } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { privateKeyToAccount } from "viem/accounts";
-import { parseSignature, getAddress, type Hex } from "viem";
+import { createPublicClient, http, parseSignature, getAddress, type Hex } from "viem";
+import { avalancheFuji } from "viem/chains";
 import { getObligation } from "../lib/obligations";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
@@ -61,6 +62,27 @@ function requireEnv(k: string): string {
   return v;
 }
 
+const ERC20_BALANCE_ABI = [{
+  name: "balanceOf", type: "function", stateMutability: "view",
+  inputs: [{ name: "account", type: "address" }], outputs: [{ type: "uint256" }],
+}] as const;
+
+// Pre-flight: the desync phase spends real testnet USDC and the heal phase does
+// NOT refund it, so an underfunded buyer would surface as a confusing pull
+// failure mid-run. Fail fast with a clear message instead.
+async function assertBuyerFunded(buyer: string) {
+  const rpc = process.env.RPC_AVALANCHE ?? "https://api.avax-test.network/ext/bc/C/rpc";
+  const client = createPublicClient({ chain: avalancheFuji, transport: http(rpc) });
+  const bal = await client.readContract({
+    address: FUJI_USDC, abi: ERC20_BALANCE_ABI, functionName: "balanceOf", args: [getAddress(buyer)],
+  });
+  console.log(`  buyer USDC balance: ${bal} micros (need >= ${AMOUNT_MICROS})`);
+  if (bal < BigInt(AMOUNT_MICROS)) {
+    console.error(`  Buyer ${buyer} is underfunded — fund testnet USDC before running. Aborting.`);
+    process.exit(2);
+  }
+}
+
 interface SavedState {
   nonce: string;
   fujiTxHash: string;
@@ -73,6 +95,8 @@ async function buildSignedRequest() {
   const buyerKey = requireEnv("BUYER_PRIVATE_KEY") as Hex;
   const treasury = getAddress(requireEnv("EVM_TREASURY_ADDRESS"));
   const buyer = privateKeyToAccount(buyerKey);
+
+  await assertBuyerFunded(buyer.address);
 
   const now = Math.floor(Date.now() / 1000);
   const validAfter = "0";
@@ -197,6 +221,14 @@ async function phaseHeal() {
   console.log("  worker:", JSON.stringify(workerResult));
 
   const o = await getObligation(state.nonce);
+
+  // Most likely operator mistake: XRPL_FORCE_FAIL leaked into the Phase 2 server.
+  // Detect it explicitly so a still-set flag doesn't masquerade as a broken worker.
+  if (o?.status !== "RETIRED" && (o?.lastError ?? "").includes("XRPL_FORCE_FAIL")) {
+    console.error("\n  >>> XRPL_FORCE_FAIL is STILL SET on the server. The worker is being told to fail.");
+    console.error("  >>> Restart the dev server WITHOUT XRPL_FORCE_FAIL, then re-run PHASE=heal.\n");
+  }
+
   ok("obligation is now RETIRED", o?.status === "RETIRED", `status=${o?.status}`);
   ok("XRPL retirement hash present", !!o?.retireTxHash, `retireTxHash=${o?.retireTxHash}`);
   ok("NO second Fuji pull (fujiTxHash unchanged → charged once)", o?.fujiTxHash === state.fujiTxHash,

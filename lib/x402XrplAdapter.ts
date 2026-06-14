@@ -153,10 +153,12 @@ const seenInvoices = new Set<string>();
 /** Convert a USDC decimal string (e.g. "1.000001") to micro-USDC as BigInt,
  *  without any floating-point arithmetic. Rejects over-precision (>6 decimals). */
 function usdcDecimalToMicros(v: string): bigint {
+  if (!v || v === ".") throw new Error("MALFORMED");
+  if (/[eE]/.test(v)) throw new Error("SCIENTIFIC_NOTATION");
   const [whole, frac = ""] = v.split(".");
   if (frac.length > 6) throw new Error("AMOUNT_TOO_PRECISE");
   const sign = whole.startsWith("-") ? -1n : 1n;
-  const absWhole = whole.replace(/^-/, "");
+  const absWhole = whole.replace(/^-/, "") || "0"; // ".5" → whole="" → "0"
   return sign * (BigInt(absWhole) * 1_000_000n + BigInt(frac.padEnd(6, "0")));
 }
 

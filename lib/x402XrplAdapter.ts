@@ -129,14 +129,40 @@ const USDC_CURRENCY_XRPL = "5553444300000000000000000000000000000000";
 /** Circle XRPL testnet USDC issuer address. */
 const USDC_ISSUER_XRPL = "rHuGNhqTG32mfmAvWA8hUyWRLV3tCSwKQt";
 
-/** In-memory replay guard for InvoiceID / tx-hash (dev/testnet only).
- *  Production should use Redis / Durable Object with short TTL. */
+import { Redis } from "@upstash/redis";
+
+// Replay guard uses Upstash Redis when available (survives serverless isolates).
+// Falls back to in-memory Set for local dev when Redis env vars are absent.
+// Redis keys expire after 5 minutes — longer than any LastLedgerSequence window.
+const REPLAY_TTL_S = 300;
+const REPLAY_KEY_PREFIX = "x402:invoice:";
+
+function redisConfigured(): boolean {
+  return !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
+}
+
+let _redis: ReturnType<typeof Redis.fromEnv> | null = null;
+function getRedis(): ReturnType<typeof Redis.fromEnv> | null {
+  if (!redisConfigured()) return null;
+  if (!_redis) _redis = Redis.fromEnv();
+  return _redis;
+}
+
 const seenInvoices = new Set<string>();
-function isReplay(invoiceId: string): boolean {
+
+async function isReplay(invoiceId: string): Promise<boolean> {
+  const redis = getRedis();
+  if (redis) {
+    const key = `${REPLAY_KEY_PREFIX}${invoiceId}`;
+    const exists = await redis.get(key);
+    if (exists !== null) return true;
+    await redis.setex(key, REPLAY_TTL_S, "1");
+    return false;
+  }
+  // Fallback: in-memory only. Does NOT survive across serverless invocations.
   if (seenInvoices.has(invoiceId)) return true;
   seenInvoices.add(invoiceId);
-  // Cap size to prevent unbounded growth on long-running dev servers.
-  if (seenInvoices.size > 10_000) {
+  if (seenInvoices.size > 1_000) {
     const iter = seenInvoices.values();
     seenInvoices.delete(iter.next().value as string);
   }
@@ -217,7 +243,7 @@ export async function xrplVerify(
 
     // 6. Replay guard
     const replayKey = (decoded.InvoiceID as string | undefined) ?? payload.xrplSignedTx;
-    if (isReplay(replayKey)) {
+    if (await isReplay(replayKey)) {
       return { isValid: false, invalidReason: "REPLAY_DETECTED: InvoiceID or tx blob already used" };
     }
 

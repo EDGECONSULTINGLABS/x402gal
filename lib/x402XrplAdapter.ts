@@ -340,7 +340,13 @@ export async function xrplSettleNative(
     };
   }
 
-  const client = await getClient();
+  let client: Awaited<ReturnType<typeof getClient>>;
+  try {
+    client = await getClient();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { success: false, errorReason: `XRPL_CONNECT_FAILED: ${msg}`, network: "xrpl" };
+  }
 
   // Decode to inspect LastLedgerSequence before burning a submission.
   let decoded: Record<string, unknown>;
@@ -352,7 +358,13 @@ export async function xrplSettleNative(
 
   const lastLedgerSeq = decoded.LastLedgerSequence as number | undefined;
   if (lastLedgerSeq !== undefined) {
-    const ledgerInfo = await client.getLedgerIndex();
+    let ledgerInfo: number;
+    try {
+      ledgerInfo = await client.getLedgerIndex();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return { success: false, errorReason: `LEDGER_QUERY_FAILED: ${msg}`, network: "xrpl" };
+    }
     if (ledgerInfo >= lastLedgerSeq) {
       return { success: false, errorReason: `EXPIRED_LEDGER: LastLedgerSequence ${lastLedgerSeq}, current ${ledgerInfo}`, network: "xrpl" };
     }

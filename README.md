@@ -1,4 +1,4 @@
-# x402GAL — Water-offset rails for AI agents
+# x402GAL — A water-offset application for AI agents, on Edge Consulting Labs' x402-over-XRPL settlement rails
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Status: Testnet](https://img.shields.io/badge/Status-Testnet%20only-orange)](README.md#disclaimer)
@@ -7,7 +7,7 @@
 [![Avalanche Fuji](https://img.shields.io/badge/Avalanche-Fuji%20USDC-ef4444)](https://testnet.avascan.info)
 [![tsc](https://img.shields.io/badge/tsc-clean-blue)](tsconfig.json)
 
-> Every AI inference consumes freshwater. x402GAL charges agents per call in USDC, swaps the proceeds for **HydroCoin (HYDRO)**, and retires it on **XRPL** as a verifiable water-restoration credit — fully on-chain, no intermediary.
+> Every AI inference consumes freshwater. x402GAL charges agents per call in USDC, swaps the proceeds for **HydroCoin (HYDRO)**, and retires it on **XRPL** as a verifiable water-restoration credit — fully on-chain, no intermediary. Built by Edge Consulting Labs for HydroCoin.
 
 **1 billion AI calls/day = 68 L of freshwater** — currently with zero accountability. x402GAL makes that externality programmable using primitives that already exist: x402, USDC, and XRPL.
 
@@ -201,10 +201,12 @@ Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc
 
 ## Intellectual Property
 
-- **x402GAL** is an open-source reference implementation of HydroCoin's XRPL settlement rails.
-- The code in this repository is released under the MIT license.
-- **HydroCoin (HYD)** and the associated MRV framework are the core protocol.
-- Commercial use of HydroCoin branding or methodology requires permission from the HydroCoin project.
+x402GAL is a water-offset application built by Edge Consulting Labs for the HydroCoin project. It combines two distinct layers:
+
+- **Settlement scheme / rails** — the generic, asset-agnostic x402-over-XRPL payment and settlement layer (agent payment, facilitator verification, on-chain settlement). This is independent infrastructure authored and owned by Edge Consulting Labs, usable with any issued currency. It is published separately as an open standard; x402GAL is one reference instance of it.
+- **HydroCoin (HYD) and the MRV framework** — the settlement asset and water-restoration methodology. These are the property of the HydroCoin project. Commercial use of HydroCoin branding, the HYD token, or the MRV methodology requires permission from HydroCoin.
+
+x402GAL applies the ECL settlement rails to the HydroCoin asset to create a verifiable, on-chain water-offset for AI agents. The application code in this repository is released under the MIT license. Ownership of each layer rests with its respective party as described above.
 
 ---
 
@@ -214,4 +216,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for open tasks including full XRPL signat
 
 ## License
 
-[MIT](LICENSE) © 2026 HydroCoin
+Application code: [MIT](LICENSE) © 2026 Edge Consulting Labs.
+
+HydroCoin (HYD) and the MRV framework © the HydroCoin project; used in this application by arrangement.
+
+The underlying x402-over-XRPL settlement scheme is published separately by Edge Consulting Labs as an open standard.

@@ -3,6 +3,10 @@
     {
       "path": "/api/drip/trigger",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/x402/retry-obligations",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

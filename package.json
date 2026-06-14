@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "demo:agent": "tsx scripts/demo-agent.ts",
+    "test:obligations": "tsx scripts/test-obligations.ts",
+    "test:obligations:redis-down": "tsx scripts/test-obligations-redis-down.ts",
     "test:e2e": "playwright test",
     "hash:methodology": "tsx scripts/hash-methodology.ts",
     "pages:build": "npx @cloudflare/next-on-pages",

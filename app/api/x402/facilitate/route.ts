@@ -36,6 +36,7 @@ import { xrplVerify, xrplSettle, X402Requirement, X402Payload } from "@/lib/x402
 import { pullUsdcToTreasury, isEvmTreasuryConfigured } from "@/lib/evmTreasury";
 import { addToBatch, drainBatch } from "@/lib/ledger";
 import { settleBatch } from "@/lib/settlement";
+import { beginSettlement, recordPull, markRetired, markFailed, type Obligation } from "@/lib/obligations";
 
 export const runtime = "nodejs";
 
@@ -67,12 +68,65 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Step 2: Pull USDC to EVM treasury (if configured + auth has v/r/s) ──────
   const auth = payload.payload?.authorization;
+  const isEvmAuthPath = !payload.xrplSignedTx && !!auth?.v && !!auth?.r && !!auth?.s && !!auth?.nonce;
+  // The obligation guard applies only when a real Fuji pull will happen — that is
+  // the money-in/nothing-out locus. Native XRPL keeps its own InvoiceID replay guard.
+  const guarded = isEvmAuthPath && isEvmTreasuryConfigured();
+
+  const usdcMicros = parseInt(auth?.value ?? "0", 10);
+  const hydroDrops = requirement.offsetHydroDrops ?? Math.max(1, Math.round(usdcMicros / 1_000));
+
+  // ── Step 2: Status-aware idempotency guard ──────────────────────────────────
+  // RETIRED → duplicate (return original receipt); RETIRING → in-flight; FAILED/PENDING
+  // → allow as a retry. Claims the obligation (→ RETIRING) so concurrent dupes hold.
+  let obligation: Obligation | undefined;
+  if (guarded) {
+    const begin = await beginSettlement(auth!.nonce!, {
+      amountUsdcMicros: usdcMicros,
+      hydroDrops,
+      bindingId: payload.invoiceId ?? requirement.invoiceId,
+    });
+    if (!begin.proceed) {
+      if (begin.reason === "ALREADY_RETIRED") {
+        const o = begin.obligation!;
+        // Idempotent replay: return the original receipt rather than re-settling.
+        return Response.json({
+          isValid: true,
+          success: true,
+          duplicate: true,
+          usdcPulled: !!o.fujiTxHash,
+          usdcTxHash: o.fujiTxHash ?? null,
+          txHash: o.mintTxHash ?? null,
+          retirementTxHash: o.retireTxHash ?? null,
+          network: "xrpl",
+          simulated: false,
+        });
+      }
+      if (begin.reason === "IN_FLIGHT") {
+        return Response.json(
+          { isValid: true, success: false, errorReason: "DUPLICATE_IN_FLIGHT: a settlement for this authorization is already in progress", network: "xrpl" },
+          { status: 409 },
+        );
+      }
+      // GUARD_UNAVAILABLE — fail-closed: cannot confirm idempotency, refuse to proceed.
+      return Response.json(
+        { isValid: true, success: false, errorReason: "SETTLEMENT_GUARD_UNAVAILABLE: cannot confirm idempotency, refusing to proceed", network: "xrpl" },
+        { status: 503 },
+      );
+    }
+    obligation = begin.obligation;
+  }
+
+  // ── Step 3: Pull USDC to EVM treasury (skip if already pulled — nonce is spent) ──
   let usdcPull: { success: boolean; skipped?: boolean; txHash?: string; explorer?: string; error?: string } =
     { success: true, skipped: true };
 
-  if (isEvmTreasuryConfigured() && auth?.v && auth?.r && auth?.s) {
+  if (obligation?.fujiTxHash) {
+    // Resume path: the pull already succeeded on a prior attempt. NEVER re-pull —
+    // the ERC-3009 nonce is burned on-chain and receiveWithAuthorization would revert.
+    usdcPull = { success: true, skipped: false, txHash: obligation.fujiTxHash };
+  } else if (isEvmTreasuryConfigured() && auth?.v && auth?.r && auth?.s) {
     const pullResult = await pullUsdcToTreasury({
       from:        auth.from,
       to:          auth.to,
@@ -85,18 +139,25 @@ export async function POST(req: NextRequest) {
       s:           auth.s,
     });
     if (!pullResult.success && !pullResult.skipped) {
+      // Pull failed — nonce not burned. Mark FAILED so it is retryable from the start.
+      if (obligation) await markFailed(obligation, `USDC pull failed: ${pullResult.error}`);
       return Response.json(
         { isValid: true, success: false, errorReason: `USDC pull failed: ${pullResult.error}`, network: "xrpl" },
         { status: 500 },
       );
     }
     usdcPull = pullResult;
+    // Persist the Fuji hash NOW so any later retry resumes from the XRPL leg only.
+    if (obligation && pullResult.txHash) await recordPull(obligation, pullResult.txHash);
   }
 
-  // ── Step 3: Settle on XRPL ──────────────────────────────────────────────────
+  // ── Step 4: Settle on XRPL ──────────────────────────────────────────────────
   const settleResult = await xrplSettle(payload, requirement);
 
   if (!settleResult.success) {
+    // The desync case: USDC pulled (recorded above) but XRPL retire failed. The
+    // obligation is now FAILED with fujiTxHash set — recorded and resumable, never dropped.
+    if (obligation) await markFailed(obligation, settleResult.errorReason ?? "XRPL settle failed");
     return Response.json(
       {
         isValid: true,
@@ -108,11 +169,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Step 4: Record in 402GAL batch ledger ───────────────────────────────────
+  // Success — finalize the obligation as RETIRED with both XRPL hashes.
+  if (obligation) {
+    await markRetired(obligation, {
+      mintTxHash: settleResult.txHash ?? "",
+      retireTxHash: settleResult.retirementTxHash ?? "",
+    });
+  }
+
+  // ── Step 5: Record in 402GAL batch ledger ───────────────────────────────────
   // Accumulate into the same batch pipeline as the internal x402 flow so
   // the dashboard settlement stream reflects externally-facilitated payments.
-  const usdcMicros = parseInt(payload.payload?.authorization?.value ?? "0", 10);
-  const hydroDrops = requirement.offsetHydroDrops ?? Math.max(1, Math.round(usdcMicros / 1_000));
   const estimatedMl = requirement.estimatedMl ?? 0;
 
   const { shouldFlush } = addToBatch({

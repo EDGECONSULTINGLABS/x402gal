@@ -13,7 +13,7 @@ import {
   rainbowWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { createConfig, http } from "wagmi";
-import { base, mainnet, polygon, avalanche } from "wagmi/chains";
+import { base, mainnet, polygon, avalanche, avalancheFuji } from "wagmi/chains";
 import type { Config } from "wagmi";
 
 export const projectId =
@@ -39,12 +39,13 @@ export function getWagmiConfig(): Config {
 
   _wagmiConfig = createConfig({
     connectors,
-    chains: [base, mainnet, polygon, avalanche],
+    chains: [base, mainnet, polygon, avalanche, avalancheFuji],
     transports: {
       [base.id]: http(),
       [mainnet.id]: http(),
       [polygon.id]: http(),
       [avalanche.id]: http(),
+      [avalancheFuji.id]: http(),
     },
     ssr: false,
   });

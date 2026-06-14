@@ -35,6 +35,7 @@ import { HydroCoinPanel } from "./HydroCoinPanel";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { ConnectButton } from "./ConnectButton";
 import { AgentSessionPanel } from "./AgentSessionPanel";
+import { PayAndOffsetPanel } from "./PayAndOffsetPanel";
 import { OnboardingGuide } from "./OnboardingGuide";
 import { useAccount } from "wagmi";
 import { Agent, Settlement } from "@/lib/types";
@@ -876,6 +877,7 @@ function DemoPanel({
       </div>
       <div data-guide="agent-session">
         <AgentSessionPanel />
+        <PayAndOffsetPanel />
       </div>
       <div className="mt-4 space-y-3" data-guide="agent-section">
         <label className="text-[11px] uppercase tracking-wider text-slate-500">

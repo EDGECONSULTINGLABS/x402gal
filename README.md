@@ -230,20 +230,10 @@ Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc
 
 ---
 
-## Intellectual Property
-
-x402GAL — the application, the brand, and the code in this repository — belongs to the HydroCoin project. HydroCoin (HYD) and the MRV framework are the property of the HydroCoin project. Built by Edge Consulting Labs.
-
-The application code in this repository is released under the MIT license.
-
----
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for open tasks including full XRPL signature verification and agent-side ERC-3009 signing.
 
 ## License
 
-x402GAL application: [MIT](LICENSE) © 2026 the HydroCoin project.
-
-Built by Edge Consulting Labs.
+[MIT](LICENSE) © 2026 the HydroCoin project.

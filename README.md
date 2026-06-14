@@ -41,6 +41,37 @@ npm run demo:agent
 
 ## How it works
 
+### Current architecture (two independent flows)
+
+EVM payment and XRPL retirement currently run as separate demonstrations. The cross-chain trigger (Fuji confirmation → XRPL retire from float) is scoped but not yet wired.
+
+```mermaid
+sequenceDiagram
+    participant Agent as AI Agent<br/>(Avalanche / Base / Eth)
+    participant GAL as x402GAL<br/>facilitator
+    participant EVM as EVM Treasury<br/>(USDC contract)
+    participant XRPL as XRPL Testnet
+
+    rect rgb(230, 245, 230)
+    Note over Agent,EVM: Flow A — EVM payment (live on Fuji)
+    Agent->>GAL: POST /api/ai/chat
+    GAL-->>Agent: 402 Payment Required<br/>{ price: 0.068 mL, methodologyHash }
+    Agent->>GAL: retry + X-PAYMENT header<br/>(ERC-3009 signed auth)
+    GAL->>EVM: receiveWithAuthorization()<br/>pull USDC → treasury
+    EVM-->>GAL: ✅ Avalanche Fuji tx hash
+    end
+
+    rect rgb(245, 245, 230)
+    Note over GAL,XRPL: Flow B — XRPL retirement (live on Testnet,<br/>triggered separately today)
+    GAL->>XRPL: mintHydro() + retire()<br/>issuer→treasury→issuer (burn)
+    XRPL-->>GAL: ✅ mint tx + retirement tx
+    end
+```
+
+> **On-ledger note:** The XRPL flow mints HYD from the issuer to the treasury, then returns it to the issuer (burned). There is no USDC↔HYD swap on-chain today; the treasury float is managed off-ledger. A DEX-based swap is on the mainnet roadmap.
+
+### Intended unified architecture (planned)
+
 ```mermaid
 sequenceDiagram
     participant Agent as AI Agent<br/>(Avalanche / Base / Eth)
@@ -51,9 +82,9 @@ sequenceDiagram
     Agent->>GAL: POST /api/ai/chat
     GAL-->>Agent: 402 Payment Required<br/>{ price: 0.068 mL, methodologyHash }
     Agent->>GAL: retry + X-PAYMENT header<br/>(ERC-3009 signed auth)
-    GAL->>EVM: receiveWithAuthorization()<br/>pull 1 USDC → treasury
-    EVM-->>GAL: ✅ Avalanche Fuji tx hash
-    GAL->>XRPL: swapAndRetireHydro()<br/>HYD issued + burned
+    GAL->>EVM: receiveWithAuthorization()<br/>pull USDC → treasury
+    EVM-->>GAL: ✅ Fuji tx hash
+    GAL->>XRPL: swapAndRetire()<br/>USDC float → HYD mint → retire
     XRPL-->>GAL: ✅ swap tx + retirement tx
     GAL-->>Agent: 200 OK + 3 on-chain receipts
 ```

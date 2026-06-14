@@ -19,8 +19,10 @@
  */
 
 import { Client, Wallet, Transaction } from "xrpl";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 
 const XRPL_TESTNET = "wss://s.altnet.rippletest.net:51233";
+const BUYER_WALLET_FILE = ".buyer-wallet.json";
 
 /** Circle XRPL testnet USDC constants (confirmed). */
 const USDC_CURRENCY = "5553444300000000000000000000000000000000";
@@ -59,15 +61,24 @@ async function main() {
   const client = new Client(XRPL_TESTNET);
   await client.connect();
 
-  // ── 1. Create buyer wallet ─────────────────────────────────────────────────
-  const buyer = Wallet.generate();
-  console.log("\n=== BUYER WALLET ===");
-  console.log("address:", buyer.address);
-  console.log("publicKey:", buyer.publicKey);
-  // NEVER log the seed — the buyer is a throwaway faucet wallet, but still.
+  // ── 1. Load or create buyer wallet ─────────────────────────────────────────
+  let buyer: Wallet;
+  if (existsSync(BUYER_WALLET_FILE)) {
+    const saved = JSON.parse(readFileSync(BUYER_WALLET_FILE, "utf8")) as { address: string; seed: string };
+    buyer = Wallet.fromSeed(saved.seed);
+    console.log("\n=== REUSING SAVED BUYER WALLET ===");
+    console.log("address:", buyer.address);
+  } else {
+    buyer = Wallet.generate();
+    writeFileSync(BUYER_WALLET_FILE, JSON.stringify({ address: buyer.address, seed: buyer.seed }, null, 2));
+    console.log("\n=== BUYER WALLET (SAVED TO .buyer-wallet.json) ===");
+    console.log("address:", buyer.address);
+    console.log("publicKey:", buyer.publicKey);
+    console.log("[info] Wallet saved to .buyer-wallet.json — reuses on next run");
 
-  // ── 2. Fund via faucet ───────────────────────────────────────────────────────
-  await fundViaFaucet(buyer.address);
+    // ── 2. Fund via faucet (only for new wallets) ─────────────────────────
+    await fundViaFaucet(buyer.address);
+  }
 
   // ── 3. Set USDC trustline ────────────────────────────────────────────────────
   const trustline: Transaction = {
@@ -84,6 +95,22 @@ async function main() {
   const signedTrust = buyer.sign(autofillTrust);
   await client.submitAndWait(signedTrust.tx_blob);
   console.log("[trustline] USDC trustline set");
+
+  // ── 3b. Confirm USDC balance ───────────────────────────────────────────────
+  const balRes = await client.request({
+    command: "account_lines",
+    account: buyer.address,
+  });
+  const usdcLine = (balRes.result.lines as Array<{ currency: string; account: string; balance: string }>)
+    .find((l) => l.currency === USDC_CURRENCY && l.account === USDC_ISSUER);
+  const usdcBalance = usdcLine ? parseFloat(usdcLine.balance) : 0;
+  console.log("[balance] Buyer USDC balance:", usdcBalance);
+  if (usdcBalance < amountUsdcMicros / 1_000_000) {
+    console.error(`\n[ERROR] Buyer has ${usdcBalance} USDC but needs ${amountUsdcMicros / 1_000_000} USDC for this test.`);
+    console.error(`[ACTION] Send testnet USDC to ${buyer.address} and re-run.`);
+    await client.disconnect();
+    process.exit(1);
+  }
 
   // ── 4. Build the canonical Payment tx ──────────────────────────────────────
   // Generate a fresh invoice ID for each run so round-trip tests don't

@@ -43,11 +43,16 @@ async function fundViaFaucet(address: string): Promise<void> {
   await new Promise((r) => setTimeout(r, 3_000));
 }
 
+const FACILITATOR_URL = process.env.NEXT_PUBLIC_FACILITATOR_URL ?? "https://x402gal.xyz/api/x402/facilitate";
+
 async function main() {
-  const treasuryAddress = process.argv[2];
-  const amountUsdcMicros = parseInt(process.argv[3] ?? "1000000", 10);
+  const roundtrip = process.argv.includes("--roundtrip");
+  const args = process.argv.filter((a) => !a.startsWith("--"));
+  const treasuryAddress = args[2];
+  const amountUsdcMicros = parseInt(args[3] ?? "1000000", 10);
   if (!treasuryAddress?.startsWith("r")) {
-    console.error("Usage: npx tsx scripts/generate-vectors.ts <TREASURY_XRPL_ADDRESS> [amountUsdcMicros]");
+    console.error("Usage: npx tsx scripts/generate-vectors.ts [--roundtrip] <TREASURY_XRPL_ADDRESS> [amountUsdcMicros]");
+    console.error("  --roundtrip   POST the success vector to the live facilitator and print the response");
     process.exit(1);
   }
 
@@ -151,6 +156,63 @@ async function main() {
       invoiceId,
     },
   }, null, 2));
+
+  // ── 5b. Round-trip self-test (optional) ────────────────────────────────────
+  if (roundtrip) {
+    console.log("\n=== ROUND-TRIP: POSTING TO LIVE FACILITATOR ===");
+    const body = {
+      requirement: {
+        x402Version: 1,
+        scheme: "exact",
+        network: "xrpl",
+        asset: "USDC",
+        maxAmountRequired: String(amountUsdcMicros),
+        resource: "/api/ai/chat",
+        description: "402GAL water-offset for chat inference",
+        mimeType: "application/json",
+        payTo: treasuryAddress,
+        requiredDeadlineSeconds: 60,
+        invoiceId,
+      },
+      payload: {
+        x402Version: 1,
+        scheme: "exact",
+        network: "xrpl",
+        payload: {
+          signature: "dummy-signature-for-auth-fields",
+          authorization: {
+            from: buyer.address,
+            to: treasuryAddress,
+            value: String(amountUsdcMicros),
+            validAfter: "0",
+            validBefore: String(Math.floor(Date.now() / 1000) + 300),
+            nonce: "test-nonce",
+          },
+        },
+        xrplSignedTx: signed.tx_blob,
+        invoiceId,
+      },
+    };
+    try {
+      const res = await fetch(FACILITATOR_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const result = await res.json();
+      console.log("facilitator status:", res.status);
+      console.log("facilitator response:", JSON.stringify(result, null, 2));
+      if (res.ok && result.success && result.paymentTxHash) {
+        console.log("[roundtrip] SUCCESS — paymentTxHash:", result.paymentTxHash);
+      } else if (!res.ok) {
+        console.error("[roundtrip] FAILED — facilitator rejected:", result.invalidReason ?? result.errorReason ?? JSON.stringify(result));
+      } else {
+        console.error("[roundtrip] FAILED — unexpected response shape");
+      }
+    } catch (err) {
+      console.error("[roundtrip] ERROR:", err instanceof Error ? err.message : String(err));
+    }
+  }
 
   // ── 6. Failure vectors ─────────────────────────────────────────────────────
   console.log("\n=== FAILURE CASE 1: AMOUNT MISMATCH ===");

@@ -150,14 +150,30 @@ function getRedis(): ReturnType<typeof Redis.fromEnv> | null {
 
 const seenInvoices = new Set<string>();
 
+/** Convert a USDC decimal string (e.g. "1.000001") to micro-USDC as BigInt,
+ *  without any floating-point arithmetic. Rejects over-precision (>6 decimals). */
+function usdcDecimalToMicros(v: string): bigint {
+  const [whole, frac = ""] = v.split(".");
+  if (frac.length > 6) throw new Error("AMOUNT_TOO_PRECISE");
+  const sign = whole.startsWith("-") ? -1n : 1n;
+  const absWhole = whole.replace(/^-/, "");
+  return sign * (BigInt(absWhole) * 1_000_000n + BigInt(frac.padEnd(6, "0")));
+}
+
 async function isReplay(invoiceId: string): Promise<boolean> {
   const redis = getRedis();
   if (redis) {
-    const key = `${REPLAY_KEY_PREFIX}${invoiceId}`;
-    const exists = await redis.get(key);
-    if (exists !== null) return true;
-    await redis.setex(key, REPLAY_TTL_S, "1");
-    return false;
+    try {
+      const key = `${REPLAY_KEY_PREFIX}${invoiceId}`;
+      const exists = await redis.get(key);
+      if (exists !== null) return true;
+      await redis.setex(key, REPLAY_TTL_S, "1");
+      return false;
+    } catch {
+      // Fail-closed: if Redis is unreachable we cannot confirm uniqueness,
+      // so we reject the payment to prevent replay under sustained traffic.
+      return true;
+    }
   }
   // Fallback: in-memory only. Does NOT survive across serverless invocations.
   if (seenInvoices.has(invoiceId)) return true;
@@ -222,7 +238,12 @@ export async function xrplVerify(
       return { isValid: false, invalidReason: `AMOUNT_MISMATCH: issuer ${amt.issuer}, expected ${USDC_ISSUER_XRPL}` };
     }
     const requiredMicro = BigInt(requirement.maxAmountRequired ?? "0");
-    const actualMicro = BigInt(Math.round(parseFloat(amt.value as string) * 1_000_000));
+    let actualMicro: bigint;
+    try {
+      actualMicro = usdcDecimalToMicros(String(amt.value));
+    } catch {
+      return { isValid: false, invalidReason: `AMOUNT_MISMATCH: value ${amt.value} has >6 decimal places or is malformed` };
+    }
     if (actualMicro !== requiredMicro) {
       return { isValid: false, invalidReason: `AMOUNT_MISMATCH: value ${amt.value} (${actualMicro} µUSDC), required ${requiredMicro} µUSDC` };
     }

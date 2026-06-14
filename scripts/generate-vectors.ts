@@ -20,6 +20,7 @@
 
 import { Client, Wallet, Transaction } from "xrpl";
 import { existsSync, readFileSync, writeFileSync } from "fs";
+import { resolve } from "path";
 
 const XRPL_TESTNET = "wss://s.altnet.rippletest.net:51233";
 const BUYER_WALLET_FILE = ".buyer-wallet.json";
@@ -49,17 +50,46 @@ const FACILITATOR_URL = process.env.NEXT_PUBLIC_FACILITATOR_URL ?? "https://x402
 
 async function main() {
   const roundtrip = process.argv.includes("--roundtrip");
-  const args = process.argv.filter((a) => !a.startsWith("--"));
+  const outputIdx = process.argv.indexOf("--output");
+  const outputPath = outputIdx >= 0 ? process.argv[outputIdx + 1] : undefined;
+  const args = process.argv.filter((a) => !a.startsWith("--") && process.argv[process.argv.indexOf(a) - 1] !== "--output");
   const treasuryAddress = args[2];
   const amountUsdcMicros = parseInt(args[3] ?? "1000000", 10);
   if (!treasuryAddress?.startsWith("r")) {
-    console.error("Usage: npx tsx scripts/generate-vectors.ts [--roundtrip] <TREASURY_XRPL_ADDRESS> [amountUsdcMicros]");
+    console.error("Usage: npx tsx scripts/generate-vectors.ts [--roundtrip] [--output <path>] <TREASURY_XRPL_ADDRESS> [amountUsdcMicros]");
     console.error("  --roundtrip   POST the success vector to the live facilitator and print the response");
+    console.error("  --output      Write structured vectors JSON to the given path");
     process.exit(1);
   }
 
   const client = new Client(XRPL_TESTNET);
   await client.connect();
+
+  // Data structure to collect all vectors for structured JSON output.
+  interface VectorSet {
+    _note: string;
+    _producedAt: string;
+    success?: {
+      description: string;
+      invoiceId: string;
+      unsignedPayment: unknown;
+      tx_blob: string;
+      tx_hash: string;
+      amountUsdcMicros: number;
+      usdcValue: string;
+      facilitateRequest: unknown;
+    };
+    failureVectors?: Array<{
+      description: string;
+      expectedError: string;
+      tx_blob: string;
+      requirement: { maxAmountRequired: string };
+    }>;
+  }
+  const vectors: VectorSet = {
+    _note: "These vectors were produced on XRPL Testnet. The example issued currency is XRPL Testnet USDC.",
+    _producedAt: new Date().toISOString(),
+  };
 
   // ── 1. Load or create buyer wallet ─────────────────────────────────────────
   let buyer: Wallet;
@@ -137,6 +167,15 @@ async function main() {
   const { decode } = await import("xrpl");
   const decoded = decode(signed.tx_blob);
 
+  // ── Assert InvoiceID consistency across all layers ─────────────────────────
+  const onLedgerInvoiceId = (decoded as Record<string, unknown>).InvoiceID as string;
+  if (onLedgerInvoiceId !== invoiceId) {
+    console.error("[CRITICAL] InvoiceID mismatch:");
+    console.error("  generated invoiceId:", invoiceId);
+    console.error("  on-ledger InvoiceID:", onLedgerInvoiceId);
+    process.exit(1);
+  }
+
   console.log("\n=== UNSIGNED PAYMENT JSON (before autofill) ===");
   console.log(JSON.stringify(unsignedPayment, null, 2));
 
@@ -150,41 +189,63 @@ async function main() {
   console.log("amountUsdcMicros:", amountUsdcMicros);
   console.log("usdcValue (XRPL decimal):", usdcValue);
 
-  // ── 5. Expected success response (what the facilitate endpoint returns) ─────
-  console.log("\n=== EXPECTED FACILITATE REQUEST ===");
-  console.log(JSON.stringify({
-    requirement: {
-      x402Version: 1,
-      scheme: "exact",
-      network: "xrpl",
-      asset: "USDC",
-      maxAmountRequired: String(amountUsdcMicros),
-      resource: "/api/ai/chat",
-      description: "402GAL water-offset for chat inference",
-      mimeType: "application/json",
-      payTo: treasuryAddress,
-      requiredDeadlineSeconds: 60,
-      invoiceId,
-    },
-    payload: {
-      x402Version: 1,
-      scheme: "exact",
-      network: "xrpl",
-      payload: {
-        signature: "dummy-signature-for-auth-fields",
-        authorization: {
-          from: buyer.address,
-          to: treasuryAddress,
-          value: String(amountUsdcMicros),
-          validAfter: "0",
-          validBefore: String(Math.floor(Date.now() / 1000) + 300),
-          nonce: "test-nonce",
-        },
+  // Build the structured success vector.
+  const validBefore = String(Math.floor(Date.now() / 1000) + 300);
+  vectors.success = {
+    description: "A valid Payment of 1.0 USDC to the example treasury, bound to a fresh invoiceId.",
+    invoiceId,
+    unsignedPayment: {
+      TransactionType: "Payment",
+      Account: buyer.address,
+      Destination: treasuryAddress,
+      Amount: {
+        currency: USDC_CURRENCY,
+        issuer: USDC_ISSUER,
+        value: usdcValue,
       },
-      xrplSignedTx: signed.tx_blob,
-      invoiceId,
+      InvoiceID: invoiceId,
     },
-  }, null, 2));
+    tx_blob: signed.tx_blob,
+    tx_hash: signed.hash,
+    amountUsdcMicros,
+    usdcValue,
+    facilitateRequest: {
+      requirement: {
+        x402Version: 1,
+        scheme: "exact",
+        network: "xrpl",
+        asset: "USDC",
+        maxAmountRequired: String(amountUsdcMicros),
+        resource: "/api/example-resource",
+        description: "Example resource access",
+        mimeType: "application/json",
+        payTo: treasuryAddress,
+        requiredDeadlineSeconds: 60,
+        invoiceId,
+      },
+      payload: {
+        x402Version: 1,
+        scheme: "exact",
+        network: "xrpl",
+        payload: {
+          signature: "dummy-signature-for-auth-fields",
+          authorization: {
+            from: buyer.address,
+            to: treasuryAddress,
+            value: String(amountUsdcMicros),
+            validAfter: "0",
+            validBefore,
+            nonce: "test-nonce",
+          },
+        },
+        xrplSignedTx: signed.tx_blob,
+        invoiceId,
+      },
+    },
+  };
+
+  console.log("\n=== EXPECTED FACILITATE REQUEST ===");
+  console.log(JSON.stringify(vectors.success.facilitateRequest, null, 2));
 
   // ── 5b. Round-trip self-test (optional) ────────────────────────────────────
   if (roundtrip) {
@@ -282,7 +343,28 @@ async function main() {
   console.log("expired_tx_blob:", expiredSigned.tx_blob);
   console.log("expectedError: EXPIRED_LEDGER");
 
+  vectors.failureVectors = [
+    {
+      description: "AMOUNT_MISMATCH: the Payment Amount.value is one micro-USDC higher than required.",
+      expectedError: "AMOUNT_MISMATCH",
+      tx_blob: badAmountSigned.tx_blob,
+      requirement: { maxAmountRequired: String(amountUsdcMicros) },
+    },
+    {
+      description: "EXPIRED_LEDGER: LastLedgerSequence is set to 1, which is always expired on Testnet.",
+      expectedError: "EXPIRED_LEDGER",
+      tx_blob: expiredSigned.tx_blob,
+      requirement: { maxAmountRequired: String(amountUsdcMicros) },
+    },
+  ];
+
   await client.disconnect();
+
+  if (outputPath) {
+    writeFileSync(resolve(outputPath), JSON.stringify(vectors, null, 2));
+    console.log(`\n[output] Vectors written to ${resolve(outputPath)}`);
+  }
+
   console.log("\n=== DONE ===");
   console.log("Hand the vectors above to 0x. The buyer wallet seed is disposable.");
 }

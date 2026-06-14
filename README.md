@@ -62,13 +62,13 @@ sequenceDiagram
     end
 
     rect rgb(245, 245, 230)
-    Note over GAL,XRPL: Flow B — XRPL retirement (live on Testnet,<br/>triggered separately today)
-    GAL->>XRPL: mintHydro() + retire()<br/>issuer→treasury→issuer (burn)
-    XRPL-->>GAL: ✅ mint tx + retirement tx
+    Note over GAL,XRPL: Flow B — XRPL settlement (live on Testnet,<br/>real AMM swap + retire)
+    GAL->>XRPL: swap (AMM: treasury USDC→HYD) + retire<br/>treasury→issuer (burn)
+    XRPL-->>GAL: ✅ swap tx + retirement tx
     end
 ```
 
-> **On-ledger note:** The XRPL flow mints HYD from the issuer to the treasury, then returns it to the issuer (burned). There is no USDC↔HYD swap on-chain today; the treasury float is managed off-ledger. A DEX-based swap is on the mainnet roadmap.
+> **On-ledger note:** The XRPL flow performs a **real on-chain AMM swap** — the treasury buys HYD from a live HYDRO/USDC pool on the XRPL **testnet** AMM using its USDC reserve, then returns the HYD to the issuer (burned). On testnet the swapped USDC is the treasury's own pre-funded reserve (a mechanism demo), **not** the agent's Fuji payment bridged across chains — that bridge is the mainnet roadmap. A hard invariant guarantees cumulative HYD deposited into the pool can never exceed the MRV-verified-and-minted supply (`lib/hydroSupply.ts`).
 
 ### Intended unified architecture (planned)
 
@@ -147,9 +147,9 @@ Response 200:
 {
   usdcPulled: true,
   usdcTxHash: "0xb881...",          // Avalanche Fuji
-  txHash: "5484EC...",              // XRPL mint
-  retirementTxHash: "4E4795...",    // XRPL water credit
-  simulated: false                    // false = on-chain tx submitted; does not imply a DEX swap occurred
+  txHash: "5484EC...",              // XRPL AMM swap (treasury USDC → HYDRO)
+  retirementTxHash: "4E4795...",    // XRPL water credit (HYDRO retired)
+  simulated: false                    // false = real on-chain AMM swap + retire submitted on testnet
 }
 ```
 
@@ -205,7 +205,9 @@ Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc
 | Full ERC-3009 agent-side signing SDK | 🔄 |
 | Solana SPL token verification | 📋 |
 | XRPL signature verification (ripple-keypairs) | 📋 |
-| XRPL DEX swap replacing in-memory AMM | 🚀 Mainnet |
+| Real XRPL **testnet** AMM swap (HYDRO/USDC pool) | ✅ |
+| Verified-supply invariant on pool deposits | ✅ |
+| Mainnet AMM swap with bridged USDC | 🚀 Mainnet |
 | Decentralized methodology oracle / DAO | 🚀 Mainnet |
 
 ---

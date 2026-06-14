@@ -37,6 +37,7 @@ import { pullUsdcToTreasury, isEvmTreasuryConfigured } from "@/lib/evmTreasury";
 import { addToBatch, drainBatch } from "@/lib/ledger";
 import { settleBatch } from "@/lib/settlement";
 import { beginSettlement, recordPull, markRetired, markFailed, type Obligation } from "@/lib/obligations";
+import { isPoolDepletionError, alertPoolDepleted } from "@/lib/xrplAmm";
 
 export const runtime = "nodejs";
 
@@ -157,7 +158,9 @@ export async function POST(req: NextRequest) {
   if (!settleResult.success) {
     // The desync case: USDC pulled (recorded above) but XRPL retire failed. The
     // obligation is now FAILED with fujiTxHash set — recorded and resumable, never dropped.
-    if (obligation) await markFailed(obligation, settleResult.errorReason ?? "XRPL settle failed");
+    const reason = settleResult.errorReason ?? "XRPL settle failed";
+    if (isPoolDepletionError(reason)) alertPoolDepleted("facilitate", reason);
+    if (obligation) await markFailed(obligation, reason);
     return Response.json(
       {
         isValid: true,

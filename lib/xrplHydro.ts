@@ -1,19 +1,22 @@
-// XRPL HydroCoin operations — real two-wallet on-chain flow.
+// XRPL HydroCoin operations — real two-wallet on-chain flow with a REAL AMM swap.
 //
 // Two-wallet architecture:
-//   ISSUER  (cold) = rBKe5... — issues HYD IOUs, signs Hop 1
-//   TREASURY (hot) = rWVeb... — holds trust line for HYD, signs Hop 2
+//   ISSUER  (cold) = rBKe5... — issues HYD IOUs, seeds the pool, receives burns
+//   TREASURY (hot) = rWVeb... — holds HYD + USDC trust lines, swaps + retires
 //
-// Hop 1 — SWAP  : Issuer sends HYD to Treasury  (represents USDC→HYDRO swap)
+// Hop 1 — SWAP  : Treasury BUYS HYD from the XRPL AMM with its USDC reserve
+//                 (real on-chain swap routed through the HYDRO/USDC pool).
 // Hop 2 — RETIRE: Treasury sends HYD back to Issuer (IOU returning to issuer
 //                 is destroyed on XRPL — the canonical burn, no black-hole needed)
 //
 // Bootstrap (one-time, called automatically on first settlement):
 //   - Treasury sets TrustSet for HYD from Issuer (limit 1B)
+//   - Treasury sets TrustSet for USDC from the XRPL USDC issuer
 //   - Issuer sets AccountSet asfDefaultRipple=false (best practice)
 
 import { Client, Wallet, type Payment, type TrustSet, type AccountSet } from "xrpl";
 import { getClient } from "./xrplClient";
+import { swapUsdcForHydro, ensureTreasuryUsdcTrustline } from "./xrplAmm";
 
 export interface HydroSwapResult {
   swapHash: string;
@@ -80,33 +83,9 @@ let bootstrapped = false;
 async function ensureBootstrapped(client: Client, issuer: Wallet, treasury: Wallet): Promise<void> {
   if (bootstrapped) return;
   await bootstrapTrustLine(client, treasury);
+  await ensureTreasuryUsdcTrustline(client, treasury);
   await disableRippling(client, issuer);
   bootstrapped = true;
-}
-
-// Hop 1 — SWAP: Issuer → Treasury  (creates HYD IOU, represents USDC→HYDRO swap)
-async function issueHydroToTreasury(
-  client: Client,
-  issuer: Wallet,
-  treasury: Wallet,
-  hydroDrops: number,
-): Promise<string> {
-  const tx: Payment = {
-    TransactionType: "Payment",
-    Account: issuer.address,
-    Destination: treasury.address,
-    Amount: {
-      currency: currency(),
-      issuer: issuerAddress(),
-      value: hydroDropsToIou(hydroDrops),
-    },
-  };
-  const r = await client.submitAndWait(tx, { wallet: issuer });
-  const res = txResult(r);
-  if (res && res !== "tesSUCCESS") {
-    throw new Error(`Swap Payment failed: ${res}`);
-  }
-  return txHash(r);
 }
 
 // Hop 2 — RETIRE: Treasury → Issuer  (IOU returns to issuer = destroyed = water credit)
@@ -151,13 +130,20 @@ export async function swapAndRetireHydro(
     throw new Error("XRPL_FORCE_FAIL: injected XRPL settlement failure (testing only)");
   }
 
+  // usdcMicros is the agent's PAID amount (on Fuji, or XRPL-native). The USDC
+  // actually spent in the swap below is the treasury's own XRPL-USDC reserve,
+  // priced by the pool — a real on-chain mechanism demo, not bridged funds.
+  void usdcMicros;
+
   const client = await getClient();
   const issuer = Wallet.fromSeed(process.env.HYDROCOIN_ISSUER_SEED!);
   const treasury = Wallet.fromSeed(process.env.XRPL_TREASURY_SEED!);
 
   await ensureBootstrapped(client, issuer, treasury);
 
-  const swapHash = await issueHydroToTreasury(client, issuer, treasury, hydroDrops);
+  // Hop 1 — REAL AMM swap: treasury buys HYD from the HYDRO/USDC pool.
+  const { swapHash } = await swapUsdcForHydro(client, treasury, hydroDrops);
+  // Hop 2 — retire the acquired HYD back to the issuer (burn = water credit).
   const retireHash = await retireHydroToIssuer(client, issuer, treasury, hydroDrops);
 
   return { swapHash, retireHash, hydroAmount: hydroDropsToIou(hydroDrops) };

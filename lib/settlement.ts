@@ -1,14 +1,18 @@
 // Settlement pipeline — direct x402 → XRPL retirement.
 //
 // Micro-payments accumulate in the pending batch. On flush the treasury
-// swaps the aggregated USDC for HydroCoin (HYDRO) on the XRPL DEX and
-// immediately retires that HYDRO as a verifiable water-restoration credit.
+// swaps its USDC reserve for HydroCoin (HYDRO) through a REAL XRPL testnet AMM
+// and immediately retires that HYDRO as a verifiable water-restoration credit.
 // There is no intermediate settlement layer: one batch → two XRPL hops.
 //
 // When XRPL_TREASURY_SEED + HYDROCOIN_ISSUER + HYDROCOIN_CURRENCY are set in
 // .env.local the pipeline submits real signed transactions to the configured
 // XRPL node and returns the actual on-chain tx hashes. Without those vars it
 // falls back to the in-memory simulation so the app works fully offline.
+//
+// NOTE: swapUsdcForHydro() below is the in-memory constant-product MODEL used
+// only to keep the dashboard price/market-cap charts moving. The REAL swap is
+// the on-chain AMM Payment inside swapAndRetireHydro() (lib/xrplAmm.ts).
 
 import { BatchEntry, Chain, Settlement, XrplHop } from "./types";
 import { TREASURY_ADDRESS } from "./constants";
@@ -40,8 +44,8 @@ export interface SettleResult {
 }
 
 // Settle a batch on XRPL in two hops:
-//   1) Swap accumulated USDC → HYDRO on the XRPL DEX (OfferCreate).
-//   2) Retire the HYDRO against a verifiable water-restoration credit (Payment to black-hole).
+//   1) Swap treasury USDC reserve → HYDRO via the real XRPL AMM pool.
+//   2) Retire the HYDRO against a verifiable water credit (treasury → issuer burn).
 //
 // Falls back to in-memory simulation when env vars are not set.
 export async function routeBatch(entries: BatchEntry[]): Promise<SettleResult> {
@@ -51,7 +55,8 @@ export async function routeBatch(entries: BatchEntry[]): Promise<SettleResult> {
   const totalOffsetDrops = entries.reduce((s, e) => s + e.offsetDrops, 0);
   const sources = Array.from(new Set(entries.map((e) => e.sourceChain))) as Chain[];
 
-  // Always update the local AMM model (keeps dashboard price/charts accurate).
+  // Update the local constant-product MODEL only (dashboard price/charts).
+  // The real swap happens on-chain inside swapAndRetireHydro().
   swapUsdcForHydro(totalUsdc);
 
   if (isXrplConfigured()) {

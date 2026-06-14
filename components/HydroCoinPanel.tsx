@@ -55,10 +55,10 @@ export function HydroCoinPanel({
                 HydroCoin
               </span>
               <span
-                title="HydroCoin is not yet deployed on-chain. AMM, balances, and HYDRO retirements shown here are an in-memory simulation of the constant-product economics."
-                className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-amber-200"
+                title="Settlement runs through a REAL XRPL testnet AMM: the treasury swaps its USDC reserve for HYDRO and retires it on-chain. The price, market cap, and gallon figures shown here are an illustrative constant-product model, not live pool quotes. Testnet only."
+                className="inline-flex items-center gap-1 rounded-full border border-hydro-400/40 bg-hydro-500/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-hydro-200"
               >
-                ◆ Simulated
+                ◆ Testnet AMM
               </span>
             </div>
             <div className="mt-1 font-mono text-xs text-hydro-300">

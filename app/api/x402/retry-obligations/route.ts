@@ -33,6 +33,7 @@ import {
 } from "@/lib/obligations";
 import { swapAndRetireHydro } from "@/lib/xrplHydro";
 import { isXrplConfigured } from "@/lib/xrplClient";
+import { isPoolDepletionError, alertPoolDepleted } from "@/lib/xrplAmm";
 
 export const runtime = "nodejs";
 // Never cache a worker run.
@@ -104,6 +105,9 @@ export async function GET(req: NextRequest) {
       results.push({ nonce: o.nonce, outcome: "retired" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      // Pool depletion is an operational condition (needs a refill), not a transient
+      // fault — surface it loudly so it is fixed before the budget dead-letters it.
+      if (isPoolDepletionError(err)) alertPoolDepleted("retry-worker", msg);
       // o.attempts was incremented by the claim; dead-letter if this was the last shot.
       if (o.attempts >= MAX_ATTEMPTS) {
         await markDead(o, `retry failed (final): ${msg}`);

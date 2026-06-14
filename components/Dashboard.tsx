@@ -1178,14 +1178,16 @@ function Footer() {
         Footprint v2 · Green Grid WUE · LBNL 2024 · Microsoft / Meta / AWS
         disclosures · Epoch AI · methodology pinned per 402 response
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-amber-300/80">
-        <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 font-mono uppercase tracking-[0.18em]">
-          ◆ Simulated
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-hydro-300/80">
+        <span className="inline-flex items-center gap-1 rounded-full border border-hydro-400/30 bg-hydro-500/10 px-2 py-0.5 font-mono uppercase tracking-[0.18em]">
+          ◆ Testnet AMM
         </span>
         <span>
-          HydroCoin is not yet deployed on-chain. AMM, balances, and HYDRO
-          retirements are an in-memory simulation of the XRPL DEX settlement.
-          The x402 contract, footprint model, and settlement state machine run for real.
+          HydroCoin swap + retirement run on a REAL XRPL testnet AMM (treasury
+          USDC reserve → HYDRO → on-chain retire). On testnet the swapped USDC is
+          treasury reserve — a mechanism demo, not the agent&apos;s payment bridged
+          across chains. The price/market-cap figures above are an illustrative
+          constant-product model.
         </span>
       </div>
     </footer>

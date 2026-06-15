@@ -42,7 +42,18 @@ async function main() {
       console.log(`  Trading fee:   ${pool.tradingFee / 1000}%`);
     }
     console.log(`\nTreasury HYD  balance: ${await lineBalance(client, treasury.address, hyd.currency, hyd.issuer)}`);
-    console.log(`Treasury USDC balance: ${await lineBalance(client, treasury.address, usdc.currency, usdc.issuer)}`);
+    console.log(`Treasury USDC balance (configured issuer ${usdc.issuer}): ${await lineBalance(client, treasury.address, usdc.currency, usdc.issuer)}`);
+
+    console.log("\nAll treasury trust lines (currency | balance | issuer):");
+    const all = await client.request({ command: "account_lines", account: treasury.address });
+    const lines = all.result.lines as Array<{ currency: string; balance: string; account: string }>;
+    if (lines.length === 0) console.log("  (none)");
+    for (const l of lines) {
+      const human = l.currency.length === 40
+        ? Buffer.from(l.currency, "hex").toString("utf8").replace(/\0+$/, "")
+        : l.currency;
+      console.log(`  ${l.currency}${human && human !== l.currency ? ` ("${human}")` : ""} | ${l.balance} | ${l.account}`);
+    }
   } finally {
     await client.disconnect();
   }

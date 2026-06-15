@@ -142,9 +142,9 @@ export async function swapAndRetireHydro(
   await ensureBootstrapped(client, issuer, treasury);
 
   // Hop 1 — REAL AMM swap: treasury buys HYD from the HYDRO/USDC pool.
-  const { swapHash } = await swapUsdcForHydro(client, treasury, hydroDrops);
-  // Hop 2 — retire the acquired HYD back to the issuer (burn = water credit).
-  const retireHash = await retireHydroToIssuer(client, issuer, treasury, hydroDrops);
+  const { swapHash, hydroAcquiredDrops } = await swapUsdcForHydro(client, treasury, hydroDrops);
+  // Hop 2 — retire EXACTLY what the swap delivered back to the issuer (burn = water credit).
+  const retireHash = await retireHydroToIssuer(client, issuer, treasury, hydroAcquiredDrops);
 
-  return { swapHash, retireHash, hydroAmount: hydroDropsToIou(hydroDrops) };
+  return { swapHash, retireHash, hydroAmount: hydroDropsToIou(hydroAcquiredDrops) };
 }

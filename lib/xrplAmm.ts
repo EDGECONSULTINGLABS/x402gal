@@ -17,7 +17,7 @@
 // MAINNET GATE: AMM writes refuse to run against a non-testnet XRPL endpoint
 // unless XRPL_AMM_ALLOW_MAINNET === "true" is explicitly set. Fail-closed.
 
-import { Client, Wallet, type Payment, type TrustSet, type AMMCreate, type AMMDeposit } from "xrpl";
+import { Client, Wallet, type OfferCreate, type TrustSet, type AMMCreate, type AMMDeposit } from "xrpl";
 import { reservePoolDeposit, releasePoolDeposit } from "./hydroSupply";
 
 // ── Errors ──────────────────────────────────────────────────────────────────
@@ -243,16 +243,28 @@ export async function refillPool(
   }
 }
 
-// ── Swap: USDC reserve → exact HYDRO out ──────────────────────────────────────
-// Computes the USDC input for an exact HYDRO output using constant-product math
-// incl. the pool trading fee, then submits an exact-output Payment routed through
-// the AMM. Fails closed (PoolInsufficientError) if the pool cannot deliver.
-const SLIPPAGE_BUFFER = 1.05;
+// ── Swap: buy HYDRO from the AMM with USDC ────────────────────────────────────
+// XRPL AMMs auto-participate in order-book crossing, so an Immediate-or-Cancel
+// OfferCreate (buy HYD, pay USDC) is the reliable way to swap against the pool —
+// a self-payment Payment will NOT be routed through the AMM by the path-finder.
+// Returns the ACTUAL HYDRO delivered (from the balance delta) so the caller
+// retires exactly what was acquired. Fails closed if the pool delivers nothing.
+const SLIPPAGE_BUFFER = 1.5; // aggressive LIMIT price; the AMM fills at its own (better) price
+const tfImmediateOrCancel = 0x00040000;
 
 export interface SwapResult {
   swapHash: string;
+  hydroAcquiredDrops: number;
   hydroAcquired: string;
   usdcSpentMax: string;
+}
+
+async function hydBalance(client: Client, account: string): Promise<number> {
+  const lines = await client.request({ command: "account_lines", account, peer: hydIssuer() });
+  const l = (lines.result.lines as Array<{ currency: string; balance: string }>).find(
+    (x) => x.currency === hydCurrency(),
+  );
+  return l ? Number(l.balance) : 0;
 }
 
 export async function swapUsdcForHydro(
@@ -268,21 +280,25 @@ export async function swapUsdcForHydro(
   const dy = hydroDrops / 1_000_000; // HYDRO units to receive
   if (dy <= 0) throw new Error("swapUsdcForHydro: non-positive HYDRO amount");
 
-  // Constant-product exact-output: to remove dy from HYD reserve y given USDC
-  // reserve x, gross USDC in = x*y/(y-dy) - x; fee inflates the input.
   const { hydValue: y, usdcValue: x, tradingFee } = pool;
   if (dy >= y) throw new PoolInsufficientError(`pool holds ${y} HYDRO, need ${dy}`);
+
+  // Constant-product estimate of USDC cost; used only to size an aggressive LIMIT.
   const fee = tradingFee / 100_000;
   const grossIn = (x * y) / (y - dy) - x;
   const usdcIn = grossIn / (1 - fee);
-  const sendMax = (usdcIn * SLIPPAGE_BUFFER).toFixed(6);
+  const usdcMax = (usdcIn * SLIPPAGE_BUFFER).toFixed(6);
 
-  const tx: Payment = {
-    TransactionType: "Payment",
+  const before = await hydBalance(client, treasury.address);
+
+  // Buy `dy` HYD, willing to pay up to usdcMax USDC. IoC fills immediately against
+  // the AMM at its price (≤ limit) and cancels any unfilled remainder.
+  const tx: OfferCreate = {
+    TransactionType: "OfferCreate",
     Account: treasury.address,
-    Destination: treasury.address,
-    Amount: { currency: hydCurrency(), issuer: hydIssuer(), value: hydroDropsToIou(hydroDrops) },
-    SendMax: { currency: usdcCurrency(), issuer: usdcIssuer(), value: sendMax },
+    TakerGets: { currency: usdcCurrency(), issuer: usdcIssuer(), value: usdcMax },
+    TakerPays: { currency: hydCurrency(), issuer: hydIssuer(), value: hydroDropsToIou(hydroDrops) },
+    Flags: tfImmediateOrCancel,
   };
 
   let r: Awaited<ReturnType<Client["submitAndWait"]>>;
@@ -292,16 +308,28 @@ export async function swapUsdcForHydro(
     throw new Error(`AMM swap submit failed: ${(e as Error).message}`);
   }
   const res = txResult(r);
-  if (res === "tesSUCCESS") {
-    return { swapHash: txHash(r), hydroAcquired: hydroDropsToIou(hydroDrops), usdcSpentMax: sendMax };
+  if (res !== "tesSUCCESS") {
+    // tecKILLED / tecUNFUNDED_OFFER → could not fill against the pool: treat as depletion.
+    if (res === "tecKILLED" || res === "tecUNFUNDED_OFFER" || res === "tecPATH_DRY") {
+      throw new PoolInsufficientError(`AMM swap ${res}: pool/reserve cannot deliver ${dy} HYDRO`);
+    }
+    throw new Error(`AMM swap failed: ${res}`);
   }
-  // tecPATH_DRY / tecPATH_PARTIAL / tecUNFUNDED_PAYMENT → the pool (or reserve)
-  // can't satisfy this swap. Surface as pool-depletion so the obligation layer
-  // captures it for retry/refill alerting rather than treating it as a generic fault.
-  if (res === "tecPATH_DRY" || res === "tecPATH_PARTIAL" || res === "tecUNFUNDED_PAYMENT") {
-    throw new PoolInsufficientError(`AMM swap ${res}: pool/reserve cannot deliver ${dy} HYDRO`);
+
+  // An IoC offer returns tesSUCCESS even if nothing filled — confirm via balance delta.
+  const after = await hydBalance(client, treasury.address);
+  const acquired = after - before;
+  const acquiredDrops = Math.round(acquired * 1_000_000);
+  if (acquiredDrops <= 0) {
+    throw new PoolInsufficientError("AMM swap delivered 0 HYDRO (pool depleted or reserve unfunded)");
   }
-  throw new Error(`AMM swap failed: ${res}`);
+
+  return {
+    swapHash: txHash(r),
+    hydroAcquiredDrops: acquiredDrops,
+    hydroAcquired: acquired.toFixed(6),
+    usdcSpentMax: usdcMax,
+  };
 }
 
 // ── Monitoring ────────────────────────────────────────────────────────────────

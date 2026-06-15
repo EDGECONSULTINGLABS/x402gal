@@ -16,7 +16,8 @@
  * XRPL_AMM_ALLOW_MAINNET=true.
  */
 
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: [".env.local", ".env"] });
 import { Client, Wallet, type Payment, type TrustSet } from "xrpl";
 import {
   seedPool,

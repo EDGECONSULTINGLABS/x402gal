@@ -14,6 +14,7 @@
     "test:amm:redis-down": "tsx scripts/test-amm-redis-down.ts",
     "test:level2": "tsx scripts/test-level2-faultinjection.ts",
     "amm:seed": "tsx scripts/setup-amm-pool.ts",
+    "amm:check": "tsx scripts/check-amm-pool.ts",
     "test:e2e": "playwright test",
     "hash:methodology": "tsx scripts/hash-methodology.ts",
     "pages:build": "npx @cloudflare/next-on-pages",

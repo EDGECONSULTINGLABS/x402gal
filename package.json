@@ -17,6 +17,7 @@
     "amm:check": "tsx scripts/check-amm-pool.ts",
     "amm:diagnose": "tsx scripts/diagnose-amm.ts",
     "swap:once": "tsx scripts/run-swap.ts",
+    "e2e:real": "tsx scripts/run-e2e.ts",
     "test:e2e": "playwright test",
     "hash:methodology": "tsx scripts/hash-methodology.ts",
     "pages:build": "npx @cloudflare/next-on-pages",

@@ -38,7 +38,7 @@ const steps: Step[] = [
   {
     id: "hydrocoin",
     title: "HydroCoin \u2014 The Water Credit",
-    description: "HydroCoin (HYDRO) is a token on the XRPL blockchain. 1 HYDRO = 1 verified gallon of water restored. When retired (burned), it proves real water restoration was funded. The price shown here tracks simulated market dynamics.",
+    description: "HydroCoin (HYDRO) is a token on the XRPL blockchain. 1 HYDRO = 1 verified gallon of water restored. When retired (burned), it proves real water restoration was funded. Settlement runs through a real XRPL testnet AMM; the price and cap figures shown are an illustrative model, not a live market.",
     icon: <Droplets className="text-hydro-300" size={24} />,
     targetSelector: "[data-guide='hydrocoin']",
     position: "bottom",

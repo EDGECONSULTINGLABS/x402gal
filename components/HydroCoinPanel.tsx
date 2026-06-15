@@ -78,11 +78,14 @@ export function HydroCoinPanel({
           <Tile label="Liters offset">
             <AnimatedNumber value={totalLitersOffset} decimals={2} suffix=" L" />
           </Tile>
-          <Tile label="Market cap">
+          <Tile
+            label="Notional cap (model)"
+            title="NOT a real market cap. This is a notional figure from an illustrative constant-product model (price × supply). The AMM is a self-seeded XRPL testnet pool, not a public market — there is no real-world value or liquidity behind this number."
+          >
             <AnimatedNumber
               value={marketCap / 1_000_000}
               decimals={2}
-              prefix="$"
+              prefix="~$"
               suffix="M"
             />
           </Tile>
@@ -120,13 +123,15 @@ function Tile({
   label,
   children,
   accent,
+  title,
 }: {
   label: string;
   children: React.ReactNode;
   accent?: boolean;
+  title?: string;
 }) {
   return (
-    <div className="rounded-lg border border-edge/80 bg-ink/40 p-3">
+    <div className="rounded-lg border border-edge/80 bg-ink/40 p-3" title={title}>
       <div className="text-[10px] uppercase tracking-wider text-slate-500">{label}</div>
       <div
         className={`mt-1 font-display text-xl font-semibold ${

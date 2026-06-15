@@ -282,11 +282,11 @@ export function PayAndOffsetPanel() {
             <ReceiptLink
               label={`Paid ${usdcLabel ?? ""} USDC on Avalanche Fuji`}
               hint="real testnet transfer"
-              href={receipt.explorerUsdc ?? (receipt.usdcTxHash ? `https://testnet.avascan.info/blockchain/c/tx/${receipt.usdcTxHash}` : null)}
+              href={receipt.explorerUsdc ?? (receipt.usdcTxHash ? `https://testnet.snowtrace.io/tx/${receipt.usdcTxHash}` : null)}
             />
             <ReceiptLink
-              label="Water credit minted on XRPL"
-              hint="mint"
+              label="USDC swapped for HYDRO on XRPL AMM"
+              hint="real testnet AMM swap"
               href={receipt.explorerSwap ?? (receipt.txHash ? `https://testnet.xrpscan.com/tx/${receipt.txHash}` : null)}
             />
             <ReceiptLink
@@ -298,13 +298,14 @@ export function PayAndOffsetPanel() {
           </div>
 
           <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
-            The USDC→HYDRO swap is simulated (pre-AMM); the mint and retirement are real on-chain.
-            Anyone can verify both legs on the explorers above — no trust required.
+            All three legs are real on-chain transactions: the USDC pull on Avalanche Fuji,
+            the USDC→HYDRO swap through the live XRPL testnet AMM, and the HYDRO retirement (burn).
+            Anyone can verify every leg on the explorers above — no trust required.
           </p>
 
           {/* Honesty label — travels with screenshots */}
           <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-amber-300/90">
-            ◆ Avalanche Fuji → XRPL · testnet · mint + retire (swap simulated) · no real-world value
+            ◆ Avalanche Fuji → XRPL · testnet · real AMM swap + retire · no real-world value
           </div>
         </div>
       )}

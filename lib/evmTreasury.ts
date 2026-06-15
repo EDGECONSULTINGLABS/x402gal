@@ -153,8 +153,8 @@ export async function pullUsdcToTreasury(
     await publicClient.waitForTransactionReceipt({ hash: txHash });
 
     const explorer = AVAX_NETWORK === "fuji"
-      ? `https://testnet.avascan.info/blockchain/c/tx/${txHash}`
-      : `https://avascan.info/blockchain/c/tx/${txHash}`;
+      ? `https://testnet.snowtrace.io/tx/${txHash}`
+      : `https://snowtrace.io/tx/${txHash}`;
 
     console.info(`[evmTreasury] USDC pulled to treasury: ${txHash}`);
 

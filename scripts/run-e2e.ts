@@ -98,7 +98,7 @@ async function main() {
 
   console.log("END-TO-END SUCCESS — real on-chain hashes:\n");
   console.log(`  1. Avalanche USDC pull: ${json.usdcTxHash}`);
-  console.log(`     https://testnet.avascan.info/blockchain/c/tx/${json.usdcTxHash}`);
+  console.log(`     https://testnet.snowtrace.io/tx/${json.usdcTxHash}`);
   console.log(`  2. XRPL AMM swap:       ${json.txHash}`);
   console.log(`     https://testnet.xrpscan.com/tx/${json.txHash}`);
   console.log(`  3. XRPL retire (burn):  ${json.retirementTxHash}`);

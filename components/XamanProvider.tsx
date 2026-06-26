@@ -86,7 +86,15 @@ export function XamanProvider({ children }: { children: ReactNode }) {
         // only use a small, stable surface (on/state/authorize/logout). This
         // keeps `next build` type-checking from breaking on package internals.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pkce: any = new XummPkce(apiKey, { implicit: true });
+        // Pin redirectUrl to the clean origin (no path/trailing slash) so it
+        // exactly matches the Origin/Redirect URIs whitelisted in the Xaman
+        // Developer Console. The SDK default is document.location.href, which
+        // includes a trailing slash (e.g. https://www.x402gal.com/) and trips
+        // Xaman's "Invalid client/redirect URL" check.
+        const pkce: any = new XummPkce(apiKey, {
+          implicit: true,
+          redirectUrl: window.location.origin,
+        });
         pkceRef.current = pkce;
 
         pkce.on("error", (err: Error) => {

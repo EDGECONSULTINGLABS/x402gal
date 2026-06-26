@@ -49,6 +49,35 @@ interface Receipt {
 
 const POLL_MS = 2500;
 
+// Xaman issues a device push token the first time a user signs a payload from
+// this app. We persist it per-account so future sign requests push straight to
+// the device instead of forcing a QR re-scan.
+const USER_TOKEN_KEY = "x402gal.xaman.userToken";
+
+function storedUserToken(account: string | null): string | null {
+  if (!account || typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(USER_TOKEN_KEY);
+    if (!raw) return null;
+    const map = JSON.parse(raw) as Record<string, string>;
+    return map[account] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function saveUserToken(account: string | null, token: string | null): void {
+  if (!account || !token || typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(USER_TOKEN_KEY);
+    const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+    map[account] = token;
+    window.localStorage.setItem(USER_TOKEN_KEY, JSON.stringify(map));
+  } catch {
+    // non-fatal — push just falls back to QR next time
+  }
+}
+
 export function XrplPayPanel() {
   const { status: xamanStatus, account: xamanAccount, pushSignRequest } = useXaman();
   const connected = xamanStatus === "connected" && !!xamanAccount;
@@ -160,6 +189,7 @@ export function XrplPayPanel() {
           setPhase("error");
           return;
         }
+        if (s.issuedUserToken) saveUserToken(s.account ?? xamanAccount, s.issuedUserToken);
         if (s.signed && s.hex) {
           clearPoll();
           await settle(p, s.hex as string, s.account ?? null);
@@ -213,7 +243,11 @@ export function XrplPayPanel() {
       const q = await qres.json();
       if (!qres.ok) throw new Error(q?.error ?? `quote failed (HTTP ${qres.status})`);
 
-      const created = await pushSignRequest(q.txjson, q.instruction);
+      const created = await pushSignRequest(
+        q.txjson,
+        q.instruction,
+        storedUserToken(xamanAccount),
+      );
       if (!created) throw new Error("XRPL session not ready — reconnect XRPL (top right) and try again.");
 
       const p: CreatedPayload = {

@@ -89,6 +89,12 @@ export interface XamanPayloadStatus {
   txid: string | null;
   /** The signer's XRPL account. */
   account: string | null;
+  /**
+   * Device push token Xaman issues for this user the first time they sign a
+   * payload from this app. Persist it and pass as `user_token` on future sign
+   * requests so they push straight to the device (no QR re-scan).
+   */
+  issuedUserToken: string | null;
 }
 
 /** Poll a Xaman payload's resolution status. */
@@ -102,6 +108,7 @@ export async function getSignPayload(uuid: string): Promise<XamanPayloadStatus> 
   }
   const data = (await res.json()) as {
     meta?: { resolved?: boolean; signed?: boolean; cancelled?: boolean; expired?: boolean };
+    application?: { issued_user_token?: string | null };
     response?: { hex?: string | null; txid?: string | null; account?: string | null };
   };
   return {
@@ -112,5 +119,6 @@ export async function getSignPayload(uuid: string): Promise<XamanPayloadStatus> 
     hex: data.response?.hex ?? null,
     txid: data.response?.txid ?? null,
     account: data.response?.account ?? null,
+    issuedUserToken: data.application?.issued_user_token ?? null,
   };
 }

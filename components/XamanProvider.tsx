@@ -42,9 +42,10 @@ interface XamanContextValue {
    * Create a sign request for the CONNECTED user using their authorized JWT
    * session — Xaman pushes it straight to their device (no re-scan). Returns
    * null if there's no live session. `submit:false` so we get the signed hex.
+   * Pass a stored `userToken` (Xaman's issued_user_token) to force a push.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pushSignRequest: (txjson: any, instruction?: string) => Promise<PushedSignRequest | null>;
+  pushSignRequest: (txjson: any, instruction?: string, userToken?: string | null) => Promise<PushedSignRequest | null>;
 }
 
 const XamanContext = createContext<XamanContextValue | null>(null);
@@ -200,12 +201,15 @@ export function XamanProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pushSignRequest = useCallback(async (txjson: any, instruction?: string) => {
+  const pushSignRequest = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async (txjson: any, instruction?: string, userToken?: string | null) => {
     const sdk = sdkRef.current;
     if (!sdk) return null;
     const created = await sdk.payload.create({
       txjson,
+      // user_token makes Xaman push the request to the user's device.
+      user_token: userToken ?? undefined,
       options: { submit: false, expire: 5 },
       custom_meta: instruction ? { instruction } : undefined,
     });

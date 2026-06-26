@@ -58,7 +58,7 @@ export function XamanProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyState = useCallback(
-    async (state: { me?: { account?: string } } | null) => {
+    async (state: { me?: { account?: string } } | null | undefined) => {
       const acct = state?.me?.account ?? null;
       if (acct) {
         setAccount(acct);
@@ -82,7 +82,11 @@ export function XamanProvider({ children }: { children: ReactNode }) {
     import("xumm-oauth2-pkce")
       .then(({ XummPkce }) => {
         if (cancelled) return;
-        const pkce = new XummPkce(apiKey, { implicit: true });
+        // Typed as `any`: the SDK's exported types vary across versions and we
+        // only use a small, stable surface (on/state/authorize/logout). This
+        // keeps `next build` type-checking from breaking on package internals.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pkce: any = new XummPkce(apiKey, { implicit: true });
         pkceRef.current = pkce;
 
         pkce.on("error", (err: Error) => {
@@ -106,7 +110,7 @@ export function XamanProvider({ children }: { children: ReactNode }) {
         // Restore any existing session; otherwise mark disconnected.
         pkce
           .state()
-          .then(async (state: { me?: { account?: string } } | null) => {
+          .then(async (state: { me?: { account?: string } } | null | undefined) => {
             if (cancelled) return;
             if (state?.me?.account) await applyState(state);
             else setStatus("disconnected");

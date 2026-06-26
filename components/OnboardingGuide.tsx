@@ -85,7 +85,7 @@ const steps: Step[] = [
   {
     id: "complete",
     title: "You\u2019re All Set!",
-    description: "Now you understand how x402GAL turns AI water consumption into verifiable restoration credits. Click 'Next' to enter the INFILTRATE ETHConf scavenger hunt.",
+    description: "Now you understand how x402GAL turns AI water consumption into verifiable restoration credits. Click 'Next' to start exploring the dashboard.",
     icon: <Zap className="text-hydro-300" size={24} />,
     position: "center",
   },
@@ -121,8 +121,6 @@ export function OnboardingGuide({ isConnected, onComplete, forceShow }: Onboardi
     localStorage.setItem("x402gal-guide-completed", "true");
     setShowGuide(false);
     onComplete();
-    // Send user back to the scavenger hunt at end of tour
-    window.location.href = "/infiltrateETHConf2026";
   };
 
   const handleSkip = () => {

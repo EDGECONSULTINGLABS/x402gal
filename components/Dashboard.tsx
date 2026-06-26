@@ -437,18 +437,6 @@ function Nav({ price, retired, xrplLive, onRestartTour, lastEvmSettlement }: { p
 
         {/* Right actions */}
         <div className="flex shrink-0 items-center gap-2">
-          {/* Infiltrate ETHConf — always visible */}
-          <a
-            href="/infiltrateETHConf2026"
-            className="inline-flex items-center gap-1.5 rounded-md border border-cyan-400/50 bg-cyan-500/10 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan-300 transition hover:border-cyan-300 hover:bg-cyan-500/20 md:px-3"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-300" />
-            </span>
-            <span className="hidden sm:inline">Infiltrate ETHConf</span>
-            <span className="sm:hidden">Infiltrate</span>
-          </a>
           {/* Tour — icon only on mobile, label on md+ */}
           <button
             onClick={onRestartTour}

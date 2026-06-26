@@ -150,7 +150,7 @@ export function PayAndOffsetPanel() {
             mimeType: "application/json",
             payTo: fuji.payTo,
             requiredDeadlineSeconds: 60,
-            offsetHydroDrops: xrpl?.offsetHydroDrops,
+            offsetHydroDroplets: xrpl?.offsetHydroDroplets,
             estimatedMl: xrpl?.estimatedMl ?? 0,
           },
           payload: {

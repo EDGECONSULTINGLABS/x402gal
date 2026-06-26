@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       agentId,
       resource: RESOURCE,
       amountUsdc: requirement.amountUsdc,
-      offsetDrops: requirement.offsetHydroDrops,
+      offsetDroplets: requirement.offsetHydroDroplets,
       waterMl: requirement.estimatedMl,
       sourceChain: "avalanche",
       nonce: evmPay.auth.nonce,
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
         completion: fakeCompletion(prompt || "your question"),
         pricing: {
           amountUsdc: requirement.amountUsdc,
-          offsetHydroDrops: requirement.offsetHydroDrops,
+          offsetHydroDroplets: requirement.offsetHydroDroplets,
           water_ml: requirement.estimatedMl,
           water_l: requirement.estimatedLiters,
           methodology_hash: requirement.footprint.methodology.methodology_hash,
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
           size_target: BATCH_SIZE,
           pending_calls: pending.calls,
           pending_usdc: pending.usdc,
-          pending_offset_drops: pending.offsetDrops,
+          pending_offset_droplets: pending.offsetDroplets,
           pending_water_ml: pending.waterMl,
           flushed: flushedSettlement?.id ?? null,
         },
@@ -149,13 +149,13 @@ export async function POST(req: NextRequest) {
   }
 
   // Add to the pending batch instead of routing immediately. Per-call
-  // settlements would be ~18 drops each (illegible on screen); we batch up
+  // settlements would be ~18 droplets each (illegible on screen); we batch up
   // to BATCH_SIZE calls and emit one human-visible XRPL retirement.
   const { shouldFlush } = addToBatch({
     agentId: payload.payer,
     resource: RESOURCE,
     amountUsdc: payload.amountUsdc,
-    offsetDrops: payload.offsetHydroDrops,
+    offsetDroplets: payload.offsetHydroDroplets,
     waterMl: requirement.estimatedMl,
     sourceChain: payload.sourceChain,
     nonce: payload.nonce,
@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
       completion: fakeCompletion(prompt || "your question"),
       pricing: {
         amountUsdc: payload.amountUsdc,
-        offsetHydroDrops: payload.offsetHydroDrops,
+        offsetHydroDroplets: payload.offsetHydroDroplets,
         water_ml: requirement.estimatedMl,
         water_l: requirement.estimatedLiters,
         methodology_hash: requirement.footprint.methodology.methodology_hash,
@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
         size_target: BATCH_SIZE,
         pending_calls: pending.calls,
         pending_usdc: pending.usdc,
-        pending_offset_drops: pending.offsetDrops,
+        pending_offset_droplets: pending.offsetDroplets,
         pending_water_ml: pending.waterMl,
         flushed: flushedSettlement?.id ?? null,
       },

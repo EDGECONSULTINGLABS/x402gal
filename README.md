@@ -183,9 +183,9 @@ W_site = WUE_site × [(T_in/1000)·e_in + (T_out/1000)·e_out + e_overhead] × F
 
 Follows [Green Grid WUE v1](https://www.thegreengrid.org/) strictly — no double-counted cooling, GPU-boundary aware. Every `402` response embeds the full methodology block so auditors can re-derive the price independently.
 
-**Defaults:** WUE 0.20 L/kWh · 200-in/500-out GPT-4-class call = **0.068 mL ≈ 18 HYDRO sub-units**
+**Defaults:** WUE 0.20 L/kWh · 200-in/500-out GPT-4-class call = **0.068 mL ≈ 18 droplets**
 
-> **Note on units:** "HYDRO sub-units" are the smallest HYD denomination (analogous to cents), where 1 HYDRO = 1 US gallon of water restoration credit. We avoid the term "drops" here to prevent confusion with XRP drops (XRP's native smallest unit).
+> **Note on units:** A **droplet** is the smallest HYD denomination (analogous to cents): **1 HYDRO = 1,000,000 droplets**, and 1 HYDRO = 1 US gallon of water restoration credit. We deliberately use "droplet" (not "drops") for the sub-unit to avoid collision with **XRP drops**, XRP's native smallest unit on the same ledger we settle on. Note that HYDRO is an XRPL issued-currency (IOU), which is not natively denominated in drops at all — "droplet" is purely the protocol's display sub-unit.
 
 Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc20ca8f38413d03122b6f0`](https://hydrocoin.com/whitepaper) — verify against the [HydroCoin MRV Framework](https://hydrocoin.com/whitepaper) to re-derive independently.
 

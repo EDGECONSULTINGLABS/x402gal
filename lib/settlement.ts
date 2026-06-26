@@ -39,7 +39,7 @@ export interface SettleResult {
   retirementReceipt: string;
   totalMs: number;
   sourceChains: Chain[];
-  hydroRetiredDrops: number;
+  hydroRetiredDroplets: number;
   usdcSettled: number;
 }
 
@@ -52,7 +52,7 @@ export async function routeBatch(entries: BatchEntry[]): Promise<SettleResult> {
   const hops: XrplHop[] = [];
 
   const totalUsdc = entries.reduce((s, e) => s + e.amountUsdc, 0);
-  const totalOffsetDrops = entries.reduce((s, e) => s + e.offsetDrops, 0);
+  const totalOffsetDroplets = entries.reduce((s, e) => s + e.offsetDroplets, 0);
   const sources = Array.from(new Set(entries.map((e) => e.sourceChain))) as Chain[];
 
   // Update the local constant-product MODEL only (dashboard price/charts).
@@ -62,7 +62,7 @@ export async function routeBatch(entries: BatchEntry[]): Promise<SettleResult> {
   if (isXrplConfigured()) {
     // ── Real XRPL path ────────────────────────────────────────────────────────
     const t0 = Date.now();
-    const { swapHash, retireHash } = await swapAndRetireHydro(totalUsdc, totalOffsetDrops);
+    const { swapHash, retireHash } = await swapAndRetireHydro(totalUsdc, totalOffsetDroplets);
     const totalMs = Date.now() - t0;
     const swapMs = totalMs * 0.4;
     const retireMs = totalMs * 0.6;
@@ -76,7 +76,7 @@ export async function routeBatch(entries: BatchEntry[]): Promise<SettleResult> {
       retirementReceipt: retireHash,
       totalMs,
       sourceChains: sources,
-      hydroRetiredDrops: totalOffsetDrops,
+      hydroRetiredDroplets: totalOffsetDroplets,
       usdcSettled: totalUsdc,
     };
   }
@@ -99,7 +99,7 @@ export async function routeBatch(entries: BatchEntry[]): Promise<SettleResult> {
     retirementReceipt,
     totalMs,
     sourceChains: sources,
-    hydroRetiredDrops: totalOffsetDrops,
+    hydroRetiredDroplets: totalOffsetDroplets,
     usdcSettled: totalUsdc,
   };
 }
@@ -119,7 +119,7 @@ export async function settleBatch(entries: BatchEntry[]): Promise<Settlement | n
     agentId: "batch",
     resource: resources.length === 1 ? resources[0] : `batch:${resources.length}-resources`,
     usdcSettled: route.usdcSettled,
-    amountDrops: route.hydroRetiredDrops,
+    amountDroplets: route.hydroRetiredDroplets,
     litersOffset: totalMl / 1000,
     callCount: entries.length,
     sourceChain: primaryChain,

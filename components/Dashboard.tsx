@@ -34,8 +34,10 @@ import { WaterBackdrop } from "./WaterBackdrop";
 import { HydroCoinPanel } from "./HydroCoinPanel";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { ConnectButton } from "./ConnectButton";
+import { XamanConnectButton } from "./XamanConnectButton";
 import { AgentSessionPanel } from "./AgentSessionPanel";
 import { PayAndOffsetPanel } from "./PayAndOffsetPanel";
+import { XrplPayPanel } from "./XrplPayPanel";
 import { OnboardingGuide } from "./OnboardingGuide";
 import { useAccount } from "wagmi";
 import { Agent, Settlement } from "@/lib/types";
@@ -56,7 +58,7 @@ interface State {
     sizeTarget: number;
     pendingCalls: number;
     pendingUsdc: number;
-    pendingOffsetDrops: number;
+    pendingOffsetDroplets: number;
     pendingMl: number;
     lastFlushAt: number;
   };
@@ -332,7 +334,7 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
                     />
                     <Mini
                       label="HYDRO retired (XRPL)"
-                      value={`${(lastSettlement.amountDrops / 1_000_000).toFixed(6)} HYDRO`}
+                      value={`${(lastSettlement.amountDroplets / 1_000_000).toFixed(6)} HYDRO`}
                     />
                     <Mini
                       label="Water restored"
@@ -402,6 +404,11 @@ function Nav({ price, retired, xrplLive, onRestartTour, lastEvmSettlement }: { p
             <Droplets size={10} className="text-hydro-300" />
             <span className="text-[10px]">{retired.toFixed(3)} gal</span>
           </Pill>
+          <Pill>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/rlusd.png" alt="RLUSD" className="h-3 w-3 rounded-full" />
+            <span className="text-[10px]">RLUSD</span>
+          </Pill>
           {xrplLive ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10px] text-emerald-300">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -468,7 +475,8 @@ function Nav({ price, retired, xrplLive, onRestartTour, lastEvmSettlement }: { p
               GitHub
             </NavLink>
           </nav>
-          <div className="hidden lg:block">
+          <div className="hidden items-center gap-2 lg:flex">
+            <XamanConnectButton />
             <ConnectButton />
           </div>
         </div>
@@ -485,7 +493,8 @@ function Nav({ price, retired, xrplLive, onRestartTour, lastEvmSettlement }: { p
               GitHub
             </MobileNavLink>
           </nav>
-          <div className="mt-4 border-t border-edge/60 pt-4">
+          <div className="mt-4 flex flex-col gap-2 border-t border-edge/60 pt-4">
+            <XamanConnectButton />
             <ConnectButton />
           </div>
         </div>
@@ -877,6 +886,7 @@ function DemoPanel({
       </div>
       <div data-guide="agent-session">
         <AgentSessionPanel />
+        <XrplPayPanel />
         <PayAndOffsetPanel />
       </div>
       <div className="mt-4 space-y-3" data-guide="agent-section">
@@ -1029,7 +1039,7 @@ function BatchPanel({
     sizeTarget: number;
     pendingCalls: number;
     pendingUsdc: number;
-    pendingOffsetDrops: number;
+    pendingOffsetDroplets: number;
     pendingMl: number;
   };
   onFlush: () => void;
@@ -1157,8 +1167,15 @@ function Footer() {
         <div className="flex items-center gap-2">
           <Logo size={20} />
           <span>
-            <span className="text-slate-300">x402GAL</span> · Built for Consensus
-            Hackathon Miami 2026 · ECL
+            <span className="text-slate-300">x402GAL</span> · Built by{" "}
+            <a
+              href="https://edgeconsultinglabs.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-hydro-300 hover:text-hydro-200"
+            >
+              ECL
+            </a>
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">

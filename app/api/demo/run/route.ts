@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       network: requirement.network,
       asset: "USDC",
       amountUsdc: requirement.amountUsdc,
-      offsetHydroDrops: requirement.offsetHydroDrops,
+      offsetHydroDroplets: requirement.offsetHydroDroplets,
       payer: agent.id,
       recipient: requirement.recipient,
       nonce: requirement.nonce,

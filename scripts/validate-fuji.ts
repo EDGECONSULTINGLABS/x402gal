@@ -40,7 +40,7 @@ async function main() {
     const sigHex = Array.from(`${agentId}|${req.nonce}`).map((c) => c.charCodeAt(0).toString(16)).join("").slice(0, 48);
     const payload = {
       x402Version: 1, scheme: "exact", network: req.network, asset: "USDC",
-      amountUsdc: req.amountUsdc, offsetHydroDrops: req.offsetHydroDrops,
+      amountUsdc: req.amountUsdc, offsetHydroDroplets: req.offsetHydroDroplets,
       payer: agentId, recipient: req.recipient, nonce: req.nonce,
       signature: `sig_${sigHex}`, sourceChain: "avalanche",
     };

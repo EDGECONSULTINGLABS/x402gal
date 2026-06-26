@@ -12,14 +12,14 @@
 // Force in-memory fallback (no real Redis) and a known small ceiling.
 delete process.env.UPSTASH_REDIS_REST_URL;
 delete process.env.UPSTASH_REDIS_REST_TOKEN;
-process.env.HYDRO_VERIFIED_CEILING_DROPS = "1000000"; // 1 HYDRO unit = 1e6 drops
+process.env.HYDRO_VERIFIED_CEILING_DROPLETS = "1000000"; // 1 HYDRO unit = 1e6 droplets
 
 import {
   checkCeiling,
   reservePoolDeposit,
   releasePoolDeposit,
   getCumulativeDeposited,
-  verifiedMintedCeilingDrops,
+  verifiedMintedCeilingDroplets,
 } from "../lib/hydroSupply";
 
 let passed = 0;
@@ -35,7 +35,7 @@ function ok(name: string, cond: boolean, detail?: string) {
 }
 
 async function main() {
-  const CEILING = verifiedMintedCeilingDrops();
+  const CEILING = verifiedMintedCeilingDroplets();
   ok("ceiling reads from env", CEILING === 1_000_000, `got ${CEILING}`);
 
   // ── Pure checkCeiling ──────────────────────────────────────────────────────

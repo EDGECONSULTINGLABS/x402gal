@@ -9,7 +9,7 @@ import { config } from "dotenv";
 config({ path: [".env.local", ".env"] });
 import { Client, Wallet } from "xrpl";
 import { getPoolInfo, hydAsset, usdcAsset } from "../lib/xrplAmm";
-import { getCumulativeDeposited, verifiedMintedCeilingDrops } from "../lib/hydroSupply";
+import { getCumulativeDeposited, verifiedMintedCeilingDroplets } from "../lib/hydroSupply";
 
 async function lineBalance(client: Client, account: string, currency: string, issuer: string): Promise<number> {
   const lines = await client.request({ command: "account_lines", account, peer: issuer });
@@ -25,8 +25,8 @@ async function main() {
 
   console.log(`Endpoint: ${endpoint}`);
   console.log(`Treasury: ${treasury.address}`);
-  console.log(`Ceiling:  ${verifiedMintedCeilingDrops()} drops`);
-  console.log(`Cumulative pool deposits: ${await getCumulativeDeposited()} drops\n`);
+  console.log(`Ceiling:  ${verifiedMintedCeilingDroplets()} droplets`);
+  console.log(`Cumulative pool deposits: ${await getCumulativeDeposited()} droplets\n`);
 
   const client = new Client(endpoint);
   await client.connect();

@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
     // Claim atomically (FAILED → RETIRING). IN_FLIGHT means a live retry owns it.
     const begin = await beginSettlement(candidate.nonce, {
       amountUsdcMicros: candidate.amountUsdcMicros,
-      hydroDrops: candidate.hydroDrops,
+      hydroDroplets: candidate.hydroDroplets,
       bindingId: candidate.bindingId,
     });
     if (!begin.proceed || !begin.obligation) {
@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
 
     const o = begin.obligation;
     try {
-      const { swapHash, retireHash } = await swapAndRetireHydro(o.amountUsdcMicros, o.hydroDrops);
+      const { swapHash, retireHash } = await swapAndRetireHydro(o.amountUsdcMicros, o.hydroDroplets);
       await markRetired(o, { mintTxHash: swapHash, retireTxHash: retireHash });
       retired++;
       results.push({ nonce: o.nonce, outcome: "retired" });

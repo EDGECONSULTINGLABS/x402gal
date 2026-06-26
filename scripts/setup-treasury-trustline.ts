@@ -1,8 +1,9 @@
 /**
  * One-time treasury trustline setup for XRPL native settlement.
  *
- * The treasury needs a USDC trustline to receive issued-currency Payments.
- * Without it, every Payment returns tecPATH_DRY.
+ * The treasury needs a trust line to each accepted issued currency (USDC and
+ * RLUSD) to receive those Payments. Without it, every Payment returns
+ * tecPATH_DRY / tecNO_LINE.
  *
  * Usage (run locally with .env.local present):
  *   npx tsx scripts/setup-treasury-trustline.ts
@@ -14,12 +15,11 @@
 import { Client, Wallet, Transaction } from "xrpl";
 import dotenv from "dotenv";
 import { resolve } from "path";
+import { acceptedXrplAssets } from "../lib/xrplAssets";
 
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 
-const XRPL_TESTNET = "wss://s.altnet.rippletest.net:51233";
-const USDC_CURRENCY = "5553444300000000000000000000000000000000";
-const USDC_ISSUER = "rHuGNhqTG32mfmAvWA8hUyWRLV3tCSwKQt";
+const XRPL_TESTNET = process.env.XRPL_ENDPOINT ?? "wss://s.altnet.rippletest.net:51233";
 
 async function main() {
   const seed = process.env.XRPL_TREASURY_SEED;
@@ -46,43 +46,43 @@ async function main() {
 
   console.log("[setup] Treasury address:", treasury.address);
 
-  // Check if trustline already exists
   const lines = await client.request({
     command: "account_lines",
     account: treasury.address,
   });
-  const already = (lines.result.lines as Array<{ currency: string; account: string }>)
-    .some((l) => l.currency === USDC_CURRENCY && l.account === USDC_ISSUER);
+  const existing = lines.result.lines as Array<{ currency: string; account: string }>;
 
-  if (already) {
-    console.log("[setup] USDC trustline already exists — nothing to do.");
-    await client.disconnect();
-    return;
-  }
+  // Establish a trust line for every accepted asset (USDC + RLUSD) idempotently.
+  for (const asset of acceptedXrplAssets()) {
+    const already = existing.some(
+      (l) => l.currency === asset.currency && l.account === asset.issuer,
+    );
+    if (already) {
+      console.log(`[setup] ${asset.symbol} trustline already exists — skipping.`);
+      continue;
+    }
 
-  // Create trustline
-  const trustline: Transaction = {
-    TransactionType: "TrustSet",
-    Account: treasury.address,
-    LimitAmount: {
-      currency: USDC_CURRENCY,
-      issuer: USDC_ISSUER,
-      value: "100000000", // 100M USDC limit
-    },
-  } as unknown as Transaction;
+    const trustline: Transaction = {
+      TransactionType: "TrustSet",
+      Account: treasury.address,
+      LimitAmount: {
+        currency: asset.currency,
+        issuer: asset.issuer,
+        value: "100000000", // 100M limit
+      },
+    } as unknown as Transaction;
 
-  const autofilled = await client.autofill(trustline as any);
-  const signed = treasury.sign(autofilled);
-  const result = await client.submitAndWait(signed.tx_blob);
-
-  const meta = result.result.meta as { TransactionResult?: string } | undefined;
-  const code = meta?.TransactionResult ?? "";
-  if (code === "tesSUCCESS") {
-    console.log("[setup] USDC trustline created successfully.");
-    console.log("[setup] Tx hash:", result.result.hash);
-  } else {
-    console.error("[setup] TrustSet failed:", code);
-    process.exit(1);
+    const autofilled = await client.autofill(trustline as any);
+    const signed = treasury.sign(autofilled);
+    const result = await client.submitAndWait(signed.tx_blob);
+    const meta = result.result.meta as { TransactionResult?: string } | undefined;
+    const code = meta?.TransactionResult ?? "";
+    if (code === "tesSUCCESS") {
+      console.log(`[setup] ${asset.symbol} trustline created. Tx:`, result.result.hash);
+    } else {
+      console.error(`[setup] ${asset.symbol} TrustSet failed:`, code);
+      process.exit(1);
+    }
   }
 
   await client.disconnect();

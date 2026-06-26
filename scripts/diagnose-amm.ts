@@ -2,7 +2,7 @@
 import { config } from "dotenv";
 config({ path: [".env.local", ".env"] });
 import { Client, Wallet } from "xrpl";
-import { hydAsset, usdcAsset, getPoolInfo, hydroDropsToIou } from "../lib/xrplAmm";
+import { hydAsset, usdcAsset, getPoolInfo, hydroDropletsToIou } from "../lib/xrplAmm";
 
 async function main() {
   const endpoint = process.env.XRPL_ENDPOINT ?? "wss://s.altnet.rippletest.net:51233";
@@ -26,7 +26,7 @@ async function main() {
       console.log(`  ${l.currency} | ${l.balance} | no_ripple=${l.no_ripple} | ${l.account}`);
     }
 
-    const destAmount = { currency: hyd.currency, issuer: hyd.issuer, value: hydroDropsToIou(100000) };
+    const destAmount = { currency: hyd.currency, issuer: hyd.issuer, value: hydroDropletsToIou(100000) };
     console.log(`\nripple_path_find USDC->HYD for ${destAmount.value} HYD (self):`);
     const pf = await client.request({
       command: "ripple_path_find",

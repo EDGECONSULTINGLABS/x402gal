@@ -4,7 +4,7 @@
 
 import { ledger } from "@/lib/ledger";
 import { marketCapUSDC, priceUSDC } from "@/lib/amm";
-import { BATCH_SIZE, DROPS_PER_HYDRO } from "@/lib/constants";
+import { BATCH_SIZE, DROPLETS_PER_HYDRO } from "@/lib/constants";
 import { FOOTPRINT_METHODOLOGY_HASH } from "@/lib/footprint";
 import { isXrplConfigured, xrplEndpoint } from "@/lib/xrplClient";
 
@@ -22,14 +22,14 @@ export function getDashboardState() {
       priceUSDC: priceUSDC(),
       marketCapUSDC: marketCapUSDC(),
       circulatingHydro:
-        (10_000_000 * DROPS_PER_HYDRO - l.amm.totalRetiredDrops) / DROPS_PER_HYDRO,
-      retiredHydro: l.amm.totalRetiredDrops / DROPS_PER_HYDRO,
+        (10_000_000 * DROPLETS_PER_HYDRO - l.amm.totalRetiredDroplets) / DROPLETS_PER_HYDRO,
+      retiredHydro: l.amm.totalRetiredDroplets / DROPLETS_PER_HYDRO,
     },
     batch: {
       sizeTarget: BATCH_SIZE,
       pendingCalls: l.pendingTotals.calls,
       pendingUsdc: l.pendingTotals.usdc,
-      pendingOffsetDrops: l.pendingTotals.offsetDrops,
+      pendingOffsetDroplets: l.pendingTotals.offsetDroplets,
       pendingMl,
       lastFlushAt: l.pendingTotals.lastFlushAt,
     },

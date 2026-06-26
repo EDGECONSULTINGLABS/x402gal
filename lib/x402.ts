@@ -10,12 +10,12 @@ import {
   FACILITATOR_URL,
   RESOURCE_DEFAULTS,
   TREASURY_ADDRESS,
-  litersToDrops,
+  litersToDroplets,
 } from "./constants";
 import { calculateFootprint } from "./footprint";
 import { buildFujiRequirement } from "./x402evm";
 import { ledger } from "./ledger";
-import { dropsToUsdcMicros } from "./amm";
+import { dropletsToUsdcMicros } from "./amm";
 import { verifyOnChain } from "./chainVerifier";
 
 export interface RequirementOpts {
@@ -40,8 +40,8 @@ export function buildRequirement(
     e_overhead_kwh: meta.e_overhead_kwh,
   });
 
-  const offsetHydroDrops = Math.max(1, litersToDrops(result.water_l));
-  const amountUsdc = dropsToUsdcMicros(offsetHydroDrops);
+  const offsetHydroDroplets = Math.max(1, litersToDroplets(result.water_l));
+  const amountUsdc = dropletsToUsdcMicros(offsetHydroDroplets);
 
   const footprint: FootprintBlock = {
     mode: result.mode,
@@ -58,7 +58,7 @@ export function buildRequirement(
     network: "xrpl",
     asset: "USDC",
     amountUsdc,
-    offsetHydroDrops,
+    offsetHydroDroplets,
     estimatedLiters: result.water_l,
     estimatedMl: result.water_ml,
     recipient: TREASURY_ADDRESS,
@@ -87,7 +87,7 @@ export function decodePayment(header: string | null): PaymentPayload | null {
     const parsed = JSON.parse(json) as PaymentPayload;
     if (parsed.x402Version !== 1) return null;
     if (parsed.scheme !== "exact") return null;
-    if (parsed.asset !== "USDC") return null;
+    if (parsed.asset !== "USDC" && parsed.asset !== "RLUSD") return null;
     if (!parsed.sourceChain) return null;
     return parsed;
   } catch {
@@ -121,10 +121,15 @@ export async function verifyPayment(
 }
 
 export function build402Response(req: PaymentRequirement): Response {
-  // Fuji "exact" (ERC-3009) rail is advertised first when the EVM treasury
-  // is configured; the XRPL entry always follows for the native demo agents.
+  // RLUSD is the lead XRPL rail (Ripple USD — the leading regulated stablecoin
+  // on the XRP Ledger); USDC follows as a secondary accepted asset. The Fuji
+  // "exact" (ERC-3009) rail is advertised first only when the EVM treasury is
+  // configured, for the existing native demo agents.
   const fuji = buildFujiRequirement(req.resource, req.amountUsdc, req.description);
-  const accepts: unknown[] = fuji ? [fuji, req] : [req];
+  const rlusdReq: PaymentRequirement = { ...req, asset: "RLUSD" };
+  const usdcReq: PaymentRequirement = { ...req, asset: "USDC" };
+  const xrplRails: PaymentRequirement[] = [rlusdReq, usdcReq];
+  const accepts: unknown[] = fuji ? [fuji, ...xrplRails] : xrplRails;
   return new Response(
     JSON.stringify({
       x402Version: 1,
@@ -137,6 +142,7 @@ export function build402Response(req: PaymentRequirement): Response {
         "Content-Type": "application/json",
         "X-402GAL-Facilitator": FACILITATOR_URL,
         "X-402GAL-Settlement": fuji ? "avalanche-fuji,xrpl" : "xrpl",
+        "X-402GAL-Assets": "RLUSD,USDC",
       },
     },
   );

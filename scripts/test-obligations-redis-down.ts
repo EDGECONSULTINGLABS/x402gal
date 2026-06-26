@@ -25,7 +25,7 @@ function ok(name: string, cond: boolean, detail?: string) {
 async function run() {
   console.log("Level 3 — Redis-down fail-closed\n");
 
-  const r = await beginSettlement(`redis-down-${Date.now()}`, { amountUsdcMicros: 1_000, hydroDrops: 1 });
+  const r = await beginSettlement(`redis-down-${Date.now()}`, { amountUsdcMicros: 1_000, hydroDroplets: 1 });
 
   ok("Redis unreachable → does NOT proceed", r.proceed === false, `proceed=${r.proceed}`);
   ok("Redis unreachable → GUARD_UNAVAILABLE", r.reason === "GUARD_UNAVAILABLE", `reason=${r.reason}`);

@@ -26,9 +26,9 @@ import {
   hydAsset,
   usdcAsset,
   assertAmmNetworkAllowed,
-  hydroDropsToIou,
+  hydroDropletsToIou,
 } from "../lib/xrplAmm";
-import { remainingHeadroomDrops, verifiedMintedCeilingDrops } from "../lib/hydroSupply";
+import { remainingHeadroomDroplets, verifiedMintedCeilingDroplets } from "../lib/hydroSupply";
 
 const HYD_UNITS = Number(process.argv[2] ?? "10000");
 const USDC_UNITS = Number(process.argv[3] ?? "10000");
@@ -58,13 +58,13 @@ async function main() {
   const hydCurrency = requireEnv("HYDROCOIN_CURRENCY");
   requireEnv("HYDROCOIN_ISSUER_ADDRESS");
 
-  const hydDrops = Math.round(HYD_UNITS * 1_000_000);
+  const hydDroplets = Math.round(HYD_UNITS * 1_000_000);
 
   console.log(`Endpoint: ${endpoint}`);
   console.log(`Issuer:   ${issuer.address}`);
   console.log(`Treasury: ${treasury.address}`);
   console.log(`Seed:     ${HYD_UNITS} HYDRO / ${USDC_UNITS} USDC  (fee ${TRADING_FEE / 1000}%)`);
-  console.log(`Ceiling:  ${verifiedMintedCeilingDrops()} drops`);
+  console.log(`Ceiling:  ${verifiedMintedCeilingDroplets()} droplets`);
 
   const client = new Client(endpoint);
   await client.connect();
@@ -92,7 +92,7 @@ async function main() {
       TransactionType: "Payment",
       Account: issuer.address,
       Destination: treasury.address,
-      Amount: { currency: hydCurrency, issuer: issuer.address, value: hydroDropsToIou(hydDrops) },
+      Amount: { currency: hydCurrency, issuer: issuer.address, value: hydroDropletsToIou(hydDroplets) },
     };
     await client.submitAndWait(mint, { wallet: issuer });
 
@@ -110,12 +110,12 @@ async function main() {
 
     // 4) Create the AMM pool (HYDRO deposit is ceiling-checked inside seedPool).
     console.log("[4/4] Creating AMM pool (AMMCreate)...");
-    const result = await seedPool(client, treasury, hydDrops, USDC_UNITS, TRADING_FEE);
+    const result = await seedPool(client, treasury, hydDroplets, USDC_UNITS, TRADING_FEE);
     console.log("\nPool created:", result);
 
     const pool = await getPoolInfo(client);
     console.log("Pool reserves:", pool);
-    console.log("Remaining ceiling headroom (drops):", await remainingHeadroomDrops());
+    console.log("Remaining ceiling headroom (droplets):", await remainingHeadroomDroplets());
     console.log("HYDRO/USDC asset pair:", hydAsset(), usdcAsset());
   } finally {
     await client.disconnect();

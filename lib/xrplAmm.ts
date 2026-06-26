@@ -19,6 +19,7 @@
 
 import { Client, Wallet, type OfferCreate, type TrustSet, type AMMCreate, type AMMDeposit } from "xrpl";
 import { reservePoolDeposit, releasePoolDeposit } from "./hydroSupply";
+import { rlusdCurrency, rlusdIssuer } from "./xrplAssets";
 
 // ── Errors ──────────────────────────────────────────────────────────────────
 export class PoolNotFoundError extends Error {
@@ -73,8 +74,8 @@ export function usdcAsset(): IouAsset {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-export function hydroDropsToIou(drops: number): string {
-  return Math.max(drops / 1_000_000, 0.000001).toFixed(6);
+export function hydroDropletsToIou(droplets: number): string {
+  return Math.max(droplets / 1_000_000, 0.000001).toFixed(6);
 }
 
 function txResult(result: Awaited<ReturnType<Client["submitAndWait"]>>): string {
@@ -110,7 +111,7 @@ export interface PoolReserves {
 }
 
 function iouValue(amount: unknown): number {
-  if (typeof amount === "string") return Number(amount) / 1_000_000; // XRP drops — not expected here
+  if (typeof amount === "string") return Number(amount) / 1_000_000; // native XRP drops — not expected here
   const a = amount as { value?: string } | undefined;
   return Number(a?.value ?? 0);
 }
@@ -159,6 +160,27 @@ export async function ensureTreasuryUsdcTrustline(client: Client, treasury: Wall
   }
 }
 
+// ── Treasury RLUSD trust line ───────────────────────────────────────────────
+// RLUSD is an issued currency: the treasury cannot RECEIVE it without a trust
+// line to the RLUSD issuer. Required before the facilitator can accept RLUSD
+// payments. Idempotent — XRPL returns tecNO_LINE_REDUNDANT on a duplicate.
+export async function ensureTreasuryRlusdTrustline(client: Client, treasury: Wallet): Promise<void> {
+  const tx: TrustSet = {
+    TransactionType: "TrustSet",
+    Account: treasury.address,
+    LimitAmount: {
+      currency: rlusdCurrency(),
+      issuer: rlusdIssuer(),
+      value: "1000000000",
+    },
+  };
+  const r = await client.submitAndWait(tx, { wallet: treasury });
+  const res = txResult(r);
+  if (res && res !== "tesSUCCESS" && res !== "tecNO_LINE_REDUNDANT") {
+    throw new Error(`RLUSD TrustSet failed: ${res}`);
+  }
+}
+
 // ── Pool seed (one-time, ceiling-checked) ─────────────────────────────────────
 // Deposits HYDRO + USDC to create the AMM. The HYDRO deposited draws down the
 // verified-minted ceiling. Treasury must already hold both balances.
@@ -171,7 +193,7 @@ export interface SeedResult {
 export async function seedPool(
   client: Client,
   treasury: Wallet,
-  hydDrops: number,
+  hydDroplets: number,
   usdcValue: number,
   tradingFee = 500,
 ): Promise<SeedResult> {
@@ -181,10 +203,10 @@ export async function seedPool(
   if (existing) throw new Error("AMM pool already exists — use refillPool to add HYDRO");
 
   // Reserve ceiling headroom BEFORE depositing freshly-issued HYDRO into the pool.
-  const reservation = await reservePoolDeposit(hydDrops);
+  const reservation = await reservePoolDeposit(hydDroplets);
   if (!reservation.ok) {
     throw new CeilingExceededError(
-      `seedPool blocked: ${reservation.reason} (remaining headroom ${reservation.remaining} drops)`,
+      `seedPool blocked: ${reservation.reason} (remaining headroom ${reservation.remaining} droplets)`,
     );
   }
 
@@ -192,17 +214,17 @@ export async function seedPool(
     const tx: AMMCreate = {
       TransactionType: "AMMCreate",
       Account: treasury.address,
-      Amount: { currency: hydCurrency(), issuer: hydIssuer(), value: hydroDropsToIou(hydDrops) },
+      Amount: { currency: hydCurrency(), issuer: hydIssuer(), value: hydroDropletsToIou(hydDroplets) },
       Amount2: { currency: usdcCurrency(), issuer: usdcIssuer(), value: usdcValue.toFixed(6) },
       TradingFee: tradingFee,
     };
     const r = await client.submitAndWait(tx, { wallet: treasury });
     const res = txResult(r);
     if (res !== "tesSUCCESS") throw new Error(`AMMCreate failed: ${res}`);
-    return { ammCreateHash: txHash(r), hydDeposited: hydDrops, usdcDeposited: usdcValue };
+    return { ammCreateHash: txHash(r), hydDeposited: hydDroplets, usdcDeposited: usdcValue };
   } catch (e) {
     // On-chain deposit did not land — give the ceiling headroom back.
-    await releasePoolDeposit(hydDrops);
+    await releasePoolDeposit(hydDroplets);
     throw e;
   }
 }
@@ -211,15 +233,15 @@ export async function seedPool(
 export async function refillPool(
   client: Client,
   treasury: Wallet,
-  hydDrops: number,
+  hydDroplets: number,
   usdcValue: number,
 ): Promise<{ depositHash: string; hydDeposited: number }> {
   assertAmmNetworkAllowed();
 
-  const reservation = await reservePoolDeposit(hydDrops);
+  const reservation = await reservePoolDeposit(hydDroplets);
   if (!reservation.ok) {
     throw new CeilingExceededError(
-      `refillPool blocked: ${reservation.reason} (remaining headroom ${reservation.remaining} drops)`,
+      `refillPool blocked: ${reservation.reason} (remaining headroom ${reservation.remaining} droplets)`,
     );
   }
 
@@ -229,16 +251,16 @@ export async function refillPool(
       Account: treasury.address,
       Asset: hydAsset(),
       Asset2: usdcAsset(),
-      Amount: { currency: hydCurrency(), issuer: hydIssuer(), value: hydroDropsToIou(hydDrops) },
+      Amount: { currency: hydCurrency(), issuer: hydIssuer(), value: hydroDropletsToIou(hydDroplets) },
       Amount2: { currency: usdcCurrency(), issuer: usdcIssuer(), value: usdcValue.toFixed(6) },
       Flags: 0x00100000, // tfTwoAsset
     };
     const r = await client.submitAndWait(tx, { wallet: treasury });
     const res = txResult(r);
     if (res !== "tesSUCCESS") throw new Error(`AMMDeposit failed: ${res}`);
-    return { depositHash: txHash(r), hydDeposited: hydDrops };
+    return { depositHash: txHash(r), hydDeposited: hydDroplets };
   } catch (e) {
-    await releasePoolDeposit(hydDrops);
+    await releasePoolDeposit(hydDroplets);
     throw e;
   }
 }
@@ -254,7 +276,7 @@ const tfImmediateOrCancel = 0x00040000;
 
 export interface SwapResult {
   swapHash: string;
-  hydroAcquiredDrops: number;
+  hydroAcquiredDroplets: number;
   hydroAcquired: string;
   usdcSpentMax: string;
 }
@@ -270,14 +292,14 @@ async function hydBalance(client: Client, account: string): Promise<number> {
 export async function swapUsdcForHydro(
   client: Client,
   treasury: Wallet,
-  hydroDrops: number,
+  hydroDroplets: number,
 ): Promise<SwapResult> {
   assertAmmNetworkAllowed();
 
   const pool = await getPoolInfo(client);
   if (!pool) throw new PoolNotFoundError();
 
-  const dy = hydroDrops / 1_000_000; // HYDRO units to receive
+  const dy = hydroDroplets / 1_000_000; // HYDRO units to receive
   if (dy <= 0) throw new Error("swapUsdcForHydro: non-positive HYDRO amount");
 
   const { hydValue: y, usdcValue: x, tradingFee } = pool;
@@ -297,7 +319,7 @@ export async function swapUsdcForHydro(
     TransactionType: "OfferCreate",
     Account: treasury.address,
     TakerGets: { currency: usdcCurrency(), issuer: usdcIssuer(), value: usdcMax },
-    TakerPays: { currency: hydCurrency(), issuer: hydIssuer(), value: hydroDropsToIou(hydroDrops) },
+    TakerPays: { currency: hydCurrency(), issuer: hydIssuer(), value: hydroDropletsToIou(hydroDroplets) },
     Flags: tfImmediateOrCancel,
   };
 
@@ -319,14 +341,14 @@ export async function swapUsdcForHydro(
   // An IoC offer returns tesSUCCESS even if nothing filled — confirm via balance delta.
   const after = await hydBalance(client, treasury.address);
   const acquired = after - before;
-  const acquiredDrops = Math.round(acquired * 1_000_000);
-  if (acquiredDrops <= 0) {
+  const acquiredDroplets = Math.round(acquired * 1_000_000);
+  if (acquiredDroplets <= 0) {
     throw new PoolInsufficientError("AMM swap delivered 0 HYDRO (pool depleted or reserve unfunded)");
   }
 
   return {
     swapHash: txHash(r),
-    hydroAcquiredDrops: acquiredDrops,
+    hydroAcquiredDroplets: acquiredDroplets,
     hydroAcquired: acquired.toFixed(6),
     usdcSpentMax: usdcMax,
   };

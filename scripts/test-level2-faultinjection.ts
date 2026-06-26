@@ -142,7 +142,7 @@ async function buildSignedRequest() {
     mimeType: "application/json",
     payTo: treasury,
     requiredDeadlineSeconds: 60,
-    offsetHydroDrops: 1,
+    offsetHydroDroplets: 1,
     estimatedMl: 1,
   };
   const payload = {

@@ -4,7 +4,7 @@
 // acceptable for the demo and we surface it honestly in the UI.)
 
 import { Agent, AmmState, BatchEntry, Settlement } from "./types";
-import { BATCH_SIZE, DROPS_PER_HYDRO, LITERS_PER_GALLON, SEED_AGENTS } from "./constants";
+import { BATCH_SIZE, DROPLETS_PER_HYDRO, LITERS_PER_GALLON, SEED_AGENTS } from "./constants";
 import { FOOTPRINT_METHODOLOGY_HASH } from "./footprint";
 
 interface LedgerState {
@@ -17,7 +17,7 @@ interface LedgerState {
   pendingBatch: BatchEntry[];
   pendingTotals: {
     usdc: number; // micro-USDC collected awaiting XRPL settlement
-    offsetDrops: number; // HYDRO drops queued for XRPL retirement
+    offsetDroplets: number; // HYDRO droplets queued for XRPL retirement
     waterMl: number;
     calls: number;
     sinceFlushMs: number;
@@ -50,7 +50,7 @@ function makeSeedSettlements(now: number): Settlement[] {
     const chain   = chains[i % chains.length];
     const calls   = 80 + ((i * 37) % 120);
     const liters  = 0.18 + (i * 0.07) % 1.2;
-    const drops   = Math.round((liters / LITERS_PER_GALLON) * DROPS_PER_HYDRO);
+    const droplets   = Math.round((liters / LITERS_PER_GALLON) * DROPLETS_PER_HYDRO);
     const usdc    = Math.round(liters * 0.0024 * 1_000_000);
     return {
       id: `seed_${i}`,
@@ -58,7 +58,7 @@ function makeSeedSettlements(now: number): Settlement[] {
       agentId: calls >= 100 ? "batch" : agentId,
       resource: resources[i % resources.length],
       usdcSettled: usdc,
-      amountDrops: drops,
+      amountDroplets: droplets,
       litersOffset: liters,
       callCount: calls,
       sourceChain: chain,
@@ -101,12 +101,12 @@ function bootstrap(): LedgerState {
   }
 
   const seedSettlements = makeSeedSettlements(now);
-  const totalRetiredDrops = seedSettlements.reduce((s, x) => s + x.amountDrops, 0);
+  const totalRetiredDroplets = seedSettlements.reduce((s, x) => s + x.amountDroplets, 0);
   const totalLitersOffset = seedSettlements.reduce((s, x) => s + x.litersOffset, 0);
 
   // Seed the HydroCoin AMM. 10M HYDRO paired against 12M USDC ⇒ start price $1.20.
-  // Deduct already-retired drops from the reserve so price reflects seeded history.
-  const reserveHydro = 10_000_000 * DROPS_PER_HYDRO - totalRetiredDrops;
+  // Deduct already-retired droplets from the reserve so price reflects seeded history.
+  const reserveHydro = 10_000_000 * DROPLETS_PER_HYDRO - totalRetiredDroplets;
   const reserveUSDC  = 12_000_000 * 1_000_000;
   return {
     agents,
@@ -116,14 +116,14 @@ function bootstrap(): LedgerState {
       reserveUSDC,
       k: reserveHydro * reserveUSDC,
       lastPriceUSDC: reserveUSDC / reserveHydro,
-      totalRetiredDrops,
+      totalRetiredDroplets,
       totalLitersOffset,
     },
     bootedAt: now,
     pendingBatch: [],
     pendingTotals: {
       usdc: 0,
-      offsetDrops: 0,
+      offsetDroplets: 0,
       waterMl: 0,
       calls: 0,
       sinceFlushMs: 0,
@@ -153,7 +153,7 @@ export function addToBatch(entry: BatchEntry): { shouldFlush: boolean } {
   }
   l.pendingBatch.push(entry);
   l.pendingTotals.usdc += entry.amountUsdc;
-  l.pendingTotals.offsetDrops += entry.offsetDrops;
+  l.pendingTotals.offsetDroplets += entry.offsetDroplets;
   l.pendingTotals.waterMl += entry.waterMl;
   l.pendingTotals.calls += 1;
   l.pendingTotals.sinceFlushMs = Date.now() - l.pendingTotals.lastFlushAt;
@@ -169,7 +169,7 @@ export function drainBatch(): BatchEntry[] {
   l.pendingBatch = [];
   l.pendingTotals = {
     usdc: 0,
-    offsetDrops: 0,
+    offsetDroplets: 0,
     waterMl: 0,
     calls: 0,
     sinceFlushMs: 0,
@@ -182,7 +182,7 @@ export function recordBatchSettlement(s: Settlement) {
   const l = ledger();
   l.settlements.unshift(s);
   if (l.settlements.length > 500) l.settlements.length = 500;
-  l.amm.totalRetiredDrops += s.amountDrops;
+  l.amm.totalRetiredDroplets += s.amountDroplets;
   l.amm.totalLitersOffset += s.litersOffset;
 }
 

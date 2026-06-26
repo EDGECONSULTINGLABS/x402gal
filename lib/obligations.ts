@@ -35,7 +35,7 @@ export interface Obligation {
   /** Avalanche Fuji tx hash from the USDC pull. Presence means Step 2 is done — never re-pull. */
   fujiTxHash?: string;
   amountUsdcMicros: number;
-  hydroDrops: number;
+  hydroDroplets: number;
   status: ObligationStatus;
   /** XRPL mint hop (issuer → treasury). */
   mintTxHash?: string;
@@ -122,7 +122,7 @@ async function createIfAbsent(o: Obligation): Promise<boolean> {
  */
 export async function beginSettlement(
   nonce: string,
-  init: { amountUsdcMicros: number; hydroDrops: number; bindingId?: string },
+  init: { amountUsdcMicros: number; hydroDroplets: number; bindingId?: string },
 ): Promise<BeginResult> {
   let existing: Obligation | null;
   try {
@@ -139,7 +139,7 @@ export async function beginSettlement(
       nonce,
       bindingId: init.bindingId,
       amountUsdcMicros: init.amountUsdcMicros,
-      hydroDrops: init.hydroDrops,
+      hydroDroplets: init.hydroDroplets,
       status: "RETIRING",
       attempts: 1,
       createdAt: now,
@@ -246,7 +246,7 @@ function logObligation(marker: string, o: Obligation): void {
       nonce: o.nonce,
       fujiTxHash: o.fujiTxHash ?? null,
       amountUsdcMicros: o.amountUsdcMicros,
-      hydroDrops: o.hydroDrops,
+      hydroDroplets: o.hydroDroplets,
       status: o.status,
       attempts: o.attempts,
       lastError: o.lastError ?? null,

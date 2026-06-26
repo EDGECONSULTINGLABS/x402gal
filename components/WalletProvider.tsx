@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { ReactNode, useEffect } from "react";
 import { getWagmiConfig } from "@/lib/walletConfig";
+import { XamanProvider } from "./XamanProvider";
 
 function makeQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } });
@@ -61,7 +62,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           })}
         >
           <WcErrorSuppressor />
-          {children}
+          <XamanProvider>{children}</XamanProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

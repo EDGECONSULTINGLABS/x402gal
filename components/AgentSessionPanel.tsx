@@ -79,7 +79,7 @@ export function AgentSessionPanel() {
           network: req.network,
           asset: "USDC",
           amountUsdc: req.amountUsdc,
-          offsetHydroDrops: req.offsetHydroDrops,
+          offsetHydroDroplets: req.offsetHydroDroplets,
           payer: agentId,
           recipient: req.recipient,
           nonce: req.nonce,

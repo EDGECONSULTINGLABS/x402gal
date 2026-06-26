@@ -12,11 +12,12 @@
 // Bootstrap (one-time, called automatically on first settlement):
 //   - Treasury sets TrustSet for HYD from Issuer (limit 1B)
 //   - Treasury sets TrustSet for USDC from the XRPL USDC issuer
+//   - Treasury sets TrustSet for RLUSD from the RLUSD issuer (accept RLUSD)
 //   - Issuer sets AccountSet asfDefaultRipple=false (best practice)
 
 import { Client, Wallet, type Payment, type TrustSet, type AccountSet } from "xrpl";
 import { getClient } from "./xrplClient";
-import { swapUsdcForHydro, ensureTreasuryUsdcTrustline } from "./xrplAmm";
+import { swapUsdcForHydro, ensureTreasuryUsdcTrustline, ensureTreasuryRlusdTrustline } from "./xrplAmm";
 
 export interface HydroSwapResult {
   swapHash: string;
@@ -31,9 +32,9 @@ function issuerAddress(): string {
   return process.env.HYDROCOIN_ISSUER_ADDRESS!;
 }
 
-// Convert HYDRO drops (6-decimal integer) to the IOU value string XRPL expects.
-function hydroDropsToIou(drops: number): string {
-  return Math.max(drops / 1_000_000, 0.000001).toFixed(6);
+// Convert HYDRO droplets (6-decimal integer) to the IOU value string XRPL expects.
+function hydroDropletsToIou(droplets: number): string {
+  return Math.max(droplets / 1_000_000, 0.000001).toFixed(6);
 }
 
 function txResult(result: Awaited<ReturnType<Client["submitAndWait"]>>): string {
@@ -84,6 +85,7 @@ async function ensureBootstrapped(client: Client, issuer: Wallet, treasury: Wall
   if (bootstrapped) return;
   await bootstrapTrustLine(client, treasury);
   await ensureTreasuryUsdcTrustline(client, treasury);
+  await ensureTreasuryRlusdTrustline(client, treasury);
   await disableRippling(client, issuer);
   bootstrapped = true;
 }
@@ -93,7 +95,7 @@ async function retireHydroToIssuer(
   client: Client,
   issuer: Wallet,
   treasury: Wallet,
-  hydroDrops: number,
+  hydroDroplets: number,
 ): Promise<string> {
   const tx: Payment = {
     TransactionType: "Payment",
@@ -102,7 +104,7 @@ async function retireHydroToIssuer(
     Amount: {
       currency: currency(),
       issuer: issuerAddress(),
-      value: hydroDropsToIou(hydroDrops),
+      value: hydroDropletsToIou(hydroDroplets),
     },
   };
   const r = await client.submitAndWait(tx, { wallet: treasury });
@@ -116,7 +118,7 @@ async function retireHydroToIssuer(
 // High-level entry point called by lib/settlement.ts on every batch flush.
 export async function swapAndRetireHydro(
   usdcMicros: number,
-  hydroDrops: number,
+  hydroDroplets: number,
 ): Promise<HydroSwapResult> {
   void usdcMicros;
 
@@ -142,9 +144,9 @@ export async function swapAndRetireHydro(
   await ensureBootstrapped(client, issuer, treasury);
 
   // Hop 1 — REAL AMM swap: treasury buys HYD from the HYDRO/USDC pool.
-  const { swapHash, hydroAcquiredDrops } = await swapUsdcForHydro(client, treasury, hydroDrops);
+  const { swapHash, hydroAcquiredDroplets } = await swapUsdcForHydro(client, treasury, hydroDroplets);
   // Hop 2 — retire EXACTLY what the swap delivered back to the issuer (burn = water credit).
-  const retireHash = await retireHydroToIssuer(client, issuer, treasury, hydroAcquiredDrops);
+  const retireHash = await retireHydroToIssuer(client, issuer, treasury, hydroAcquiredDroplets);
 
-  return { swapHash, retireHash, hydroAmount: hydroDropsToIou(hydroAcquiredDrops) };
+  return { swapHash, retireHash, hydroAmount: hydroDropletsToIou(hydroAcquiredDroplets) };
 }

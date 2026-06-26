@@ -6,6 +6,7 @@
 *.pem
 *.key
 .buyer-wallet.json
+.rlusd-buyer-wallet.json
 
 # ── Next.js ───────────────────────────────────────────────────────────────────
 .next/

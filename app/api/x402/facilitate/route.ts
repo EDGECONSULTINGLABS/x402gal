@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   const guarded = isEvmAuthPath && isEvmTreasuryConfigured();
 
   const usdcMicros = parseInt(auth?.value ?? "0", 10);
-  const hydroDrops = requirement.offsetHydroDrops ?? Math.max(1, Math.round(usdcMicros / 1_000));
+  const hydroDroplets = requirement.offsetHydroDroplets ?? Math.max(1, Math.round(usdcMicros / 1_000));
 
   // ── Step 2: Status-aware idempotency guard ──────────────────────────────────
   // RETIRED → duplicate (return original receipt); RETIRING → in-flight; FAILED/PENDING
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
   if (guarded) {
     const begin = await beginSettlement(auth!.nonce!, {
       amountUsdcMicros: usdcMicros,
-      hydroDrops,
+      hydroDroplets,
       bindingId: payload.invoiceId ?? requirement.invoiceId,
     });
     if (!begin.proceed) {
@@ -189,7 +189,7 @@ export async function POST(req: NextRequest) {
     agentId: payload.payload?.authorization?.from ?? "external_agent",
     resource: requirement.resource,
     amountUsdc: usdcMicros,
-    offsetDrops: hydroDrops,
+    offsetDroplets: hydroDroplets,
     waterMl: estimatedMl,
     sourceChain: "xrpl",
     nonce: payload.payload?.authorization?.nonce ?? "",
@@ -235,12 +235,12 @@ export async function GET() {
     version: 1,
     supportedNetworks: ["xrpl", "avalanche-fuji"],
     supportedSchemes: ["exact"],
-    supportedAssets: ["USDC"],
+    supportedAssets: ["RLUSD", "USDC"],
     settlementHops: ["payment", "swap", "retire"],
     retirementAsset: "HYD",
     retirementRegistry: "XRPL",
     description:
-      "Dual-rail x402 facilitator. XRPL native: pre-signed Payment tx settlement + HydroCoin retirement. Avalanche Fuji: ERC-3009 receiveWithAuthorization.",
+      "Dual-rail x402 facilitator. XRPL native: pre-signed Payment tx settlement in RLUSD or USDC + HydroCoin retirement. Avalanche Fuji: ERC-3009 receiveWithAuthorization.",
     docs: "https://github.com/your-org/x402gal",
   });
 }

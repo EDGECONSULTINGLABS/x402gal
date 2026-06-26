@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     agentId: payload.payer,
     resource: requirement.resource,
     amountUsdc: payload.amountUsdc,
-    offsetDrops: payload.offsetHydroDrops,
+    offsetDroplets: payload.offsetHydroDroplets,
     waterMl: requirement.estimatedMl,
     sourceChain: payload.sourceChain,
     nonce: payload.nonce,

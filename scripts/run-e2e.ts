@@ -24,7 +24,7 @@ const BASE = process.env.BASE ?? "http://localhost:3000";
 const FUJI_USDC = "0x5425890298aed601595a70AB815c96711a31Bc65" as Hex;
 const FUJI_CHAIN_ID = 43113;
 const AMOUNT_MICROS = Number(process.env.E2E_AMOUNT_MICROS ?? "10000"); // 0.01 USDC
-const OFFSET_DROPS = Number(process.env.E2E_OFFSET_DROPS ?? "100000"); // 0.1 HYDRO
+const OFFSET_DROPLETS = Number(process.env.E2E_OFFSET_DROPLETS ?? "100000"); // 0.1 HYDRO
 
 const publicClient = createPublicClient({ chain: avalancheFuji, transport: http(process.env.RPC_AVALANCHE ?? "https://api.avax-test.network/ext/bc/C/rpc") });
 
@@ -76,7 +76,7 @@ async function main() {
     x402Version: 1, scheme: "exact", network: "xrpl", asset: "USDC",
     maxAmountRequired: AMOUNT_MICROS, resource: "/api/ai/chat", description: "x402GAL e2e",
     mimeType: "application/json", payTo: treasury, requiredDeadlineSeconds: 60,
-    offsetHydroDrops: OFFSET_DROPS, estimatedMl: 1,
+    offsetHydroDroplets: OFFSET_DROPLETS, estimatedMl: 1,
   };
   const payload = {
     x402Version: 1, scheme: "exact", network: "xrpl",

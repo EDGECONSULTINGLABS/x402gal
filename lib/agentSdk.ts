@@ -33,7 +33,7 @@ export async function x402galFetch(input: string, opts: X402galFetchOptions): Pr
     network: req.network,
     asset: "USDC",
     amountUsdc: req.amountUsdc,
-    offsetHydroDrops: req.offsetHydroDrops,
+    offsetHydroDroplets: req.offsetHydroDroplets,
     payer: opts.wallet.agentId,
     recipient: req.recipient,
     nonce: req.nonce,

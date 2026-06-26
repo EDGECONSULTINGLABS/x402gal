@@ -22,28 +22,31 @@
 
 import { Redis } from "@upstash/redis";
 
-export const HYDRO_DROPS_PER_UNIT = 1_000_000;
+export const HYDRO_DROPLETS_PER_UNIT = 1_000_000;
 
-// Default testnet ceiling: 1,000,000 HYDRO units = 1e12 drops. Stands in for the
-// MRV-verified supply available for the public testnet demo. Override per-deploy
-// with HYDRO_VERIFIED_CEILING_DROPS (raised only by a real verified mint event).
-const DEFAULT_CEILING_DROPS = 1_000_000 * HYDRO_DROPS_PER_UNIT;
+// Default testnet ceiling: 1,000,000 HYDRO units = 1e12 droplets. Stands in for
+// the MRV-verified supply available for the public testnet demo. Override per-deploy
+// with HYDRO_VERIFIED_CEILING_DROPLETS (raised only by a real verified mint event).
+const DEFAULT_CEILING_DROPLETS = 1_000_000 * HYDRO_DROPLETS_PER_UNIT;
 
 const CUMULATIVE_KEY = "x402:hydro:pool_deposited_drops";
 
-export function verifiedMintedCeilingDrops(): number {
-  const env = process.env.HYDRO_VERIFIED_CEILING_DROPS;
-  if (env === undefined || env === "") return DEFAULT_CEILING_DROPS;
+export function verifiedMintedCeilingDroplets(): number {
+  // New name preferred; HYDRO_VERIFIED_CEILING_DROPS kept as a legacy alias so
+  // existing deployments don't silently fall back to the default on rename.
+  const env =
+    process.env.HYDRO_VERIFIED_CEILING_DROPLETS ?? process.env.HYDRO_VERIFIED_CEILING_DROPS;
+  if (env === undefined || env === "") return DEFAULT_CEILING_DROPLETS;
   const n = Number(env);
   if (!Number.isFinite(n) || n < 0) {
-    throw new Error(`Invalid HYDRO_VERIFIED_CEILING_DROPS: ${env}`);
+    throw new Error(`Invalid HYDRO_VERIFIED_CEILING_DROPLETS: ${env}`);
   }
   return Math.floor(n);
 }
 
 export interface CeilingCheck {
   ok: boolean;
-  /** Cumulative deposited total AFTER applying `additionalDrops` (if it were allowed). */
+  /** Cumulative deposited total AFTER applying `additionalDroplets` (if it were allowed). */
   cumulativeAfter: number;
   ceiling: number;
   /** Remaining headroom BEFORE this deposit (ceiling − current cumulative). */
@@ -56,19 +59,19 @@ export interface CeilingCheck {
  * Level-1 unit-testable. Returns ok=false (never throws) so callers decide policy.
  */
 export function checkCeiling(
-  cumulativeDepositedDrops: number,
-  additionalDrops: number,
-  ceilingDrops: number,
+  cumulativeDepositedDroplets: number,
+  additionalDroplets: number,
+  ceilingDroplets: number,
 ): CeilingCheck {
-  const remaining = ceilingDrops - cumulativeDepositedDrops;
-  if (!Number.isFinite(additionalDrops) || additionalDrops < 0) {
-    return { ok: false, cumulativeAfter: cumulativeDepositedDrops, ceiling: ceilingDrops, remaining, reason: "NEGATIVE_DEPOSIT" };
+  const remaining = ceilingDroplets - cumulativeDepositedDroplets;
+  if (!Number.isFinite(additionalDroplets) || additionalDroplets < 0) {
+    return { ok: false, cumulativeAfter: cumulativeDepositedDroplets, ceiling: ceilingDroplets, remaining, reason: "NEGATIVE_DEPOSIT" };
   }
-  const after = cumulativeDepositedDrops + additionalDrops;
-  if (after > ceilingDrops) {
-    return { ok: false, cumulativeAfter: after, ceiling: ceilingDrops, remaining, reason: "CEILING_EXCEEDED" };
+  const after = cumulativeDepositedDroplets + additionalDroplets;
+  if (after > ceilingDroplets) {
+    return { ok: false, cumulativeAfter: after, ceiling: ceilingDroplets, remaining, reason: "CEILING_EXCEEDED" };
   }
-  return { ok: true, cumulativeAfter: after, ceiling: ceilingDrops, remaining: ceilingDrops - after };
+  return { ok: true, cumulativeAfter: after, ceiling: ceilingDroplets, remaining: ceilingDroplets - after };
 }
 
 // ── Durable tracking ──────────────────────────────────────────────────────────
@@ -96,7 +99,7 @@ export async function getCumulativeDeposited(): Promise<number> {
 
 /**
  * Atomically reserve headroom for a HYDRO deposit into the pool. Call this BEFORE
- * submitting an AMMCreate/AMMDeposit that adds `additionalDrops` of HYDRO.
+ * submitting an AMMCreate/AMMDeposit that adds `additionalDroplets` of HYDRO.
  *
  * Atomicity: INCRBY first (single atomic op), then if the new total breaches the
  * ceiling, undo it and reject. Two concurrent reservers can never both slip past
@@ -104,36 +107,36 @@ export async function getCumulativeDeposited(): Promise<number> {
  *
  * Fail-closed: if Redis is configured but the call throws, refuse the reservation.
  */
-export async function reservePoolDeposit(additionalDrops: number): Promise<CeilingCheck> {
-  const ceiling = verifiedMintedCeilingDrops();
+export async function reservePoolDeposit(additionalDroplets: number): Promise<CeilingCheck> {
+  const ceiling = verifiedMintedCeilingDroplets();
 
-  if (!Number.isFinite(additionalDrops) || additionalDrops < 0) {
+  if (!Number.isFinite(additionalDroplets) || additionalDroplets < 0) {
     return { ok: false, cumulativeAfter: NaN, ceiling, remaining: NaN, reason: "NEGATIVE_DEPOSIT" };
   }
 
   const redis = getRedis();
   if (!redis) {
-    const check = checkCeiling(memCumulative, additionalDrops, ceiling);
+    const check = checkCeiling(memCumulative, additionalDroplets, ceiling);
     if (check.ok) memCumulative = check.cumulativeAfter;
     return check;
   }
 
   let after: number;
   try {
-    after = await redis.incrby(CUMULATIVE_KEY, additionalDrops);
+    after = await redis.incrby(CUMULATIVE_KEY, additionalDroplets);
   } catch {
     return { ok: false, cumulativeAfter: NaN, ceiling, remaining: NaN, reason: "GUARD_UNAVAILABLE" };
   }
   if (after > ceiling) {
     // Undo — this deposit would breach the verified ceiling.
     try {
-      await redis.incrby(CUMULATIVE_KEY, -additionalDrops);
+      await redis.incrby(CUMULATIVE_KEY, -additionalDroplets);
     } catch {
       // Best-effort undo; the value is over-counted but that only makes the guard
       // STRICTER (never looser), which is the safe direction. Log for reconciliation.
-      console.error(`[hydroSupply][UNDO_FAILED] over-counted ${additionalDrops} drops; manual reconcile`);
+      console.error(`[hydroSupply][UNDO_FAILED] over-counted ${additionalDroplets} droplets; manual reconcile`);
     }
-    return { ok: false, cumulativeAfter: after, ceiling, remaining: ceiling - (after - additionalDrops), reason: "CEILING_EXCEEDED" };
+    return { ok: false, cumulativeAfter: after, ceiling, remaining: ceiling - (after - additionalDroplets), reason: "CEILING_EXCEEDED" };
   }
   return { ok: true, cumulativeAfter: after, ceiling, remaining: ceiling - after };
 }
@@ -143,22 +146,22 @@ export async function reservePoolDeposit(additionalDrops: number): Promise<Ceili
  * the headroom was reserved). Keeps the cumulative total in sync with what actually
  * landed in the pool. Never drives the counter below zero.
  */
-export async function releasePoolDeposit(drops: number): Promise<void> {
-  if (!Number.isFinite(drops) || drops <= 0) return;
+export async function releasePoolDeposit(droplets: number): Promise<void> {
+  if (!Number.isFinite(droplets) || droplets <= 0) return;
   const redis = getRedis();
   if (!redis) {
-    memCumulative = Math.max(0, memCumulative - drops);
+    memCumulative = Math.max(0, memCumulative - droplets);
     return;
   }
   try {
-    const after = await redis.incrby(CUMULATIVE_KEY, -drops);
+    const after = await redis.incrby(CUMULATIVE_KEY, -droplets);
     if (after < 0) await redis.set(CUMULATIVE_KEY, 0);
   } catch {
-    console.error(`[hydroSupply][RELEASE_FAILED] could not release ${drops} drops`);
+    console.error(`[hydroSupply][RELEASE_FAILED] could not release ${droplets} droplets`);
   }
 }
 
-/** Headroom remaining before the verified ceiling (drops). For monitoring. */
-export async function remainingHeadroomDrops(): Promise<number> {
-  return verifiedMintedCeilingDrops() - (await getCumulativeDeposited());
+/** Headroom remaining before the verified ceiling (droplets). For monitoring. */
+export async function remainingHeadroomDroplets(): Promise<number> {
+  return verifiedMintedCeilingDroplets() - (await getCumulativeDeposited());
 }

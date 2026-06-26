@@ -37,7 +37,7 @@ function ok(name: string, cond: boolean, detail?: string) {
   }
 }
 
-const init = { amountUsdcMicros: 1_000, hydroDrops: 1 };
+const init = { amountUsdcMicros: 1_000, hydroDroplets: 1 };
 let n = 0;
 const nonce = () => `test-nonce-${Date.now()}-${n++}`;
 

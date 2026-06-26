@@ -2,8 +2,8 @@
 //
 // Agents pay in USDC via x402. Micro-payments batch; on flush the treasury
 // swaps the accumulated USDC for HydroCoin (HYDRO) and retires it on XRPL
-// as a verifiable water-restoration credit. HYDRO is denominated in "drops"
-// (1 HYDRO = 1_000_000 drops); 1 HYDRO = 1 US gallon of restored freshwater.
+// as a verifiable water-restoration credit. HYDRO is denominated in "droplets"
+// (1 HYDRO = 1_000_000 droplets); 1 HYDRO = 1 US gallon of restored freshwater.
 
 export type Chain = "base" | "solana" | "ethereum" | "polygon" | "xrpl" | "avalanche";
 
@@ -31,9 +31,9 @@ export interface PaymentRequirement {
   x402Version: 1;
   scheme: "exact"; // exact-amount scheme, the simplest x402 mode
   network: Chain; // settlement network; XRPL is the retirement registry
-  asset: "USDC"; // agents pay in USDC; HYDRO is the downstream retirement unit
+  asset: "USDC" | "RLUSD"; // agents pay in RLUSD or USDC; HYDRO is the downstream retirement unit
   amountUsdc: number; // payable amount in micro-USDC (6 decimals)
-  offsetHydroDrops: number; // HYDRO drops to be retired on XRPL for this call
+  offsetHydroDroplets: number; // HYDRO droplets to be retired on XRPL for this call
   estimatedLiters: number; // site water in liters
   estimatedMl: number; // same in mL, for human readability at small scales
   recipient: string; // 402GAL treasury address on `network`
@@ -76,9 +76,9 @@ export interface PaymentPayload {
   x402Version: 1;
   scheme: "exact";
   network: Chain;
-  asset: "USDC";
-  amountUsdc: number; // micro-USDC the agent is paying
-  offsetHydroDrops: number; // HYDRO drops this payment will retire on XRPL
+  asset: "USDC" | "RLUSD";
+  amountUsdc: number; // micro-stablecoin the agent is paying (6-decimal)
+  offsetHydroDroplets: number; // HYDRO droplets this payment will retire on XRPL
   payer: AgentId;
   recipient: string;
   nonce: string;
@@ -94,7 +94,7 @@ export interface Settlement {
   agentId: AgentId | "batch"; // "batch" when this settlement aggregates many agents
   resource: string;
   usdcSettled: number; // micro-USDC collected from x402 payments
-  amountDrops: number; // HYDRO drops retired on XRPL against the water credit
+  amountDroplets: number; // HYDRO droplets retired on XRPL against the water credit
   litersOffset: number;
   callCount: number; // number of x402 calls aggregated into this settlement
   sourceChain: Chain;
@@ -111,7 +111,7 @@ export interface BatchEntry {
   agentId: AgentId;
   resource: string;
   amountUsdc: number; // micro-USDC paid for this call
-  offsetDrops: number; // HYDRO drops to retire for this call
+  offsetDroplets: number; // HYDRO droplets to retire for this call
   waterMl: number;
   sourceChain: Chain;
   nonce: string;
@@ -126,10 +126,10 @@ export interface XrplHop {
 }
 
 export interface AmmState {
-  reserveHydro: number; // drops
+  reserveHydro: number; // droplets
   reserveUSDC: number; // 6-decimal micro-USDC
   k: number;
   lastPriceUSDC: number; // USDC per HYDRO
-  totalRetiredDrops: number;
+  totalRetiredDroplets: number;
   totalLitersOffset: number;
 }

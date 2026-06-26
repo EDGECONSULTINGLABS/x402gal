@@ -53,6 +53,7 @@
 
 import { isXrplConfigured, getClient } from "./xrplClient";
 import { swapAndRetireHydro } from "./xrplHydro";
+import { matchXrplAsset } from "./xrplAssets";
 import { decode, verifySignature, type Client, type Transaction } from "xrpl";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -74,7 +75,7 @@ export interface X402Requirement {
   requiredDeadlineSeconds: number;
   facilitatorUrl?: string;
   // 402GAL extensions — water footprint metadata
-  offsetHydroDrops?: number;  // HYDRO drops to retire for this payment
+  offsetHydroDroplets?: number;  // HYDRO droplets to retire for this payment
   estimatedMl?: number;       // site water footprint in mL
   footprint?: Record<string, unknown>;
   // Native XRPL settlement binding
@@ -123,11 +124,9 @@ export interface SettleResult {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-
-/** Circle XRPL testnet USDC currency code (40-char hex). */
-const USDC_CURRENCY_XRPL = "5553444300000000000000000000000000000000";
-/** Circle XRPL testnet USDC issuer address. */
-const USDC_ISSUER_XRPL = "rHuGNhqTG32mfmAvWA8hUyWRLV3tCSwKQt";
+// Accepted XRPL asset (currency, issuer) pairs are defined in lib/xrplAssets.ts
+// and matched via matchXrplAsset() in verify() below. Adding a new accepted
+// stablecoin is a one-entry change there, not here.
 
 import { Redis } from "@upstash/redis";
 
@@ -228,16 +227,17 @@ export async function xrplVerify(
       return { isValid: false, invalidReason: `INVALID_DESTINATION: got ${decoded.Destination}, expected ${requirement.payTo}` };
     }
 
-    // 3. Amount — must be issued-currency USDC
+    // 3. Amount — must be one of the accepted issued-currency assets (USDC or RLUSD)
     const amt = decoded.Amount as Record<string, unknown> | undefined;
     if (!amt || typeof amt !== "object") {
       return { isValid: false, invalidReason: "AMOUNT_MISMATCH: Amount is not an issued-currency object" };
     }
-    if (amt.currency !== USDC_CURRENCY_XRPL) {
-      return { isValid: false, invalidReason: `AMOUNT_MISMATCH: currency ${amt.currency}, expected ${USDC_CURRENCY_XRPL}` };
-    }
-    if (amt.issuer !== USDC_ISSUER_XRPL) {
-      return { isValid: false, invalidReason: `AMOUNT_MISMATCH: issuer ${amt.issuer}, expected ${USDC_ISSUER_XRPL}` };
+    const asset = matchXrplAsset(amt.currency, amt.issuer);
+    if (!asset) {
+      return {
+        isValid: false,
+        invalidReason: `AMOUNT_MISMATCH: unsupported asset currency=${amt.currency} issuer=${amt.issuer} — accepts USDC or RLUSD`,
+      };
     }
     const requiredMicro = BigInt(requirement.maxAmountRequired ?? "0");
     let actualMicro: bigint;
@@ -325,7 +325,7 @@ export async function xrplVerify(
 export async function xrplSettleNative(
   xrplSignedTx: string,
   usdcMicros: number,
-  hydroDrops: number,
+  hydroDroplets: number,
 ): Promise<SettleResult> {
   if (!isXrplConfigured()) {
     const rndHex = (n: number) =>
@@ -393,7 +393,7 @@ export async function xrplSettleNative(
 
   // Only on confirmed tesSUCCESS → proceed to HYDRO swap + retire.
   try {
-    const { swapHash, retireHash } = await swapAndRetireHydro(usdcMicros, hydroDrops);
+    const { swapHash, retireHash } = await swapAndRetireHydro(usdcMicros, hydroDroplets);
     return {
       success: true,
       paymentTxHash,
@@ -429,11 +429,11 @@ export async function xrplSettle(
   requirement: X402Requirement,
 ): Promise<SettleResult> {
   const usdcMicros = parseInt(payload.payload?.authorization?.value ?? "0", 10);
-  const hydroDrops = requirement.offsetHydroDrops ?? Math.max(1, Math.round(usdcMicros / 1_000));
+  const hydroDroplets = requirement.offsetHydroDroplets ?? Math.max(1, Math.round(usdcMicros / 1_000));
 
   // Native XRPL Payment path — the buyer submitted a pre-signed tx blob.
   if (payload.xrplSignedTx) {
-    return xrplSettleNative(payload.xrplSignedTx, usdcMicros, hydroDrops);
+    return xrplSettleNative(payload.xrplSignedTx, usdcMicros, hydroDroplets);
   }
 
   // EVM-auth fallback path — no pre-signed XRPL tx; HYDRO retire only.
@@ -450,7 +450,7 @@ export async function xrplSettle(
   }
 
   try {
-    const { swapHash, retireHash } = await swapAndRetireHydro(usdcMicros, hydroDrops);
+    const { swapHash, retireHash } = await swapAndRetireHydro(usdcMicros, hydroDroplets);
     return {
       success: true,
       txHash: swapHash,

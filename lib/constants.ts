@@ -3,13 +3,13 @@
 // Footprint is computed at request time by lib/footprint.ts using the v2
 // boundary-aware Green Grid WUE split (Alula spec). HYDRO is denominated in
 // US gallons of restored freshwater: 1 HYDRO = 1 gallon. A typical
-// GPT-4-class inference is ~0.07 mL ≈ 1.85e-5 HYDRO ≈ 18 drops, which is
+// GPT-4-class inference is ~0.07 mL ≈ 1.85e-5 HYDRO ≈ 18 droplets, which is
 // why per-call x402 payments are aggregated into a single XRPL settlement
 // every BATCH_SIZE calls so each on-chain tick is human-visible.
 
 import { ModelTier, InfraTier } from "./footprint";
 
-export const DROPS_PER_HYDRO = 1_000_000;
+export const DROPLETS_PER_HYDRO = 1_000_000;
 export const LITERS_PER_GALLON = 3.785411784; // exact, US liquid gallon
 export const TREASURY_ADDRESS =
   process.env.XRPL_TREASURY_ADDRESS || "racKPugSG4zH8qZczvcP2p3f1P9NRfLSjf";
@@ -21,12 +21,12 @@ export const FACILITATOR_URL = "/api/x402/verify";
 export const BATCH_SIZE = 100;
 export const BATCH_FLUSH_MS = 60_000;
 
-// Convert site water (liters) to HYDRO drops at the protocol denomination.
-export function litersToDrops(liters: number): number {
-  return Math.round((liters / LITERS_PER_GALLON) * DROPS_PER_HYDRO);
+// Convert site water (liters) to HYDRO droplets at the protocol denomination.
+export function litersToDroplets(liters: number): number {
+  return Math.round((liters / LITERS_PER_GALLON) * DROPLETS_PER_HYDRO);
 }
-export function dropsToLiters(drops: number): number {
-  return (drops / DROPS_PER_HYDRO) * LITERS_PER_GALLON;
+export function dropletsToLiters(droplets: number): number {
+  return (droplets / DROPLETS_PER_HYDRO) * LITERS_PER_GALLON;
 }
 
 // Per-resource defaults for footprint calc. Token counts here are typical

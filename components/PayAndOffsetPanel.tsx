@@ -208,7 +208,7 @@ export function PayAndOffsetPanel() {
             </a>{" "}
             (select <span className="text-slate-200">Avalanche Fuji</span>), send to your wallet.
           </li>
-          <li>Connect your wallet → one tap to switch to Fuji (no gas).</li>
+          <li>Connect your <span className="text-slate-200">EVM</span> wallet → one tap to switch to Fuji (no gas).</li>
           <li>Click <span className="text-slate-200">Pay &amp; Offset</span>, sign once → watch it settle on two chains.</li>
         </ol>
       </div>
@@ -216,7 +216,7 @@ export function PayAndOffsetPanel() {
       {/* ── Action ── */}
       {!isConnected ? (
         <p className="mt-3 rounded-md border border-edge bg-ink/40 p-3 text-center text-xs text-slate-400">
-          Connect your wallet (top right) to begin.
+          Connect your EVM wallet (top right) to begin. Paying in RLUSD instead? Use the RLUSD panel above — no EVM wallet needed.
         </p>
       ) : (
         <button

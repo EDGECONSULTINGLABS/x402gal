@@ -257,8 +257,8 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
               <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border border-hydro-400/30 bg-hydro-500/10">
                 <Wallet size={22} className="text-hydro-300" />
               </div>
-              <p className="text-sm font-medium text-slate-200">Connect your wallet to interact</p>
-              <p className="mt-1 text-xs text-slate-500">Send queries, flush batches, and track your agent&apos;s water offset</p>
+              <p className="text-sm font-medium text-slate-200">Connect your EVM wallet to interact</p>
+              <p className="mt-1 text-xs text-slate-500">For the Avalanche-Fuji USDC demo. Already connected XRPL? Use the RLUSD panel below.</p>
               <div className="mt-4 flex justify-center">
                 <ConnectButton />
               </div>

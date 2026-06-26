@@ -642,9 +642,9 @@ function Hero({
           402 Payment Required
         </code>{" "}
         with a v2 boundary-aware footprint. The agent signs an x402 payload to
-        pay in <span className="font-semibold text-hydro-300">USDC</span>,
-        micro-payments accrue into a 100-call batch, the treasury swaps the
-        USDC for{" "}
+        pay in <span className="font-semibold text-hydro-300">RLUSD</span> or{" "}
+        <span className="font-semibold text-hydro-300">USDC</span>, micro-payments
+        accrue into a 100-call batch, the treasury swaps the stablecoin for{" "}
         <span className="font-semibold text-hydro-300">HydroCoin</span> on the
         XRPL DEX and retires it as a verifiable water-restoration credit.
       </motion.p>

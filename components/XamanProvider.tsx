@@ -22,6 +22,14 @@ import {
 
 type XamanStatus = "loading" | "unconfigured" | "disconnected" | "connecting" | "connected" | "error";
 
+/** Sign request pushed to the connected device (QR/deeplink are fallbacks). */
+export interface PushedSignRequest {
+  uuid: string;
+  qrPng: string;
+  deeplink: string;
+  pushed: boolean;
+}
+
 interface XamanContextValue {
   status: XamanStatus;
   account: string | null;
@@ -30,6 +38,13 @@ interface XamanContextValue {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   refreshBalance: () => Promise<void>;
+  /**
+   * Create a sign request for the CONNECTED user using their authorized JWT
+   * session — Xaman pushes it straight to their device (no re-scan). Returns
+   * null if there's no live session. `submit:false` so we get the signed hex.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pushSignRequest: (txjson: any, instruction?: string) => Promise<PushedSignRequest | null>;
 }
 
 const XamanContext = createContext<XamanContextValue | null>(null);
@@ -42,6 +57,9 @@ export function useXaman(): XamanContextValue {
 
 export function XamanProvider({ children }: { children: ReactNode }) {
   const pkceRef = useRef<any>(null);
+  // The authorized XummSdkJwt from the resolved flow — used to push sign
+  // requests directly to the connected user's Xaman app.
+  const sdkRef = useRef<any>(null);
   const [status, setStatus] = useState<XamanStatus>("loading");
   const [account, setAccount] = useState<string | null>(null);
   const [rlusd, setRlusd] = useState<string | null>(null);
@@ -58,9 +76,11 @@ export function XamanProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyState = useCallback(
-    async (state: { me?: { account?: string } } | null | undefined) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async (state: any) => {
       const acct = state?.me?.account ?? null;
       if (acct) {
+        if (state?.sdk) sdkRef.current = state.sdk;
         setAccount(acct);
         setStatus("connected");
         setError(null);
@@ -173,10 +193,29 @@ export function XamanProvider({ children }: { children: ReactNode }) {
     try {
       await pkceRef.current?.logout();
     } finally {
+      sdkRef.current = null;
       setAccount(null);
       setRlusd(null);
       setStatus("disconnected");
     }
+  }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pushSignRequest = useCallback(async (txjson: any, instruction?: string) => {
+    const sdk = sdkRef.current;
+    if (!sdk) return null;
+    const created = await sdk.payload.create({
+      txjson,
+      options: { submit: false, expire: 5 },
+      custom_meta: instruction ? { instruction } : undefined,
+    });
+    if (!created) return null;
+    return {
+      uuid: created.uuid as string,
+      qrPng: created.refs?.qr_png ?? "",
+      deeplink: created.next?.always ?? "",
+      pushed: !!created.pushed,
+    };
   }, []);
 
   const refreshBalance = useCallback(async () => {
@@ -185,7 +224,7 @@ export function XamanProvider({ children }: { children: ReactNode }) {
 
   return (
     <XamanContext.Provider
-      value={{ status, account, rlusd, error, connect, disconnect, refreshBalance }}
+      value={{ status, account, rlusd, error, connect, disconnect, refreshBalance, pushSignRequest }}
     >
       {children}
     </XamanContext.Provider>

@@ -9,7 +9,9 @@ import {
   AlertTriangle,
   Smartphone,
   QrCode,
+  BellRing,
 } from "lucide-react";
+import { useXaman } from "./XamanProvider";
 
 // Human-facing RLUSD pay flow on XRPL via Xaman (formerly XUMM).
 //
@@ -48,9 +50,13 @@ interface Receipt {
 const POLL_MS = 2500;
 
 export function XrplPayPanel() {
+  const { status: xamanStatus, account: xamanAccount, pushSignRequest } = useXaman();
+  const connected = xamanStatus === "connected" && !!xamanAccount;
+
   const [phase, setPhase] = useState<Phase>("idle");
   const [priceMicros, setPriceMicros] = useState<number | null>(null);
   const [payload, setPayload] = useState<CreatedPayload | null>(null);
+  const [pushed, setPushed] = useState(false);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [error, setError] = useState<string>("");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -164,10 +170,12 @@ export function XrplPayPanel() {
     }, POLL_MS);
   }
 
-  async function payWithXaman() {
+  // Anonymous flow: server creates the Xaman sign request and we show a QR.
+  async function payWithQr() {
     setReceipt(null);
     setError("");
     setPayload(null);
+    setPushed(false);
     try {
       setPhase("creating");
       const res = await fetch("/api/xaman/payload", {
@@ -188,6 +196,50 @@ export function XrplPayPanel() {
     }
   }
 
+  // Connected flow: server returns a tamper-proof txjson; we push the sign
+  // request straight to the user's authorized Xaman device (no re-scan).
+  async function payConnected() {
+    setReceipt(null);
+    setError("");
+    setPayload(null);
+    setPushed(false);
+    try {
+      setPhase("creating");
+      const qres = await fetch("/api/xaman/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resource: "/api/ai/chat" }),
+      });
+      const q = await qres.json();
+      if (!qres.ok) throw new Error(q?.error ?? `quote failed (HTTP ${qres.status})`);
+
+      const created = await pushSignRequest(q.txjson, q.instruction);
+      if (!created) throw new Error("XRPL session not ready — reconnect XRPL (top right) and try again.");
+
+      const p: CreatedPayload = {
+        uuid: created.uuid,
+        qrPng: created.qrPng,
+        deeplink: created.deeplink,
+        invoiceId: q.invoiceId,
+        amountMicros: q.amountMicros,
+        destination: q.destination,
+        offsetHydroDroplets: q.offsetHydroDroplets,
+        estimatedMl: q.estimatedMl,
+        resource: q.resource,
+      };
+      setPayload(p);
+      setPushed(created.pushed);
+      setPriceMicros(p.amountMicros);
+      setPhase("awaiting");
+      startPolling(p);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
+      setPhase("error");
+    }
+  }
+
+  const payWithXaman = connected ? payConnected : payWithQr;
+
   return (
     <div className="glass-strong mt-4 rounded-2xl p-5">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-hydro-300">
@@ -198,27 +250,56 @@ export function XrplPayPanel() {
 
       {/* Onboarding */}
       <div className="mt-3 rounded-xl border border-hydro-400/20 bg-hydro-500/5 p-3 text-xs leading-relaxed text-slate-300">
-        <p className="font-medium text-hydro-200">
-          Pay an AI query&apos;s water bill in <span className="text-hydro-300">RLUSD</span> straight
-          from your Xaman wallet — settled natively on the XRP Ledger.
-        </p>
-        <ol className="mt-2 list-decimal space-y-1 pl-4 text-slate-400">
-          <li>
-            Install <span className="text-slate-200">Xaman</span> and hold a little testnet RLUSD
-            (trust line + faucet at{" "}
-            <a
-              href="https://tryrlusd.com"
-              target="_blank"
-              rel="noreferrer"
-              className="text-hydro-300 underline decoration-dotted hover:text-hydro-200"
-            >
-              tryrlusd.com
-            </a>
-            ).
-          </li>
-          <li>Click <span className="text-slate-200">Pay with Xaman</span>, scan the QR (or tap on mobile).</li>
-          <li>Approve once → we submit it on XRPL and retire the water credit.</li>
-        </ol>
+        {connected ? (
+          <>
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-hydro-400/30 bg-hydro-500/10 px-2.5 py-1 font-mono text-[10px] text-hydro-200">
+              <CheckCircle2 size={11} /> XRPL connected · {xamanAccount!.slice(0, 6)}…{xamanAccount!.slice(-4)}
+            </div>
+            <p className="font-medium text-hydro-200">
+              You&apos;re signed in. We&apos;ll push the{" "}
+              <span className="text-hydro-300">RLUSD</span> sign request straight to your Xaman app —
+              just approve it on your device.
+            </p>
+            <p className="mt-1 text-slate-400">
+              Approving authorizes this one payment (it isn&apos;t another login). Need testnet RLUSD?
+              Trust line + faucet at{" "}
+              <a
+                href="https://tryrlusd.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-hydro-300 underline decoration-dotted hover:text-hydro-200"
+              >
+                tryrlusd.com
+              </a>
+              .
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="font-medium text-hydro-200">
+              Pay an AI query&apos;s water bill in <span className="text-hydro-300">RLUSD</span> straight
+              from your Xaman wallet — settled natively on the XRP Ledger.
+            </p>
+            <ol className="mt-2 list-decimal space-y-1 pl-4 text-slate-400">
+              <li>
+                <span className="text-slate-200">Connect XRPL</span> (top right) to push the request to
+                your phone — or just scan the QR below. Hold a little testnet RLUSD (trust line + faucet
+                at{" "}
+                <a
+                  href="https://tryrlusd.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-hydro-300 underline decoration-dotted hover:text-hydro-200"
+                >
+                  tryrlusd.com
+                </a>
+                ).
+              </li>
+              <li>Click <span className="text-slate-200">Pay with Xaman</span>, scan the QR (or tap on mobile).</li>
+              <li>Approve once → we submit it on XRPL and retire the water credit.</li>
+            </ol>
+          </>
+        )}
       </div>
 
       {/* Action */}
@@ -228,7 +309,7 @@ export function XrplPayPanel() {
         className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-hydro-400/40 bg-hydro-500/10 px-3 py-2.5 text-sm font-medium text-hydro-300 transition hover:bg-hydro-500/20 disabled:opacity-50"
       >
         {busy ? <Loader2 size={14} className="animate-spin" /> : <Smartphone size={14} />}
-        {phase === "creating" && "Creating sign request…"}
+        {phase === "creating" && (connected ? "Pushing to your Xaman…" : "Creating sign request…")}
         {phase === "awaiting" && "Waiting for Xaman approval…"}
         {phase === "settling" && "Settling on XRPL…"}
         {(phase === "idle" || phase === "done" || phase === "error") &&
@@ -238,9 +319,15 @@ export function XrplPayPanel() {
       {/* QR / deeplink */}
       {phase === "awaiting" && payload && (
         <div className="mt-3 flex flex-col items-center gap-3 rounded-xl border border-hydro-400/30 bg-ink/60 p-4">
-          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-hydro-200">
-            <QrCode size={12} /> Scan with Xaman
-          </div>
+          {pushed ? (
+            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-hydro-200">
+              <BellRing size={12} /> Pushed to your Xaman — approve on your device
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-hydro-200">
+              <QrCode size={12} /> {connected ? "Or scan with Xaman" : "Scan with Xaman"}
+            </div>
+          )}
           {payload.qrPng && (
             // eslint-disable-next-line @next/next/no-img-element
             <img

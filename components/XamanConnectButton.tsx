@@ -10,7 +10,7 @@ function shortAddr(a: string): string {
 // XRPL (Xaman) sign-in button for the header — sits beside the EVM ConnectButton.
 // Hidden entirely when Xaman isn't configured so it never shows a dead control.
 export function XamanConnectButton() {
-  const { status, account, rlusd, connect, disconnect } = useXaman();
+  const { status, account, rlusd, error, connect, disconnect } = useXaman();
 
   if (status === "unconfigured" || status === "loading") return null;
 
@@ -39,15 +39,22 @@ export function XamanConnectButton() {
   const connecting = status === "connecting";
 
   return (
-    <button
-      onClick={connect}
-      disabled={connecting}
-      type="button"
-      className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-violet-400/50 bg-violet-500/15 px-3 py-2 text-sm font-semibold text-violet-200 transition active:scale-95 hover:border-violet-300 hover:bg-violet-500/25 disabled:opacity-60 sm:px-4 sm:py-2.5"
-      aria-label="Connect XRPL wallet with Xaman"
-    >
-      {connecting ? <Loader2 size={16} className="animate-spin" /> : <Smartphone size={16} />}
-      <span className="hidden sm:inline">{connecting ? "Connecting…" : "Connect XRPL"}</span>
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        onClick={connect}
+        disabled={connecting}
+        type="button"
+        className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-violet-400/50 bg-violet-500/15 px-3 py-2 text-sm font-semibold text-violet-200 transition active:scale-95 hover:border-violet-300 hover:bg-violet-500/25 disabled:opacity-60 sm:px-4 sm:py-2.5"
+        aria-label="Connect XRPL wallet with Xaman"
+      >
+        {connecting ? <Loader2 size={16} className="animate-spin" /> : <Smartphone size={16} />}
+        <span className="hidden sm:inline">{connecting ? "Connecting…" : "Connect XRPL"}</span>
+      </button>
+      {error && (
+        <span className="max-w-[240px] text-right text-[10px] leading-tight text-rose-300">
+          {error}
+        </span>
+      )}
+    </div>
   );
 }

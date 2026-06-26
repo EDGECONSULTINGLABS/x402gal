@@ -143,8 +143,26 @@ export function XamanProvider({ children }: { children: ReactNode }) {
     setError(null);
     setStatus("connecting");
     try {
-      const state = await pkceRef.current.authorize();
-      await applyState(state ?? (await pkceRef.current.state()));
+      const resolved = await pkceRef.current.authorize();
+      let state = resolved ?? (await pkceRef.current.state());
+
+      // Fallback: the popup/QR flow can resolve the account a beat after
+      // authorize() returns (especially cross-device QR sign-in). Poll state()
+      // briefly so a slightly-delayed result still connects the header.
+      for (let i = 0; i < 12 && !state?.me?.account; i++) {
+        await new Promise((r) => setTimeout(r, 750));
+        state = await pkceRef.current.state();
+      }
+
+      if (state?.me?.account) {
+        await applyState(state);
+      } else {
+        // Don't get stuck on the spinner — drop back to a clickable button.
+        setStatus("disconnected");
+        setError(
+          "Sign-in didn't return an account. If a popup was blocked, allow popups and retry. Make sure you're on the same domain that's whitelisted in Xaman (www vs non-www).",
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Xaman sign-in failed");
       setStatus("error");

@@ -112,9 +112,14 @@ export function XamanProvider({ children }: { children: ReactNode }) {
         // Developer Console. The SDK default is document.location.href, which
         // includes a trailing slash (e.g. https://www.x402gal.com/) and trips
         // Xaman's "Invalid client/redirect URL" check.
+        // Persist the session in sessionStorage (not the SDK default of
+        // localStorage) so the wallet stays connected across page reloads but
+        // is cleared when the browser/tab is closed — closing the browser
+        // shouldn't leave a live, signable session behind.
         const pkce: any = new XummPkce(apiKey, {
           implicit: true,
           redirectUrl: window.location.origin,
+          storage: window.sessionStorage,
         });
         pkceRef.current = pkce;
 

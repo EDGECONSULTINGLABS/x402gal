@@ -320,12 +320,15 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
-  // Check authorization using X-API-Key header (Authorization header is stripped by Vercel)
-  // For cron jobs, skip auth check
+  // Check authorization using X-API-Key header.
+  // Cron invocations are verified via CRON_SECRET (Vercel sends it as a
+  // Bearer token) — the X-Vercel-CRON header is client-spoofable and must
+  // never be trusted for auth.
   const DRIP_API_KEY = process.env.DRIP_API_KEY;
   const apiKey = req.headers.get("X-API-Key");
-  const isCron = req.headers.get("X-Vercel-CRON") === "true";
-  
+  const cronSecret = process.env.CRON_SECRET;
+  const isCron = !!cronSecret && req.headers.get("Authorization") === `Bearer ${cronSecret}`;
+
   if (!isCron && (!DRIP_API_KEY || apiKey !== DRIP_API_KEY)) {
     return Response.json({ ok: false, error: "Unauthorized" }, { status: 401, headers: CORS });
   }

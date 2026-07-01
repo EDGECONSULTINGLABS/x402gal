@@ -1,30 +1,28 @@
 // app/api/leads/route.ts
 // Returns all registered agents for INFILTRATE as a JSON table.
 // Also returns funnel drop-off counters per screen.
-// Access controlled via client-side auth on /leads page.
+// Access controlled server-side via signed HttpOnly session cookie
+// issued by /api/leads-auth (see lib/leadsAuth.ts).
 //
 // GET /api/leads?eventId=ethconf-nyc-2026
 // Returns: { agents: [...], funnel: { view: {...}, abandon: {...} }, total }
 
 import { Redis } from "@upstash/redis";
 import { NextRequest } from "next/server";
+import { verifyLeadsToken, LEADS_COOKIE } from "@/lib/leadsAuth";
 
 export const runtime = "nodejs";
 
 const redis = Redis.fromEnv();
 const DEFAULT_EVENT_ID = process.env.EVENT_ID || "ethconf-nyc-2026";
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
-
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: CORS });
-}
-
 export async function GET(req: NextRequest) {
+  // PII endpoint: same-origin only (no CORS), authenticated session required.
+  const session = verifyLeadsToken(req.cookies.get(LEADS_COOKIE)?.value);
+  if (!session) {
+    return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   const eventId = req.nextUrl.searchParams.get("eventId") || DEFAULT_EVENT_ID;
 
   try {
@@ -60,9 +58,9 @@ export async function GET(req: NextRequest) {
       total: agents.length,
       agents,
       funnel: { view: funnelView, abandon: funnelAbandon },
-    }, { headers: CORS });
+    });
   } catch (err) {
     console.error("[leads] error:", err);
-    return Response.json({ ok: false, error: String((err as Error).message || err) }, { status: 500, headers: CORS });
+    return Response.json({ ok: false, error: String((err as Error).message || err) }, { status: 500 });
   }
 }

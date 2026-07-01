@@ -13,17 +13,12 @@
 
 import { Redis } from "@upstash/redis";
 import { NextRequest } from "next/server";
+import { verifyLeadsToken, LEADS_COOKIE } from "@/lib/leadsAuth";
 
 export const runtime = "nodejs";
 
 const redis = Redis.fromEnv();
 const DEFAULT_EVENT_ID = process.env.EVENT_ID || "ethconf-nyc-2026";
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
 
 // ---- D365 OAuth token (cached in memory for the lifetime of the serverless instance) ----
 let _token: string | null = null;
@@ -113,15 +108,17 @@ async function upsertLead(agent: Record<string, string>, token: string, orgUrl: 
   return true;
 }
 
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: CORS });
-}
-
 export async function POST(req: NextRequest) {
+  // Admin endpoint: same-origin only (no CORS), authenticated session required.
+  const session = verifyLeadsToken(req.cookies.get(LEADS_COOKIE)?.value);
+  if (!session) {
+    return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   // Check D365 config
   const orgUrl = process.env.D365_ORG_URL;
   if (!process.env.D365_TENANT_ID || !process.env.D365_CLIENT_ID || !process.env.D365_CLIENT_SECRET || !orgUrl) {
-    return Response.json({ ok: false, error: "D365 env vars not configured (D365_TENANT_ID, D365_CLIENT_ID, D365_CLIENT_SECRET, D365_ORG_URL)" }, { status: 503, headers: CORS });
+    return Response.json({ ok: false, error: "D365 env vars not configured (D365_TENANT_ID, D365_CLIENT_ID, D365_CLIENT_SECRET, D365_ORG_URL)" }, { status: 503 });
   }
 
   let body: Record<string, unknown> = {};
@@ -157,9 +154,9 @@ export async function POST(req: NextRequest) {
     const synced = results.filter(r => r.ok).length;
     const failed = results.filter(r => !r.ok).length;
 
-    return Response.json({ ok: true, synced, failed, results }, { headers: CORS });
+    return Response.json({ ok: true, synced, failed, results });
   } catch (err) {
     console.error("[d365-sync] error:", err);
-    return Response.json({ ok: false, error: String((err as Error).message || err) }, { status: 500, headers: CORS });
+    return Response.json({ ok: false, error: String((err as Error).message || err) }, { status: 500 });
   }
 }

@@ -96,6 +96,14 @@ export default function LeadsPageClient() {
     setLoading(true); setError(null);
     try {
       const res = await fetch("/api/leads");
+      if (res.status === 401) {
+        // Server session expired or missing — force re-login.
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        setAuthed(false);
+        setAuthEmail(null);
+        setError("Session expired. Please log in again.");
+        return;
+      }
       const json = await res.json() as LeadsResponse;
       if (!json.ok) { setError("Error loading leads."); return; }
       setData(json);

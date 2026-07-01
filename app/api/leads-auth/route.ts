@@ -4,6 +4,8 @@
 // Password is read from LEADS_PASSWORD env var (server-side only, never exposed to client).
 
 import { NextRequest } from "next/server";
+import { timingSafeEqual } from "crypto";
+import { createLeadsToken, LEADS_COOKIE, LEADS_SESSION_TTL_MS } from "@/lib/leadsAuth";
 
 export const runtime = "nodejs";
 
@@ -37,9 +39,23 @@ export async function POST(req: NextRequest) {
     return Response.json({ ok: false, error: "Unauthorized email address." }, { status: 403 });
   }
 
-  if (password !== leadsPassword) {
+  const a = Buffer.from(password, "utf8");
+  const b = Buffer.from(leadsPassword, "utf8");
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
     return Response.json({ ok: false, error: "Invalid password." }, { status: 401 });
   }
 
-  return Response.json({ ok: true });
+  const token = createLeadsToken(email);
+  if (!token) {
+    return Response.json({ ok: false, error: "Server misconfigured: session secret not set." }, { status: 500 });
+  }
+
+  return Response.json(
+    { ok: true },
+    {
+      headers: {
+        "Set-Cookie": `${LEADS_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${Math.floor(LEADS_SESSION_TTL_MS / 1000)}`,
+      },
+    }
+  );
 }

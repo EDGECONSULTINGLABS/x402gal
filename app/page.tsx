@@ -1,9 +1,5 @@
-import { Dashboard } from "@/components/Dashboard";
-import { getDashboardState, DashboardState } from "@/lib/getState";
-
-export const dynamic = "force-dynamic";
+import { Landing } from "@/components/Landing";
 
 export default function Page() {
-  const initialState: DashboardState = getDashboardState();
-  return <Dashboard initialState={initialState} />;
+  return <Landing />;
 }

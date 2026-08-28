@@ -30,17 +30,9 @@ const steps: Step[] = [
   {
     id: "hero",
     title: "The Problem & Solution",
-    description: "Every AI query consumes water for data center cooling. x402GAL measures that footprint and converts it into a verifiable water-restoration payment \u2014 automatically, per call.",
+    description: "This console is a testnet mechanism demo. It does not show public volume and does not mint attested HydroCoin.",
     icon: <Droplets className="text-hydro-300" size={24} />,
     targetSelector: "[data-guide='metrics']",
-    position: "bottom",
-  },
-  {
-    id: "hydrocoin",
-    title: "HydroCoin \u2014 The Water Credit",
-    description: "HydroCoin (HYDRO) is a token on the XRPL blockchain. 1 HYDRO = 1 verified gallon of water restored. When retired (burned), it proves real water restoration was funded. Settlement runs through a real XRPL testnet AMM; the price and cap figures shown are an illustrative model, not a live market.",
-    icon: <Droplets className="text-hydro-300" size={24} />,
-    targetSelector: "[data-guide='hydrocoin']",
     position: "bottom",
   },
   {

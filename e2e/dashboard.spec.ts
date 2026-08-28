@@ -8,10 +8,10 @@ test("dashboard renders and demo round-trip works", async ({ page }) => {
     if (m.type() === "error") errors.push(m.text());
   });
 
-  await page.goto("http://localhost:3000/", { waitUntil: "networkidle", timeout: 60000 });
-  await expect(page.getByText("402GAL", { exact: true }).first()).toBeVisible({ timeout: 30000 });
-  await expect(page.getByText("Water-offset rails for AI agents")).toBeVisible();
-  await expect(page.locator("text=Water restored").first()).toBeVisible({ timeout: 15000 });
+  await page.goto("http://localhost:3000/console", { waitUntil: "networkidle", timeout: 60000 });
+  await expect(page.getByText("x402GAL").first()).toBeVisible({ timeout: 30000 });
+  await expect(page.getByText("Testnet mechanism demo").first()).toBeVisible();
+  await expect(page.getByText("No public volume on this page")).toBeVisible({ timeout: 15000 });
   await expect(page.getByText("Pending batch")).toBeVisible();
   await expect(page.getByText(/Footprint methodology/)).toBeVisible();
   await page.screenshot({ path: "e2e/screenshots/01-loaded.png", fullPage: true });

@@ -19,7 +19,6 @@ import {
   Layers,
   Beaker,
   ExternalLink,
-  Wallet,
   Map,
   Menu,
   X,
@@ -214,27 +213,7 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
           onRun={() => runDemo(1)}
           onBurst={() => runDemo(100)}
           running={running}
-          isConnected={isConnected}
         />
-
-        {!isConnected && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 flex items-center justify-center rounded-2xl border border-hydro-400/20 bg-hydro-500/5 px-6 py-10 text-center"
-          >
-            <div>
-              <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border border-hydro-400/30 bg-hydro-500/10">
-                <Wallet size={22} className="text-hydro-300" />
-              </div>
-              <p className="text-sm font-medium text-slate-200">Connect your EVM wallet to interact</p>
-              <p className="mt-1 text-xs text-slate-500">For the Avalanche-Fuji USDC demo. Already connected XRPL? Use the RLUSD panel below.</p>
-              <div className="mt-4 flex justify-center">
-                <ConnectButton />
-              </div>
-            </div>
-          </motion.div>
-        )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="flex flex-col gap-6 lg:col-span-2">
             <div data-guide="price-chart">
@@ -543,12 +522,10 @@ function Hero({
   onRun,
   onBurst,
   running,
-  isConnected,
 }: {
   onRun: () => void;
   onBurst: () => void;
   running: boolean;
-  isConnected: boolean;
 }) {
   return (
     <section className="relative pt-12 sm:pt-20">
@@ -582,9 +559,9 @@ function Hero({
         transition={{ delay: 0.3, duration: 0.6 }}
         className="mt-6 max-w-2xl text-balance text-base leading-relaxed text-slate-400 sm:text-lg"
       >
-        Sandbox for the x402 pay path on Avalanche Fuji and XRPL testnet.
-        Payments here do not mint or retire attested HydroCoin. The public
-        story is on the{" "}
+        Sandbox for the agent pay path. An agent receives HTTP 402 and
+        settles — a wallet is not the product. Payments here do not mint or
+        retire attested HydroCoin. The public story is on the{" "}
         <a href="/" className="text-hydro-300 hover:text-hydro-200">
           landing page
         </a>
@@ -598,27 +575,21 @@ function Hero({
         transition={{ delay: 0.5, duration: 0.5 }}
         className="mt-8 flex flex-wrap items-center gap-3"
       >
-        {isConnected ? (
-          <>
-            <button
-              onClick={onRun}
-              disabled={running}
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-hydro-gradient px-6 py-3 text-sm font-semibold text-abyss shadow-glow-lg transition hover:brightness-110 disabled:opacity-60"
-            >
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              <Send size={14} /> Send 1 paid query
-            </button>
-            <button
-              onClick={onBurst}
-              disabled={running}
-              className="inline-flex items-center gap-2 rounded-xl border border-hydro-400/40 bg-hydro-500/10 px-5 py-3 text-sm font-medium text-hydro-200 transition hover:border-hydro-300 hover:bg-hydro-500/20 disabled:opacity-60"
-            >
-              <Layers size={14} /> Burst 100 → flush
-            </button>
-          </>
-        ) : (
-          <ConnectButton />
-        )}
+        <button
+          onClick={onRun}
+          disabled={running}
+          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-hydro-gradient px-6 py-3 text-sm font-semibold text-abyss shadow-glow-lg transition hover:brightness-110 disabled:opacity-60"
+        >
+          <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+          <Send size={14} /> Send 1 paid query
+        </button>
+        <button
+          onClick={onBurst}
+          disabled={running}
+          className="inline-flex items-center gap-2 rounded-xl border border-hydro-400/40 bg-hydro-500/10 px-5 py-3 text-sm font-medium text-hydro-200 transition hover:border-hydro-300 hover:bg-hydro-500/20 disabled:opacity-60"
+        >
+          <Layers size={14} /> Burst 100 → flush
+        </button>
         <a
           href="https://www.hydrocoin.com/"
           target="_blank"
@@ -630,8 +601,8 @@ function Hero({
       </motion.div>
 
       <p className="mt-8 text-xs text-slate-600" data-guide="metrics">
-        No public volume on this page. Operator receipts live on the landing
-        page. Console totals start at zero.
+        No public volume on this page. Console totals start at zero. Wallet
+        connect stays in the nav for the optional Fuji USDC pull.
       </p>
     </section>
   );

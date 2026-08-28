@@ -38,7 +38,7 @@ const steps: Step[] = [
   {
     id: "agent-console",
     title: "Agent Console",
-    description: "This panel simulates AI agents making paid API calls. In the real world, agents are autonomous programs (like chatbots or trading bots) that auto-pay using the x402 protocol. Connect a wallet to try it yourself, or just watch the metrics.",
+    description: "This panel simulates AI agents making paid API calls. In the real world, agents are autonomous programs that auto-pay using the x402 protocol. A wallet is optional — the product is the agent pay path.",
     icon: <Bot className="text-hydro-300" size={24} />,
     targetSelector: "[data-guide='agent-section']",
     position: "top",
@@ -70,7 +70,7 @@ const steps: Step[] = [
   {
     id: "wallet-info",
     title: "Wallet (Optional)",
-    description: "Connecting a wallet lets you interact with the demo: send queries, flush batches, and see settlements. It uses testnet funds (no real money). If you don\u2019t have a wallet, that\u2019s fine \u2014 you can still explore the dashboard and learn how the system works.",
+    description: "A wallet is not required. This is an agentic pay path. Connecting is only for the optional Avalanche Fuji USDC pull (testnet, no real money).",
     icon: <Wallet className="text-hydro-300" size={24} />,
     position: "center",
   },

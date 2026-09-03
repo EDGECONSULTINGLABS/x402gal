@@ -4,8 +4,7 @@
 // acceptable for the demo and we surface it honestly in the UI.)
 
 import { Agent, AmmState, BatchEntry, Settlement } from "./types";
-import { BATCH_SIZE, DROPLETS_PER_HYDRO, LITERS_PER_GALLON, SEED_AGENTS } from "./constants";
-import { FOOTPRINT_METHODOLOGY_HASH } from "./footprint";
+import { BATCH_SIZE, DROPLETS_PER_HYDRO, SEED_AGENTS } from "./constants";
 
 interface LedgerState {
   agents: Map<string, Agent>;
@@ -32,61 +31,12 @@ declare global {
   var __x402galLedger: LedgerState | undefined;
 }
 
-// Pre-seeded settlement history so the dashboard never cold-starts at zero.
-// Spread over the past ~72 hours, mixing agents and chains for visual variety.
-function makeSeedSettlements(now: number): Settlement[] {
-  const chains = ["base", "solana", "ethereum", "polygon", "avalanche"] as const;
-  const agentIds = SEED_AGENTS.map(a => a.id);
-  const resources = ["/api/ai/chat", "/api/ai/embed", "/api/ai/image", "/api/ai/video"];
-  const hops = (chain: string, offset: number) => [
-    { chain: chain as Settlement["sourceChain"], action: "swap" as const, hash: `seed_swap_${offset.toString(16)}`, ms: 420 + (offset % 80) },
-    { chain: "xrpl" as const, action: "retire" as const, hash: `seed_retire_${offset.toString(16)}`, ms: 310 + (offset % 60) },
-  ];
-
-  // 38 settlements spread over 72 h → ~1 every 2 h on average
-  const intervals = [72,69,66,63,60,58,55,53,50,48,46,44,42,40,38,36,34,32,30,28,27,26,24,22,21,20,18,17,16,14,13,12,10,8,6,4,2,1];
-  return intervals.map((hoursAgo, i) => {
-    const agentId = agentIds[i % agentIds.length];
-    const chain   = chains[i % chains.length];
-    const calls   = 80 + ((i * 37) % 120);
-    const liters  = 0.18 + (i * 0.07) % 1.2;
-    const droplets   = Math.round((liters / LITERS_PER_GALLON) * DROPLETS_PER_HYDRO);
-    const usdc    = Math.round(liters * 0.0024 * 1_000_000);
-    return {
-      id: `seed_${i}`,
-      txId: `seed_tx_${i.toString(16).padStart(4, "0")}`,
-      agentId: calls >= 100 ? "batch" : agentId,
-      resource: resources[i % resources.length],
-      usdcSettled: usdc,
-      amountDroplets: droplets,
-      litersOffset: liters,
-      callCount: calls,
-      sourceChain: chain,
-      settlementHash: `seed_hash_${i.toString(16).padStart(8, "0")}`,
-      retirementReceipt: `seed_receipt_${i.toString(16).padStart(8, "0")}`,
-      status: "retired" as const,
-      createdAt: now - hoursAgo * 3_600_000,
-      hops: hops(chain, i),
-      methodologyHash: FOOTPRINT_METHODOLOGY_HASH,
-    } satisfies Settlement;
-  });
-}
-
 function bootstrap(): LedgerState {
   const now = Date.now();
   const agents = new Map<string, Agent>();
 
-  // Per-agent seeded activity totals (queries + liters accumulated before this boot)
-  const seedActivity: Record<string, { queries: number; liters: number }> = {
-    agent_meridian_v3: { queries: 2847, liters: 3.12 },
-    agent_solace_alpha: { queries: 1934, liters: 2.08 },
-    agent_orin_x7:     { queries: 1102, liters: 1.24 },
-    agent_kairo_pro:   { queries: 3561, liters: 3.89 },
-    agent_apex_av1:    { queries: 2203, liters: 2.41 },
-  };
-
+  // Console sandbox only — zero activity. Do not invent public volume.
   for (const a of SEED_AGENTS) {
-    const act = seedActivity[a.id] ?? { queries: 500, liters: 0.5 };
     agents.set(a.id, {
       id: a.id,
       label: a.label,
@@ -94,15 +44,14 @@ function bootstrap(): LedgerState {
       chain: a.chain,
       walletAddress: `${a.chain}1${a.id.slice(0, 12)}xxxxxxxxxx`,
       balanceUsdc: a.balanceUsdc,
-      totalLitersOffset: act.liters,
-      totalQueries: act.queries,
-      joinedAt: now - 72 * 3_600_000, // "joined" 72 h ago
+      totalLitersOffset: 0,
+      totalQueries: 0,
+      joinedAt: now,
     });
   }
 
-  const seedSettlements = makeSeedSettlements(now);
-  const totalRetiredDroplets = seedSettlements.reduce((s, x) => s + x.amountDroplets, 0);
-  const totalLitersOffset = seedSettlements.reduce((s, x) => s + x.litersOffset, 0);
+  const totalRetiredDroplets = 0;
+  const totalLitersOffset = 0;
 
   // Seed the HydroCoin AMM. 10M HYDRO paired against 12M USDC ⇒ start price $1.20.
   // Deduct already-retired droplets from the reserve so price reflects seeded history.
@@ -110,7 +59,7 @@ function bootstrap(): LedgerState {
   const reserveUSDC  = 12_000_000 * 1_000_000;
   return {
     agents,
-    settlements: seedSettlements,
+    settlements: [],
     amm: {
       reserveHydro,
       reserveUSDC,

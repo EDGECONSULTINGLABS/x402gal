@@ -18,10 +18,7 @@ import {
   Send,
   Layers,
   Beaker,
-  Droplets,
   ExternalLink,
-  Activity,
-  Wallet,
   Map,
   Menu,
   X,
@@ -31,8 +28,6 @@ import { ChainBadge } from "./ChainBadge";
 import { RouteTrace } from "./RouteTrace";
 import { SettlementRow } from "./SettlementRow";
 import { WaterBackdrop } from "./WaterBackdrop";
-import { HydroCoinPanel } from "./HydroCoinPanel";
-import { AnimatedNumber } from "./AnimatedNumber";
 import { ConnectButton } from "./ConnectButton";
 import { XamanConnectButton } from "./XamanConnectButton";
 import { AgentSessionPanel } from "./AgentSessionPanel";
@@ -107,18 +102,7 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
   const [history, setHistory] = useState<
     { t: number; price: number; liters: number }[]
   >(() => {
-    // Seed with demo data so the chart shows movement on load
-    const now = Date.now();
-    const seed: { t: number; price: number; liters: number }[] = [];
-    for (let i = 0; i < 30; i++) {
-      const progress = i / 29;
-      seed.push({
-        t: now - (29 - i) * 2500,
-        price: 1.2 + Math.sin(progress * Math.PI * 2) * 0.08 + progress * 0.05,
-        liters: progress * 0.42 + Math.sin(progress * 5) * 0.02,
-      });
-    }
-    return seed;
+    return [];
   });
   const [guideKey, setGuideKey] = useState(0);
   const [forceShowGuide, setForceShowGuide] = useState(false);
@@ -222,49 +206,14 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1100px] gridline opacity-40" />
 
-      <Nav price={state?.amm.priceUSDC} retired={state?.amm.retiredHydro ?? 0} xrplLive={state?.xrpl.live ?? false} onRestartTour={restartGuide} lastEvmSettlement={state?.lastEvmSettlement} />
+      <Nav xrplLive={state?.xrpl.live ?? false} onRestartTour={restartGuide} lastEvmSettlement={state?.lastEvmSettlement} />
 
       <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8">
         <Hero
-          totalLiters={state?.totals.litersOffset ?? 0}
-          totalMl={state?.totals.mlOffset ?? 0}
-          callsServed={state?.totals.callsServed ?? 0}
-          settlements={state?.totals.settlements ?? 0}
-          retired={state?.amm.retiredHydro ?? 0}
           onRun={() => runDemo(1)}
           onBurst={() => runDemo(100)}
           running={running}
-          isConnected={isConnected}
         />
-
-        <div className="mt-10 sm:mt-14" data-guide="hydrocoin">
-          <HydroCoinPanel
-            priceUSDC={state?.amm.priceUSDC ?? 0}
-            marketCap={state?.amm.marketCapUSDC ?? 0}
-            retiredHydro={state?.amm.retiredHydro ?? 0}
-            circulatingHydro={state?.amm.circulatingHydro ?? 0}
-            totalLitersOffset={state?.totals.litersOffset ?? 0}
-          />
-        </div>
-
-        {!isConnected && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 flex items-center justify-center rounded-2xl border border-hydro-400/20 bg-hydro-500/5 px-6 py-10 text-center"
-          >
-            <div>
-              <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border border-hydro-400/30 bg-hydro-500/10">
-                <Wallet size={22} className="text-hydro-300" />
-              </div>
-              <p className="text-sm font-medium text-slate-200">Connect your EVM wallet to interact</p>
-              <p className="mt-1 text-xs text-slate-500">For the Avalanche-Fuji USDC demo. Already connected XRPL? Use the RLUSD panel below.</p>
-              <div className="mt-4 flex justify-center">
-                <ConnectButton />
-              </div>
-            </div>
-          </motion.div>
-        )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="flex flex-col gap-6 lg:col-span-2">
             <div data-guide="price-chart">
@@ -375,7 +324,7 @@ export function Dashboard({ initialState }: { initialState?: DashboardState }) {
 
 /* ─────────────────────────────────────────────────────── */
 
-function Nav({ price, retired, xrplLive, onRestartTour, lastEvmSettlement }: { price?: number; retired: number; xrplLive: boolean; onRestartTour?: () => void; lastEvmSettlement?: { network: string; txHash: string; explorer: string; amountUsdc: number; at: number } | null }) {
+function Nav({ xrplLive, onRestartTour, lastEvmSettlement }: { xrplLive: boolean; onRestartTour?: () => void; lastEvmSettlement?: { network: string; txHash: string; explorer: string; amountUsdc: number; at: number } | null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -385,25 +334,17 @@ function Nav({ price, retired, xrplLive, onRestartTour, lastEvmSettlement }: { p
         <div className="flex min-w-0 items-center gap-2">
           <Logo size={28} />
           <div className="min-w-0">
-            <div className="font-display text-sm font-semibold tracking-tight">
+            <a href="/" className="font-display text-sm font-semibold tracking-tight text-white">
               x402GAL
-            </div>
+            </a>
             <div className="hidden text-[10px] uppercase tracking-[0.18em] text-slate-500 lg:block">
-              Water-offset rails for AI agents
+              Testnet mechanism demo
             </div>
           </div>
         </div>
 
         {/* Pills — desktop only */}
         <div className="hidden items-center gap-1.5 xl:flex">
-          <Pill>
-            <Activity size={10} className="text-hydro-300 animate-pulse" />
-            <span className="text-[10px]">HYDRO ${price ? price.toFixed(4) : "—"}</span>
-          </Pill>
-          <Pill>
-            <Droplets size={10} className="text-hydro-300" />
-            <span className="text-[10px]">{retired.toFixed(3)} gal</span>
-          </Pill>
           <Pill>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/rlusd.png" alt="RLUSD" className="h-3 w-3 rounded-full" />
@@ -578,31 +519,14 @@ function MobileNavLink({
 /* ─────────────────────────────────────────────────────── */
 
 function Hero({
-  totalLiters,
-  totalMl,
-  callsServed,
-  settlements,
-  retired,
   onRun,
   onBurst,
   running,
-  isConnected,
 }: {
-  totalLiters: number;
-  totalMl: number;
-  callsServed: number;
-  settlements: number;
-  retired: number;
   onRun: () => void;
   onBurst: () => void;
   running: boolean;
-  isConnected: boolean;
 }) {
-  const litersDisplay =
-    totalLiters >= 0.01
-      ? `${totalLiters.toFixed(3)} L`
-      : `${totalMl.toFixed(2)} mL`;
-
   return (
     <section className="relative pt-12 sm:pt-20">
       <motion.div
@@ -615,7 +539,7 @@ function Hero({
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-hydro-400 opacity-75" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-hydro-300" />
         </span>
-        x402 · XRPL · HydroCoin
+        Testnet mechanism demo · not public volume
       </motion.div>
 
       <motion.h1
@@ -624,11 +548,9 @@ function Hero({
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="display-fluid max-w-5xl text-balance font-display font-semibold text-white"
       >
-        Every AI query has a{" "}
-        <span className="sheen-text">water footprint.</span>
+        Mechanism demo.
         <br className="hidden sm:block" />{" "}
-        <span className="text-slate-400">x402GAL settles it</span>{" "}
-        <span className="text-white">in real time.</span>
+        <span className="text-slate-400">Not a live inventory.</span>
       </motion.h1>
 
       <motion.p
@@ -637,16 +559,13 @@ function Hero({
         transition={{ delay: 0.3, duration: 0.6 }}
         className="mt-6 max-w-2xl text-balance text-base leading-relaxed text-slate-400 sm:text-lg"
       >
-        Each inference returns HTTP{" "}
-        <code className="rounded bg-hydro-500/10 px-1.5 py-0.5 font-mono text-sm text-hydro-300">
-          402 Payment Required
-        </code>{" "}
-        with a v2 boundary-aware footprint. The agent signs an x402 payload to
-        pay in <span className="font-semibold text-hydro-300">RLUSD</span> or{" "}
-        <span className="font-semibold text-hydro-300">USDC</span>, micro-payments
-        accrue into a 100-call batch, the treasury swaps the stablecoin for{" "}
-        <span className="font-semibold text-hydro-300">HydroCoin</span> on the
-        XRPL DEX and retires it as a verifiable water-restoration credit.
+        Sandbox for the agent pay path. An agent receives HTTP 402 and
+        settles — a wallet is not the product. Payments here do not mint or
+        retire attested HydroCoin. The public story is on the{" "}
+        <a href="/" className="text-hydro-300 hover:text-hydro-200">
+          landing page
+        </a>
+        .
       </motion.p>
 
       {/* CTAs */}
@@ -656,27 +575,21 @@ function Hero({
         transition={{ delay: 0.5, duration: 0.5 }}
         className="mt-8 flex flex-wrap items-center gap-3"
       >
-        {isConnected ? (
-          <>
-            <button
-              onClick={onRun}
-              disabled={running}
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-hydro-gradient px-6 py-3 text-sm font-semibold text-abyss shadow-glow-lg transition hover:brightness-110 disabled:opacity-60"
-            >
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              <Send size={14} /> Send 1 paid query
-            </button>
-            <button
-              onClick={onBurst}
-              disabled={running}
-              className="inline-flex items-center gap-2 rounded-xl border border-hydro-400/40 bg-hydro-500/10 px-5 py-3 text-sm font-medium text-hydro-200 transition hover:border-hydro-300 hover:bg-hydro-500/20 disabled:opacity-60"
-            >
-              <Layers size={14} /> Burst 100 → flush
-            </button>
-          </>
-        ) : (
-          <ConnectButton />
-        )}
+        <button
+          onClick={onRun}
+          disabled={running}
+          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-hydro-gradient px-6 py-3 text-sm font-semibold text-abyss shadow-glow-lg transition hover:brightness-110 disabled:opacity-60"
+        >
+          <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+          <Send size={14} /> Send 1 paid query
+        </button>
+        <button
+          onClick={onBurst}
+          disabled={running}
+          className="inline-flex items-center gap-2 rounded-xl border border-hydro-400/40 bg-hydro-500/10 px-5 py-3 text-sm font-medium text-hydro-200 transition hover:border-hydro-300 hover:bg-hydro-500/20 disabled:opacity-60"
+        >
+          <Layers size={14} /> Burst 100 → flush
+        </button>
         <a
           href="https://www.hydrocoin.com/"
           target="_blank"
@@ -687,27 +600,10 @@ function Hero({
         </a>
       </motion.div>
 
-      {/* Live metric strip */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7, duration: 0.6 }}
-        data-guide="metrics"
-        className="mt-8 grid grid-cols-2 gap-2 sm:mt-12 sm:gap-3 md:grid-cols-4"
-      >
-        <Metric label="Water restored" value={litersDisplay} accent />
-        <Metric
-          label="Calls served"
-          value={callsServed.toLocaleString()}
-          sub="≈0.07 mL each"
-        />
-        <Metric
-          label="HYDRO retired"
-          value={<AnimatedNumber value={retired} decimals={4} />}
-          sub={`${settlements} settlement${settlements === 1 ? "" : "s"}`}
-        />
-        <Metric label="Verified gallons" value={<AnimatedNumber value={retired} decimals={4} />} sub="1 HYDRO = 1 gallon" accent />
-      </motion.div>
+      <p className="mt-8 text-xs text-slate-600" data-guide="metrics">
+        No public volume on this page. Console totals start at zero. Wallet
+        connect stays in the nav for the optional Fuji USDC pull.
+      </p>
     </section>
   );
 }

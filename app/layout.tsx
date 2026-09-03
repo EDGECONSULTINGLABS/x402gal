@@ -1,12 +1,6 @@
 import "./globals.css";
-import "@rainbow-me/rainbowkit/styles.css";
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
-import dynamic from "next/dynamic";
-const WalletProvider = dynamic(
-  () => import("@/components/WalletProvider").then((m) => m.WalletProvider),
-  { ssr: false }
-);
 
 const display = Space_Grotesk({
   subsets: ["latin"],
@@ -35,17 +29,18 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "x402GAL — Every AI query has a water footprint",
+  title: "x402GAL — verified water, purchasable by machine",
   description:
-    "Pay it back in real time. x402GAL settles water offsets on XRPL for every inference.",
+    "Pilot stage. x402GAL is the purchase layer that lets an agent discover, price, purchase and retire a verified gallon over HTTP. You buy verified gallons — not a ticker.",
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",
   },
   metadataBase: new URL("https://x402gal.com"),
   openGraph: {
-    title: "x402GAL — Every AI query has a water footprint",
-    description: "Pay it back in real time. x402GAL settles water offsets on XRPL for every inference.",
+    title: "x402GAL — verified water, purchasable by machine",
+    description:
+      "Pilot stage. An agent discovers, prices, purchases and retires a verified gallon over HTTP.",
     type: "website",
     url: "https://x402gal.com",
     siteName: "x402GAL",
@@ -60,8 +55,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "x402GAL — Every AI query has a water footprint",
-    description: "Pay it back in real time. x402GAL settles water offsets on XRPL for every inference.",
+    title: "x402GAL — verified water, purchasable by machine",
+    description:
+      "Pilot stage. An agent discovers, prices, purchases and retires a verified gallon over HTTP.",
     images: ["https://www.x402gal.com/og-main.jpg?v=3"],
   },
 };
@@ -84,11 +80,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="x402GAL - Every AI query has a water footprint" />
+        <meta property="og:image:alt" content="x402GAL — verified water, purchasable by machine" />
         <meta name="twitter:image:src" content="https://www.x402gal.com/og-main.jpg?v=3" />
       </head>
       <body className="font-body antialiased selection:bg-hydro-500/40 selection:text-white">
-        <WalletProvider>{children}</WalletProvider>
+        {children}
       </body>
     </html>
   );

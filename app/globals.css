@@ -157,6 +157,33 @@ body {
   animation: pulse-ring 2.4s cubic-bezier(0.4,0,0.6,1) infinite;
 }
 
+/* ── Landing HTTP exchange ───────────────────── */
+.exchange-trace .x-line {
+  display: block;
+  white-space: pre;
+  opacity: 0;
+  transform: translateY(5px);
+  animation: x-rise 0.45s ease forwards;
+}
+.exchange-trace .x-gap { display: block; height: 16px; }
+.exchange-trace .x-verb { color: #e8f4f8; font-weight: 600; }
+.exchange-trace .x-path { color: #9ec9d4; }
+.exchange-trace .x-key { color: #64748b; }
+.exchange-trace .x-val { color: #cbd5e1; }
+.exchange-trace .x-402 { color: #fbbf24; font-weight: 600; }
+.exchange-trace .x-200 { color: #5fe1ff; font-weight: 600; }
+.exchange-trace .x-cmt { color: #4b6b72; }
+.exchange-trace .x-caret {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: #fbbf24;
+  vertical-align: -2px;
+  animation: x-blink 1.05s steps(1) infinite;
+}
+@keyframes x-rise { to { opacity: 1; transform: none; } }
+@keyframes x-blink { 50% { opacity: 0; } }
+
 /* ── Reduced motion ──────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

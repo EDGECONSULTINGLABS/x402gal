@@ -310,7 +310,7 @@
   <section class="screen on" id="s-entry">
     <span class="eyebrow"><span class="pulse"></span> Field mission · ETHConf NYC</span>
     <h1>Every AI run<br>drinks water.<br><span class="g">Pay it back.</span></h1>
-    <p class="lede">You're a field agent now. Complete the run across the floor to learn how AI can pay water back. <b>This activation raises awareness for verified stormwater infiltration</b> recorded on XRPL under HydroCoin's methodology. Finish, and your Genesis badge is yours to keep.</p>
+    <p class="lede">You're a field agent now. Complete the run across the floor to learn how AI can pay water back. <b>This activation is a demonstration.</b> It does not issue attested gallons or apply HydroCoin verification to a demo token. Finish, and your Genesis badge is yours to keep.</p>
 
     <div class="hero hud">
       <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
@@ -331,7 +331,7 @@
       </div>
       <button class="btn primary" id="startBtn">Begin infiltration &nbsp;&rarr;</button>
     </div>
-    <p class="fineprint">Built by Edge Consulting Labs with HydroCoin. 1 HydroCoin = 1 verified gallon, settled on XRPL.</p>
+    <p class="fineprint">Built by Edge Consulting Labs. HydroCoin is the proof layer for attested gallons. Completing missions here does not mint or retire those credits.</p>
   </section>
 
   <!-- ===== SCREEN 2: CAPTURE ===== -->
@@ -453,7 +453,7 @@
 
   var CONFIG = {
     shareHandle: "@HydroCoinHQ and @MyCrypt0world",   // handles tagged inline in shareText below
-    shareText: "There\u2019s a game running at ETHConf right now.\n\nComplete missions on the floor \u2192 mint a free NFT on XRPL \u2192 every badge = verified gallons returned underground.\n\nAI that actually pays back the water it uses. Not a claim. Measured, signed, on-chain.\n\nJoin before the holo badges run out \ud83d\udca7\n\nhttps://www.x402gal.com/infiltrateETHConf2026\n\n@HydroCoinHQ @MyCrypt0world",
+    shareText: "There\u2019s a game running at ETHConf right now.\n\nComplete missions on the floor \u2192 mint a free NFT on XRPL testnet.\n\nA demonstration of AI paying a water offset. Not attested inventory.\n\nhttps://www.x402gal.com/infiltrateETHConf2026\n\n@HydroCoinHQ @MyCrypt0world",
     shareHashtags: "InfiltrateETHConf,x402GAL,HydroCoin,GreenAI,XRPL",
     baseAgents: 141,        // seed for the live counter; wire to backend for real-time
     badgeThreshold: 4,      // missions needed to unlock a badge
@@ -474,7 +474,7 @@
       icon:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>' },
     { id:"paper", type:"link", points:15, url:WHITEPAPER_URL,
       title:"Read the white paper",
-      desc:"One HydroCoin = one verified gallon. See how the methodology is signed by a PE, attested by a CPA, and fingerprinted.",
+      desc:"Read how HydroCoin accounts for attested gallons. That methodology lives on the HydroCoin white paper — not on this demonstration.",
       hint:"Opens in a new tab. Come back here when you're done.",
       icon:'<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>' },
     { id:"follow", type:"link", points:15, urls:["https://x.com/HydroCoinHQ","https://x.com/MyCrypt0world"],
@@ -797,7 +797,7 @@
         'Green AI · verified'+
       '</div>'+
       '<div style="font-family:\'Fraunces\',serif;font-size:19px;color:var(--paper);line-height:1.25;margin-bottom:8px">You ran AI today. Now it pays the water back.</div>'+
-      '<div style="font-size:13.5px;color:var(--body);line-height:1.5">How the water claim works: "verified gallons" means stormwater infiltration confirmed under HydroCoin\'s measurement, verification, and reporting methodology and recorded on the XRP Ledger. This activation raises awareness; verified infiltration is performed and recorded separately and is not caused by completing missions. <a href="https://www.hydrocoin.com/whitepaper" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:underline">Methodology</a>.</div>';
+      '<div style="font-size:13.5px;color:var(--body);line-height:1.5">This activation is a demonstration. HydroCoin accounts for attested gallons on its own certification path. Completing missions here does not apply that methodology to a demo token, and does not mint or retire attested credits. <a href="https://www.hydrocoin.com/whitepaper" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:underline">HydroCoin methodology</a>.</div>';
     stage.appendChild(green);
 
     var minted = !!(state.nft && state.nft.nftokenID);

@@ -1,7 +1,7 @@
 // Economic constants for the x402GAL offset protocol.
 //
 // Footprint is computed at request time by lib/footprint.ts using the v2
-// boundary-aware Green Grid WUE split (Alula spec). HYDRO is denominated in
+// boundary-aware Green Grid WUE split. HYDRO is denominated in
 // US gallons of restored freshwater: 1 HYDRO = 1 gallon. A typical
 // GPT-4-class inference is ~0.07 mL ≈ 1.85e-5 HYDRO ≈ 18 droplets, which is
 // why per-call x402 payments are aggregated into a single XRPL settlement

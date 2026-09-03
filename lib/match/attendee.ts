@@ -6,15 +6,25 @@
 
 export const SUMMIT_EVENT_ID = "avalanche-summit-nyc-2026";
 
+/**
+ * Who is in the room at an Avalanche summit: builders first, then the people who fund,
+ * run and cover them; the water-side roles (data centers, AI, sustainability) after.
+ * "Other" opens a short free-text field (roleDetail) so no one is forced into a box.
+ */
 export const ROLES = [
-  "Data centers",
+  "Builder or developer",
+  "Founder",
+  "Investor or fund",
+  "Protocol or L1 team",
+  "Payments or stablecoins",
+  "Data centers or infra",
   "AI or cloud",
-  "Corporate sustainability",
-  "Investor",
-  "Ecosystem or payments",
+  "Sustainability or ESG",
+  "Media or community",
   "Other",
 ] as const;
 export type Role = (typeof ROLES)[number];
+export const ROLE_DETAIL_MAX = 60;
 
 export const SOURCES = ["Saw the ad", "Met the team on the floor", "Team1", "Other"] as const;
 export type Source = (typeof SOURCES)[number];
@@ -37,6 +47,8 @@ export type AttendeeInput = {
   email: string;
   company: string;
   role: Role;
+  /** Free text, only meaningful when role is "Other". Optional, ≤ ROLE_DETAIL_MAX chars. */
+  roleDetail?: string;
   source: Source;
   consent: boolean;
 };
@@ -68,7 +80,11 @@ export function validateAttendee(input: Partial<AttendeeInput>): { ok: true; val
   if (!ROLES.includes(input.role as Role)) return { ok: false, error: "Pick a role." };
   if (!SOURCES.includes(input.source as Source)) return { ok: false, error: "Pick what brought you here." };
   if (input.consent !== true) return { ok: false, error: "Consent is needed to continue." };
-  return { ok: true, value: { name, email, company, role: input.role as Role, source: input.source as Source, consent: true } };
+  const role = input.role as Role;
+  const roleDetail = role === "Other" ? (input.roleDetail ?? "").trim().slice(0, ROLE_DETAIL_MAX) : "";
+  const value: AttendeeInput = { name, email, company, role, source: input.source as Source, consent: true };
+  if (roleDetail) value.roleDetail = roleDetail;
+  return { ok: true, value };
 }
 
 const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"; // no 0/O/1/I

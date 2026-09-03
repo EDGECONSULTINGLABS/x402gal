@@ -18,6 +18,7 @@ const COLUMNS = [
   "email",
   "company",
   "role",
+  "roleDetail",
   "source",
   "consent",
   "consentAt",

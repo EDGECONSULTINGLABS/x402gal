@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import {
   CONSENT_COPY,
+  ROLE_DETAIL_MAX,
   ROLES,
   SOURCES,
   SUMMIT_EVENT_ID,
@@ -26,6 +27,7 @@ export function Gate({ onEntered }: Props) {
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [role, setRole] = useState<Role | "">("");
+  const [roleDetail, setRoleDetail] = useState("");
   const [source, setSource] = useState<Source | "">("");
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,15 @@ export function Gate({ onEntered }: Props) {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const checked = validateAttendee({ name, email, company, role: role as Role, source: source as Source, consent });
+    const checked = validateAttendee({
+      name,
+      email,
+      company,
+      role: role as Role,
+      roleDetail,
+      source: source as Source,
+      consent,
+    });
     if (!checked.ok) {
       setError(checked.error);
       return;
@@ -135,6 +145,17 @@ export function Gate({ onEntered }: Props) {
                   </button>
                 ))}
               </div>
+              {role === "Other" && (
+                <input
+                  className="match-input mt-2 w-full px-3 py-3 text-[15px]"
+                  placeholder="What do you do? A few words is plenty."
+                  aria-label="Your role, in your words"
+                  maxLength={ROLE_DETAIL_MAX}
+                  autoFocus
+                  value={roleDetail}
+                  onChange={(e) => setRoleDetail(e.target.value)}
+                />
+              )}
             </fieldset>
 
             <fieldset className="mt-5">

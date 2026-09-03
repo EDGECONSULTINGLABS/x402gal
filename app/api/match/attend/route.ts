@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
       email: input.email,
       company: input.company,
       role: input.role,
+      roleDetail: input.roleDetail ?? "",
       source: input.source,
       consent: "true",
       consentAt: existing?.consentAt || (typeof body.consentAt === "string" ? body.consentAt : now),

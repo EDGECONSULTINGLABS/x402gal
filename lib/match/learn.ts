@@ -46,7 +46,7 @@ export const LEARN_STEPS: readonly LearnStep[] = [
     title: "Why retirement matters",
     body: [
       "When a buyer claims a gallon, the record is retired — permanently removed so it cannot be counted twice. That is the control other credit markets lacked.",
-      "HydroCoin is the accounting layer for that record. Nothing is minted or for sale here today; what you can do is find your watershed and talk to us at the booth.",
+      "HydroCoin is the accounting layer for that record. Nothing is minted or for sale here today; what you can do is find your watershed and find one of us on the floor.",
     ],
     terms: ["retirement"],
   },

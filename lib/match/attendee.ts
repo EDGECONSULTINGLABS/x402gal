@@ -16,8 +16,17 @@ export const ROLES = [
 ] as const;
 export type Role = (typeof ROLES)[number];
 
-export const SOURCES = ["Saw the ad", "Met at the booth", "Team1", "Other"] as const;
+export const SOURCES = ["Saw the ad", "Met the team on the floor", "Team1", "Other"] as const;
 export type Source = (typeof SOURCES)[number];
+
+/**
+ * How the coin is collected. HydroCoin has no booth at the Summit; the team is on the floor.
+ * One string, referenced everywhere the redemption is mentioned. Change it here only.
+ */
+export const REDEEM_COPY = "Show this to anyone on the x402GAL team for your coin.";
+/** Fallback when nobody from the team is in reach. The record carries the code. */
+export const REDEEM_FALLBACK_COPY =
+  "Can't find us? The code is saved with your email, and we'll get your coin to you.";
 
 /** Exact consent copy from the launch spec §7. Render as written. */
 export const CONSENT_COPY =

@@ -77,7 +77,7 @@ export function Gate({ onEntered }: Props) {
             </p>
             <p className="mt-3 text-[15px] leading-relaxed">
               Then three taps estimate your own AI&apos;s daily water, and the map shows where it comes from.
-              Finish the short walk-through and you have a code to bring to the HydroCoin booth.
+              Finish the short walk-through and you have a code; show it to the x402GAL team for a coin.
             </p>
             <p className="match-quiet mt-3 text-[13px] leading-relaxed">
               Metros today: {metroNames}. Utah follows once its footprint is confirmed.

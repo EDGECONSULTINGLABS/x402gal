@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { LocalAttendee } from "@/lib/match/attendee";
+import { REDEEM_COPY, REDEEM_FALLBACK_COPY, type LocalAttendee } from "@/lib/match/attendee";
 import { Lockup } from "./Lockup";
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 
 /**
  * Completion record + a code. The app's job ends at producing this screen.
- * The coin is a physical keepsake handed over at the booth. Nothing on-chain attaches to it.
+ * The coin is a physical keepsake handed over by the team on the floor (no booth). Nothing on-chain attaches to it.
  */
 export function Badge({ attendee, metroName, subwatershed, onBackToMap }: Props) {
   const first = attendee.name.split(/\s+/)[0] || attendee.name;
@@ -38,7 +38,8 @@ export function Badge({ attendee, metroName, subwatershed, onBackToMap }: Props)
         <div className="match-card mt-6 p-4">
           <p className="match-quiet text-[13px]">Your code</p>
           <p className="match-code mt-2 px-3 py-3 text-center text-[1.9rem] font-medium">{attendee.badgeCode}</p>
-          <p className="mt-3 text-[15px] leading-relaxed">Show this at the HydroCoin booth for your coin.</p>
+          <p className="mt-3 text-[15px] leading-relaxed">{REDEEM_COPY}</p>
+          <p className="match-quiet mt-1 text-[13px] leading-relaxed">{REDEEM_FALLBACK_COPY}</p>
           <p className="match-quiet mt-1 text-[13px] leading-relaxed">
             The coin is a keepsake. No HydroCoin allocation attaches to it; supply comes only from verified infiltration.
           </p>

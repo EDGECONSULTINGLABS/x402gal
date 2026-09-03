@@ -14,7 +14,7 @@ export const runtime = "nodejs";
 
 const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
-/** Server-side twin of badgeCodeFor() — the booth code must not depend on the phone. */
+/** Server-side twin of badgeCodeFor() — the team must be able to verify a code without the phone. */
 function badgeCode(email: string, eventId: string): string {
   const digest = createHash("sha256").update(`${eventId}:${email.trim().toLowerCase()}`).digest();
   let out = "";

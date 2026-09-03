@@ -19,7 +19,7 @@ import { MatchApp, type Handoff } from "./MatchApp";
 
 /**
  * The Summit flow, end to end:
- *   gate → instrument (place, neighbors) → assess → map it → learn → badge/booth
+ *   gate → instrument (place, neighbors) → assess → map it → learn → badge (code for the team on the floor)
  * The instrument works with the network off. The gate stores locally first and syncs when it can.
  */
 type Stage = "gate" | "instrument" | "assess" | "learn" | "badge";

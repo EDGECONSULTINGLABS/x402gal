@@ -40,6 +40,14 @@
         "outside bbox": 15
       },
       "built": "2026-09-03"
+    },
+    "stewardship.geojson": {
+      "features": 0,
+      "bytes": 42,
+      "source": "ESG workbook, sheet \"All Companies (All States)\", curated via data/summit/stewardship-curation.json (include only)",
+      "geocoder": "US Census batch (Public_AR_Current), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox",
+      "sourceUrls": "verified to resolve at build",
+      "built": "2026-09-03"
     }
   },
   "note": "Interim. Rebuild with --source=source-data once all four Watershed Boundary layers are on disk."

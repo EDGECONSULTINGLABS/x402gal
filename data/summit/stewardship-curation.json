@@ -1,0 +1,50 @@
+{
+  "_about": [
+    "Curation pass over Master_50State_ESG_Companies_All_Locations.xlsx, sheet 'All Companies (All States)', per summit-launch-spec §5.",
+    "Key = 'Company|Facility/Site Name' exactly as in columns B and C. Only rows in a Summit metro are considered.",
+    "include: a published, quantified water commitment, ≤160 chars, in the company's own terms, with a working company source.",
+    "exclude: the goal text says none was found, the figure is performance not a commitment, the source is not the company's own, or anything uncertain.",
+    "Columns J (Product Fit), K (Fit Category), M (Notes) are never read by the build.",
+    "verified = date the commitment wording was checked against the source by a person or agent. Re-verify before the event."
+  ],
+  "include": {
+    "Intel Corporation|Ocotillo Campus": {
+      "commitment": "Net positive water by 2030: restore more than 100% of the fresh water Intel consumes.",
+      "source_url": "https://www.intel.com/content/www/us/en/corporate-responsibility/water-restoration.html",
+      "verified": "2026-09-03"
+    },
+    "Salt River Project (SRP)|SRP Headquarters / Project Administration Building": {
+      "commitment": "By 2035: 30% lower generation-related water-use intensity than 2005, and 5 billion gallons conserved through partnership.",
+      "source_url": "https://www.srpnet.com/grid-water-management/future-planning/sustainability",
+      "verified": "2026-09-03"
+    },
+    "Kimberly-Clark Corporation|World Headquarters": {
+      "commitment": "2030 Ambition: reduce operational water footprint 50% versus 2015 at manufacturing sites in water-stressed areas.",
+      "source_url": "https://www.kimberly-clark.com/en-us/sustainability/2030-ambition/water-use-and-stewardship",
+      "verified": "2026-09-03"
+    },
+    "Alphabet Inc. (Google)|New Albany Data Center Campus": {
+      "commitment": "Replenish 120% of the freshwater consumed across offices and data centers, on average, by 2030.",
+      "source_url": "https://sustainability.google/commitments/water/",
+      "verified": "2026-09-03",
+      "note": "Sheet address '1101 Beech Rd SW, New Albany' has no Census street match, so the card drops at build. Needs a confirmed geocodable address for the campus."
+    }
+  },
+  "exclude": {
+    "Freeport-McMoRan Inc.|Corporate Headquarters (Freeport-McMoRan Center)": "83% recycled is a reported figure, not a commitment; source is Wikipedia.",
+    "TSMC Arizona|Phoenix Fab Complex (Fab 21)": "Reclamation-plant target is real but no reachable company source; media link 404s. Revisit with a tsmc.com URL.",
+    "JPMorgan Chase & Co.|Global Headquarters (270 Park Avenue)": "Goal text: no quantified water target found.",
+    "Pfizer Inc.|World Headquarters (The Spiral)": "Goal text: no quantified water target confirmed.",
+    "American Electric Power Company, Inc.|AEP Building (Corporate Headquarters)": "Goal text: no quantified water target found.",
+    "Cardinal Health, Inc.|Corporate Headquarters": "Goal text: no quantified water target found.",
+    "Nationwide Mutual Insurance Company|One Nationwide Plaza": "Goal text: no quantified water target found.",
+    "AT&T Inc.|Whitacre Tower (World Headquarters)": "Goal text: no quantified water target found.",
+    "American Airlines Group Inc.|Robert L. Crandall Campus (World Headquarters)": "Goal text: no quantified water target found.",
+    "Ball Corporation|Fort Worth Plant": "ball.com/sustainability lists 2030 goals with no water target; source in sheet is Yelp.",
+    "McKesson Corporation|Corporate Headquarters": "Goal text: no quantified water target found.",
+    "Molson Coors Beverage Company|Fort Worth Brewery": "22% efficiency goal cited but no reachable company page for it; location page only. Revisit.",
+    "Southwest Airlines Co.|Corporate Headquarters": "Goal text: no quantified water target found.",
+    "Toyota Motor North America, Inc.|National Headquarters": "Aspiration, not a quantified target; source is a dealer site.",
+    "General Dynamics Corporation|World Headquarters": "Goal text: no quantified water target found."
+  }
+}

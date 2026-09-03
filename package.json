@@ -22,6 +22,7 @@
     "hash:methodology": "tsx scripts/hash-methodology.ts",
     "match:clip": "tsx scripts/clip-summit-geodata.ts",
     "match:facilities": "tsx scripts/build-facilities.ts",
+    "match:stewardship": "tsx scripts/build-stewardship.ts",
     "match:check": "tsx scripts/check-resolve.ts",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:dev": "npm run pages:build && wrangler pages dev",

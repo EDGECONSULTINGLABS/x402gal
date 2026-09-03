@@ -177,6 +177,7 @@ export function SummitApp() {
       key={mapKey}
       handoff={handoff}
       assessed={result !== null}
+      estimateLine={result ? `About ${result.dailyDisplay} a day` : null}
       onAssess={() => setStage("assess")}
       onLearn={() => setStage("learn")}
       onMetroChosen={onMetroChosen}

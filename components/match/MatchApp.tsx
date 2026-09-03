@@ -15,7 +15,7 @@ import {
   searchFacilityIndex,
   type FacilityIndexEntry,
 } from "@/lib/match/facilities";
-import { findContainingFeature, loadCollection } from "@/lib/match/geo";
+import { findContainingFeature, haversineMeters, loadCollection } from "@/lib/match/geo";
 import { METROS, PENDING_METROS, metroById, metroForPoint, type MetroId } from "@/lib/match/metros";
 import {
   HUC_LEVEL_NAME,
@@ -53,6 +53,8 @@ type Props = {
   /** Learn CTA. Shown once the assessment has run. */
   onLearn: () => void;
   assessed: boolean;
+  /** e.g. "About 6 mL a day" once the assessment has run. */
+  estimateLine?: string | null;
   handoff?: Handoff | null;
   onMetroChosen?: (metroId: MetroId) => void;
   onContext?: (ctx: { metroName: string; subwatershed: string | null }) => void;
@@ -68,7 +70,47 @@ function metroData(id: MetroId) {
     huc8: `${base}/huc8.geojson`,
     aquifers: `${base}/aquifers.geojson`,
     facilities: `${base}/facilities.geojson`,
+    stewardship: `${base}/stewardship.geojson`,
   };
+}
+
+/** A curated stewardship card (spec §5): exactly these five fields, nothing else. */
+type Steward = {
+  company: string;
+  facility: string;
+  sector: string;
+  commitment: string;
+  sourceUrl: string;
+  lng: number;
+  lat: number;
+  distanceKm: number;
+};
+
+function formatDistance(km: number): string {
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+}
+
+function stewardsFrom(col: GeoJsonFeatureCollection | null, lng: number, lat: number, radiusKm: number): Steward[] {
+  if (!col) return [];
+  const out: Steward[] = [];
+  for (const f of col.features) {
+    if (f.geometry?.type !== "Point") continue;
+    const [x, y] = f.geometry.coordinates as [number, number];
+    const p = (f.properties ?? {}) as Record<string, unknown>;
+    const distanceKm = haversineMeters(lng, lat, x, y) / 1000;
+    if (distanceKm > radiusKm) continue;
+    out.push({
+      company: String(p.company ?? ""),
+      facility: String(p.facility ?? ""),
+      sector: String(p.sector ?? ""),
+      commitment: String(p.commitment ?? ""),
+      sourceUrl: String(p.source_url ?? ""),
+      lng: x,
+      lat: y,
+      distanceKm,
+    });
+  }
+  return out.sort((a, b) => a.distanceKm - b.distanceKm);
 }
 
 function HucLine({ unit }: { unit: HucUnit | null }) {
@@ -82,7 +124,15 @@ function HucLine({ unit }: { unit: HucUnit | null }) {
   );
 }
 
-export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroChosen, onContext }: Props) {
+export function MatchApp({
+  onAssess,
+  onLearn,
+  assessed,
+  estimateLine = null,
+  handoff = null,
+  onMetroChosen,
+  onContext,
+}: Props) {
   const first = handoff ? metroById(handoff.metroId) : METROS[0];
   const [step, setStep] = useState<Step>(handoff ? "resolved" : "place");
   const [metroId, setMetroId] = useState<MetroId>(first.id);
@@ -110,6 +160,7 @@ export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroC
   const [huc8, setHuc8] = useState<GeoJsonFeatureCollection | null>(null);
   const [aquifers, setAquifers] = useState<GeoJsonFeatureCollection | null>(null);
   const [facilityCol, setFacilityCol] = useState<GeoJsonFeatureCollection | null>(null);
+  const [stewardCol, setStewardCol] = useState<GeoJsonFeatureCollection | null>(null);
   const [facilityIndex, setFacilityIndex] = useState<FacilityIndexEntry[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -146,6 +197,7 @@ export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroC
     setHuc8(null);
     setAquifers(null);
     setFacilityCol(null);
+    setStewardCol(null);
     setWatershed(null);
     setAquifer(null);
     setLoadError(null);
@@ -156,15 +208,17 @@ export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroC
         if (cancelled) return;
         setHuc12(a12);
         setAquifers(aq);
-        const [a10, a8, fac] = await Promise.all([
+        const [a10, a8, fac, stew] = await Promise.all([
           loadCollection(urls.huc10),
           loadCollection(urls.huc8),
           loadCollection(urls.facilities).catch(() => null),
+          loadCollection(urls.stewardship).catch(() => null),
         ]);
         if (cancelled) return;
         setHuc10(a10);
         setHuc8(a8);
         setFacilityCol(fac);
+        setStewardCol(stew);
       } catch (err) {
         if (!cancelled) setLoadError((err as Error).message);
       }
@@ -219,6 +273,10 @@ export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroC
     return selected.source === "list" ? hits.filter((h) => h.distanceKm > 0.02) : hits;
   }, [facilities, selected.lng, selected.lat, selected.source, radiusKm, subwatershedFeature]);
   const sameCount = neighbors.filter((n) => n.sameSubwatershed).length;
+  const stewards = useMemo(
+    () => stewardsFrom(stewardCol, selected.lng, selected.lat, radiusKm),
+    [stewardCol, selected.lng, selected.lat, radiusKm]
+  );
 
   const applyPlace = (hit: {
     metroId: MetroId;
@@ -568,7 +626,7 @@ export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroC
                                 <span className="block text-[14px] leading-snug">{n.facility.name}</span>
                                 <span className="block text-[12px] leading-snug text-[var(--quiet)]">
                                   {n.facility.operator ? `${n.facility.operator} · ` : ""}
-                                  <span className="match-mono">{n.distanceKm < 1 ? `${Math.round(n.distanceKm * 1000)} m` : `${n.distanceKm.toFixed(1)} km`}</span>
+                                  <span className="match-mono">{formatDistance(n.distanceKm)}</span>
                                   {n.sameSubwatershed ? " · same subwatershed" : ""}
                                 </span>
                               </button>
@@ -592,8 +650,36 @@ export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroC
                   </section>
                   <section className="mt-3">
                     <h2 className="text-[14px] font-medium">Water stewardship nearby</h2>
-                    <p className="mt-1 text-[13px] text-[var(--quiet)]">
-                      Lists when the curated commitments load. Each card will carry its source.
+                    {stewards.length === 0 ? (
+                      <p className="mt-1 text-[13px] text-[var(--quiet)]">
+                        {stewardCol
+                          ? `No published, quantified water commitment on file within ${radiusKm} km.`
+                          : "Loading curated commitments."}
+                      </p>
+                    ) : (
+                      <ul className="mt-2 flex flex-col gap-2">
+                        {stewards.map((s) => (
+                          <li key={`${s.company}|${s.facility}`} className="match-card p-3">
+                            <p className="text-[14px] font-medium leading-snug">{s.company}</p>
+                            <p className="text-[12px] text-[var(--quiet)]">
+                              {s.facility} · {s.sector} · {formatDistance(s.distanceKm)}
+                            </p>
+                            <p className="mt-2 text-[13px] leading-relaxed">{s.commitment}</p>
+                            <a
+                              href={s.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="match-link mt-2 inline-block text-[12px]"
+                            >
+                              Source: {new URL(s.sourceUrl).hostname.replace(/^www\./, "")}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <p className="mt-2 text-[12px] leading-relaxed text-[var(--quiet)]">
+                      Published commitments in the company&apos;s own words. Not a ranking, not a claim about
+                      performance.
                     </p>
                   </section>
 
@@ -654,7 +740,9 @@ export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroC
                       <p className="mt-1 text-[13px] leading-relaxed">
                         Demand. A published coefficient, not a meter.
                       </p>
-                      <p className="mt-2 text-[13px] text-[var(--quiet)]">Waits on the stewardship layer.</p>
+                      <p className="mt-2 text-[13px] text-[var(--quiet)]">
+                        {estimateLine ? `${estimateLine}, from your three answers.` : "Run the estimate to see your own number."}
+                      </p>
                     </div>
                   </div>
 

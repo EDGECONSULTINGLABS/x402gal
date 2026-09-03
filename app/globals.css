@@ -184,6 +184,78 @@ body {
 @keyframes x-rise { to { opacity: 1; transform: none; } }
 @keyframes x-blink { 50% { opacity: 0; } }
 
+/* ── Summit match instrument ─────────────────── */
+.match-root {
+  --paper: #eef1f2;
+  --ink: #14212b;
+  --water: #14607a;
+  --subsurface: #8c6239;
+  --quiet: #6b7a85;
+  font-family: var(--font-match-sans), "IBM Plex Sans", sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+.match-root .match-mono {
+  font-family: var(--font-match-mono), "IBM Plex Mono", ui-monospace, monospace;
+}
+.match-panel {
+  background: #eef1f2;
+  color: #14212b;
+  border: 1px solid #14212b;
+}
+.match-glossary {
+  position: fixed;
+  z-index: 80;
+  background: #eef1f2;
+  color: #14212b;
+  border: 1px solid #14212b;
+  font-family: var(--font-match-sans), "IBM Plex Sans", sans-serif;
+  max-height: min(22rem, calc(100dvh - 24px));
+  overflow-y: auto;
+  padding: 14px;
+}
+.match-action {
+  background: var(--water);
+  color: #fff;
+}
+.match-choice {
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+.match-measured {
+  border-left: 4px solid var(--water);
+  background: #e4eef1;
+}
+.match-estimated {
+  border-left: 4px solid var(--quiet);
+  background: #e8eaeb;
+}
+
+/* ── Summit match map ────────────────────────── */
+.match-map,
+.match-map .maplibregl-map,
+.match-map .maplibregl-canvas-container,
+.match-map .maplibregl-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.match-map .maplibregl-ctrl-attrib {
+  background: #eef1f2;
+  color: #14212b;
+  font-size: 10px;
+}
+.match-map .maplibregl-ctrl-attrib a { color: #14607a; }
+.match-map .maplibregl-ctrl-group {
+  background: #eef1f2;
+  border: 1px solid #14212b;
+}
+.match-map .maplibregl-ctrl-group button + button {
+  border-top-color: #14212b;
+}
+
 /* ── Reduced motion ──────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

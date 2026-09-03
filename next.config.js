@@ -14,6 +14,7 @@ module.exports = {
       },
     ];
   },
+  transpilePackages: ["maplibre-gl"],
   experimental: {
     serverComponentsExternalPackages: ["xrpl", "@solana/web3.js"],
   },

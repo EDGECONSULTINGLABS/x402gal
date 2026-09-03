@@ -125,6 +125,9 @@ export function Landing({ reviewerEmail }: { reviewerEmail?: string }) {
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
             {reviewerEmail && <PreviewSignOut email={reviewerEmail} />}
+            <a href="/match" className="hidden text-xs text-slate-500 hover:text-hydro-200 sm:inline">
+              Match
+            </a>
             <span className="hidden items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500 sm:inline-flex">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-hydro-300" />
               Pilot stage · Avalanche Summit, New York, Sep 16–17

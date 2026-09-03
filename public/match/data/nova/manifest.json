@@ -1,0 +1,46 @@
+{
+  "metro": "nova",
+  "source": "USGS WBD MapServer (hydro.nationalmap.gov) + USGS Principal Aquifers (ScienceBase doi:10.5066/P9Y2HOUJ)",
+  "files": null,
+  "clipped": "2026-09-03",
+  "bbox": [
+    -77.85,
+    38.65,
+    -77,
+    39.2
+  ],
+  "layers": {
+    "huc12.geojson": {
+      "features": 70,
+      "bytes": 156462,
+      "simplify": "maxAllowableOffset=0.0008deg"
+    },
+    "huc10.geojson": {
+      "features": 21,
+      "bytes": 55447,
+      "simplify": "maxAllowableOffset=0.0015deg"
+    },
+    "huc8.geojson": {
+      "features": 6,
+      "bytes": 46568,
+      "simplify": "maxAllowableOffset=0.0015deg"
+    },
+    "aquifers.geojson": {
+      "features": 6,
+      "bytes": 49904
+    },
+    "facilities.geojson": {
+      "features": 136,
+      "bytes": 28653,
+      "source": "Master 50-state data-center workbook, sheet \"All Facilities (All States)\", Active rows in metro cities",
+      "geocoder": "US Census batch (Public_AR_Current), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox",
+      "dropped": {
+        "no match": 82,
+        "city and zip mismatch": 0,
+        "outside bbox": 6
+      },
+      "built": "2026-09-03"
+    }
+  },
+  "note": "Interim. Rebuild with --source=source-data once all four Watershed Boundary layers are on disk."
+}

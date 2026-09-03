@@ -11,7 +11,10 @@ export type Metro = {
   bbox: BBox;
 };
 
-/** Summit metros. New York is the floor. The other four are the demand markets. */
+/**
+ * Summit metros. New York is the floor. The other four are the demand markets.
+ * Utah is the sixth (see PENDING_METROS) and joins this list once its footprint is confirmed.
+ */
 export const METROS: readonly Metro[] = [
   {
     id: "nyc",
@@ -48,6 +51,21 @@ export const METROS: readonly Metro[] = [
     center: [-82.999, 39.961],
     zoom: 10,
     bbox: [-83.3, 39.8, -82.7, 40.2],
+  },
+];
+
+/**
+ * Metros named in the launch spec whose footprint is not yet confirmed.
+ * No bbox, no clip, no pin — listed so the choice is visible and honest.
+ * Utah: confirm the facility location with Joe before clipping. Do not guess it.
+ */
+export type PendingMetro = { id: string; name: string; waitingOn: string };
+
+export const PENDING_METROS: readonly PendingMetro[] = [
+  {
+    id: "utah",
+    name: "Utah",
+    waitingOn: "Waiting on the confirmed facility location before this metro is clipped.",
   },
 ];
 

@@ -9,7 +9,7 @@ import type {
 } from "./types";
 
 function unitFromFeature(feature: GeoJsonFeature, level: HucLevel): HucUnit | null {
-  const code = propString(feature.properties, [`huc${level}`, "huc12", "huc10", "huc8", "huc6"]);
+  const code = propString(feature.properties, [`huc${level}`, "huc12", "huc10", "huc8"]);
   const name = propString(feature.properties, ["name", "hu_name", "huname"]);
   if (!code) return null;
   return { code, name: name ?? code, level };
@@ -34,7 +34,6 @@ export function resolveWatershed(
     huc12: GeoJsonFeatureCollection | null;
     huc10: GeoJsonFeatureCollection | null;
     huc8: GeoJsonFeatureCollection | null;
-    huc6: GeoJsonFeatureCollection | null;
   }
 ): WatershedHit | null {
   const feature = findContainingFeature(layers.huc12, lng, lat);
@@ -46,7 +45,6 @@ export function resolveWatershed(
     huc12,
     huc10: code.length >= 10 ? unitFromCode(layers.huc10, code.slice(0, 10), 10) : null,
     huc8: code.length >= 8 ? unitFromCode(layers.huc8, code.slice(0, 8), 8) : null,
-    huc6: code.length >= 6 ? unitFromCode(layers.huc6, code.slice(0, 6), 6) : null,
   };
 }
 

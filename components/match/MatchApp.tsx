@@ -1,30 +1,64 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  cityAmbiguity,
+  facilityListLoading,
+  facilityNotFound,
   matchAlias,
   outsideMetroDirection,
-  waitingForFacilityList,
 } from "@/lib/match/aliases";
-import { loadCollection } from "@/lib/match/geo";
-import { METROS, metroById, metroForPoint, type MetroId } from "@/lib/match/metros";
-import type {
-  AquiferHit,
-  GeoJsonFeatureCollection,
-  SelectedLocation,
-  WatershedHit,
+import {
+  facilitiesFrom,
+  nearbyFacilities,
+  searchFacilityIndex,
+  type FacilityIndexEntry,
+} from "@/lib/match/facilities";
+import { findContainingFeature, loadCollection } from "@/lib/match/geo";
+import { METROS, PENDING_METROS, metroById, metroForPoint, type MetroId } from "@/lib/match/metros";
+import {
+  HUC_LEVEL_NAME,
+  type AquiferHit,
+  type FacilityHit,
+  type GeoJsonFeatureCollection,
+  type HucUnit,
+  type SelectedLocation,
+  type WatershedHit,
 } from "@/lib/match/types";
 import { resolveAquifer, resolveWatershed } from "@/lib/match/watershed";
 import { GlossaryProvider, GlossaryRow, GlossaryTerm } from "./GlossaryTerm";
+import { Lockup } from "./Lockup";
 
 const MatchMap = dynamic(() => import("./MatchMap").then((m) => m.MatchMap), {
   ssr: false,
-  loading: () => <div className="absolute inset-0 bg-[#1a1a1a]" />,
+  loading: () => <div className="absolute inset-0 bg-[#0d1117]" />,
 });
 
 type Step = "place" | "resolved" | "close";
+
+/** Where the assessment lands: a representative facility, or the metro center if none loaded. */
+export type Handoff = {
+  metroId: MetroId;
+  lng: number;
+  lat: number;
+  label: string;
+  /** e.g. "About 20 mL a day, estimated." */
+  resultLine: string;
+};
+
+type Props = {
+  /** Assessment CTA. Instrument → loop. */
+  onAssess: () => void;
+  /** Learn CTA. Shown once the assessment has run. */
+  onLearn: () => void;
+  assessed: boolean;
+  handoff?: Handoff | null;
+  onMetroChosen?: (metroId: MetroId) => void;
+  onContext?: (ctx: { metroName: string; subwatershed: string | null }) => void;
+};
+
+const FACILITY_INDEX_URL = "/match/data/facilities-index.json";
 
 function metroData(id: MetroId) {
   const base = `/match/data/${id}`;
@@ -32,22 +66,33 @@ function metroData(id: MetroId) {
     huc12: `${base}/huc12.geojson`,
     huc10: `${base}/huc10.geojson`,
     huc8: `${base}/huc8.geojson`,
-    huc6: `${base}/huc6.geojson`,
     aquifers: `${base}/aquifers.geojson`,
+    facilities: `${base}/facilities.geojson`,
   };
 }
 
-export function MatchApp() {
-  const first = METROS[0];
-  const [step, setStep] = useState<Step>("place");
+function HucLine({ unit }: { unit: HucUnit | null }) {
+  if (!unit) return null;
+  return (
+    <p className="mt-1 text-[13px] leading-snug">
+      <span className="text-[var(--quiet)]">{HUC_LEVEL_NAME[unit.level]}</span>{" "}
+      <span>{unit.name}</span>{" "}
+      <span className="match-mono text-[12px] text-[var(--quiet)]">HUC{unit.level} {unit.code}</span>
+    </p>
+  );
+}
+
+export function MatchApp({ onAssess, onLearn, assessed, handoff = null, onMetroChosen, onContext }: Props) {
+  const first = handoff ? metroById(handoff.metroId) : METROS[0];
+  const [step, setStep] = useState<Step>(handoff ? "resolved" : "place");
   const [metroId, setMetroId] = useState<MetroId>(first.id);
-  const [zoom, setZoom] = useState(first.zoom);
-  const [selected, setSelected] = useState<SelectedLocation>({
-    lng: first.center[0],
-    lat: first.center[1],
-    label: `${first.name} metro center`,
-    source: "metro",
-  });
+  const [zoom, setZoom] = useState(handoff ? Math.max(first.zoom, 12.5) : first.zoom);
+  const [selected, setSelected] = useState<SelectedLocation>(
+    handoff
+      ? { lng: handoff.lng, lat: handoff.lat, label: handoff.label, source: "list" }
+      : { lng: first.center[0], lat: first.center[1], label: `${first.name} metro center`, source: "metro" }
+  );
+  const [showHandoff, setShowHandoff] = useState(Boolean(handoff));
   const [radiusKm, setRadiusKm] = useState(25);
   const [showWbd, setShowWbd] = useState(true);
   const [showAquifer, setShowAquifer] = useState(true);
@@ -57,13 +102,15 @@ export function MatchApp() {
   const [placeMsg, setPlaceMsg] = useState<string | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [panelH, setPanelH] = useState(420);
+  const [showAllNeighbors, setShowAllNeighbors] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [huc12, setHuc12] = useState<GeoJsonFeatureCollection | null>(null);
   const [huc10, setHuc10] = useState<GeoJsonFeatureCollection | null>(null);
   const [huc8, setHuc8] = useState<GeoJsonFeatureCollection | null>(null);
-  const [huc6, setHuc6] = useState<GeoJsonFeatureCollection | null>(null);
   const [aquifers, setAquifers] = useState<GeoJsonFeatureCollection | null>(null);
+  const [facilityCol, setFacilityCol] = useState<GeoJsonFeatureCollection | null>(null);
+  const [facilityIndex, setFacilityIndex] = useState<FacilityIndexEntry[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [watershed, setWatershed] = useState<WatershedHit | null>(null);
@@ -73,42 +120,51 @@ export function MatchApp() {
   const dragRef = useRef<{ startY: number; startH: number } | null>(null);
 
   useEffect(() => {
+    if (step !== "place") onMetroChosen?.(metroId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metroId, step === "place"]);
+
+  useEffect(() => {
+    onContext?.({ metroName: metro.name, subwatershed: watershed?.huc12.name ?? null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metro.name, watershed?.huc12.name]);
+
+  useEffect(() => {
     const max = Math.round(window.innerHeight * 0.78);
     const wide = window.innerWidth >= 1024;
     if (step === "close") setPanelH(wide ? max : Math.round(window.innerHeight * 0.56));
     else setPanelH(wide ? Math.min(560, max) : 480);
     scrollRef.current?.scrollTo(0, 0);
+    setShowAllNeighbors(false);
   }, [step]);
 
+  // One metro at a time. Nothing national on first paint.
   useEffect(() => {
     let cancelled = false;
     setHuc12(null);
     setHuc10(null);
     setHuc8(null);
-    setHuc6(null);
     setAquifers(null);
+    setFacilityCol(null);
     setWatershed(null);
     setAquifer(null);
     setLoadError(null);
     (async () => {
       try {
         const urls = metroData(metroId);
-        const [a12, aq] = await Promise.all([
-          loadCollection(urls.huc12),
-          loadCollection(urls.aquifers),
-        ]);
+        const [a12, aq] = await Promise.all([loadCollection(urls.huc12), loadCollection(urls.aquifers)]);
         if (cancelled) return;
         setHuc12(a12);
         setAquifers(aq);
-        const [a10, a8, a6] = await Promise.all([
+        const [a10, a8, fac] = await Promise.all([
           loadCollection(urls.huc10),
           loadCollection(urls.huc8),
-          loadCollection(urls.huc6),
+          loadCollection(urls.facilities).catch(() => null),
         ]);
         if (cancelled) return;
         setHuc10(a10);
         setHuc8(a8);
-        setHuc6(a6);
+        setFacilityCol(fac);
       } catch (err) {
         if (!cancelled) setLoadError((err as Error).message);
       }
@@ -118,12 +174,29 @@ export function MatchApp() {
     };
   }, [metroId]);
 
+  // The typed-name index loads only when the type field opens.
+  useEffect(() => {
+    if (!typeOpen || facilityIndex) return;
+    let cancelled = false;
+    fetch(FACILITY_INDEX_URL)
+      .then((r) => (r.ok ? (r.json() as Promise<FacilityIndexEntry[]>) : []))
+      .then((rows) => {
+        if (!cancelled) setFacilityIndex(Array.isArray(rows) ? rows : []);
+      })
+      .catch(() => {
+        if (!cancelled) setFacilityIndex([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [typeOpen, facilityIndex]);
+
   const resolveAt = useCallback(
     (lng: number, lat: number) => {
-      setWatershed(resolveWatershed(lng, lat, { huc12, huc10, huc8, huc6 }));
+      setWatershed(resolveWatershed(lng, lat, { huc12, huc10, huc8 }));
       setAquifer(resolveAquifer(lng, lat, aquifers));
     },
-    [huc12, huc10, huc8, huc6, aquifers]
+    [huc12, huc10, huc8, aquifers]
   );
 
   useEffect(() => {
@@ -135,6 +208,18 @@ export function MatchApp() {
     resolveAt(selected.lng, selected.lat);
   }, [huc12, aquifers, selected.lng, selected.lat, resolveAt]);
 
+  const facilities = useMemo(() => facilitiesFrom(facilityCol), [facilityCol]);
+  const subwatershedFeature = useMemo(
+    () => (huc12 ? findContainingFeature(huc12, selected.lng, selected.lat) : null),
+    [huc12, selected.lng, selected.lat]
+  );
+  const neighbors: FacilityHit[] = useMemo(() => {
+    const hits = nearbyFacilities(facilities, selected.lng, selected.lat, radiusKm, subwatershedFeature);
+    // The pin itself, when it is a listed facility.
+    return selected.source === "list" ? hits.filter((h) => h.distanceKm > 0.02) : hits;
+  }, [facilities, selected.lng, selected.lat, selected.source, radiusKm, subwatershedFeature]);
+  const sameCount = neighbors.filter((n) => n.sameSubwatershed).length;
+
   const applyPlace = (hit: {
     metroId: MetroId;
     lng: number;
@@ -142,6 +227,7 @@ export function MatchApp() {
     label: string;
     note?: string;
     zoom?: number;
+    source?: SelectedLocation["source"];
   }) => {
     const next = metroById(hit.metroId);
     setMetroId(hit.metroId);
@@ -150,11 +236,12 @@ export function MatchApp() {
       lng: hit.lng,
       lat: hit.lat,
       label: hit.label,
-      source: hit.zoom ? "geocode" : "metro",
+      source: hit.source ?? (hit.zoom ? "geocode" : "metro"),
     });
-    setWatershed(null);
-    setAquifer(null);
+    // Watershed/aquifer re-resolve from the effect on (layers, lng, lat). Nulling them here
+    // left a stale null when the chosen metro and point equal the initial state.
     setPlaceMsg(hit.note ?? null);
+    setShowHandoff(false);
     setStep("resolved");
   };
 
@@ -165,6 +252,19 @@ export function MatchApp() {
       lng: next.center[0],
       lat: next.center[1],
       label: `${next.name} metro center`,
+    });
+  };
+
+  const pickFacility = (lng: number, lat: number, name: string, id?: MetroId) => {
+    const hit = id ? metroById(id) : metroForPoint(lng, lat);
+    if (!hit) return;
+    applyPlace({
+      metroId: hit.id,
+      lng,
+      lat,
+      label: name,
+      zoom: Math.max(hit.zoom, 12.5),
+      source: "list",
     });
   };
 
@@ -180,6 +280,7 @@ export function MatchApp() {
       lat,
       label: "Map location",
       zoom: Math.max(hit.zoom, 11),
+      source: "map",
     });
   };
 
@@ -187,15 +288,37 @@ export function MatchApp() {
     e.preventDefault();
     const q = query.trim();
     if (q.length < 2) return;
+
+    const ambiguous = cityAmbiguity(q);
+    if (ambiguous) {
+      setPlaceMsg(ambiguous);
+      return;
+    }
     const local = matchAlias(q);
     if (local) {
       applyPlace(local);
       return;
     }
-    if (/^[a-z][a-z0-9 .,'&-]{3,}$/i.test(q) && !/\d/.test(q) && q.split(/\s+/).length >= 2) {
-      setPlaceMsg(waitingForFacilityList());
-      return;
+
+    const looksLikeName = /^[a-z][a-z0-9 .,'&-]{2,}$/i.test(q) && !/\d{5}/.test(q);
+    if (looksLikeName) {
+      if (!facilityIndex) {
+        setPlaceMsg(facilityListLoading());
+        return;
+      }
+      const hits = searchFacilityIndex(facilityIndex, q);
+      if (hits.length) {
+        const top = hits[0];
+        pickFacility(top.c[0], top.c[1], top.n, top.m);
+        if (hits.length > 1) setPlaceMsg(`Showing ${top.n}. ${hits.length - 1} more listed under that name.`);
+        return;
+      }
+      if (q.split(/\s+/).length >= 2 && !/\d/.test(q)) {
+        setPlaceMsg(facilityNotFound());
+        return;
+      }
     }
+
     setGeocoding(true);
     setPlaceMsg(null);
     try {
@@ -214,13 +337,7 @@ export function MatchApp() {
         setPlaceMsg(data.message ?? outsideMetroDirection());
         return;
       }
-      applyPlace({
-        metroId: hit.metroId,
-        lng: hit.lng,
-        lat: hit.lat,
-        label: hit.label,
-        zoom: 12,
-      });
+      applyPlace({ metroId: hit.metroId, lng: hit.lng, lat: hit.lat, label: hit.label, zoom: 12 });
     } catch {
       setPlaceMsg("Address lookup needs a network. Choose a metro — that path is local.");
     } finally {
@@ -260,6 +377,8 @@ export function MatchApp() {
         ? "Not a named principal aquifer"
         : null;
 
+  const visibleNeighbors = showAllNeighbors ? neighbors : neighbors.slice(0, 5);
+
   return (
     <GlossaryProvider newYorkLesson={metroId === "nyc"}>
       <div className="relative h-[100dvh] overflow-hidden bg-[var(--paper)]">
@@ -272,13 +391,17 @@ export function MatchApp() {
           showAquifer={showAquifer}
           huc12={huc12}
           aquifers={aquifers}
+          facilities={step === "place" ? null : facilityCol}
           selectedHuc12={step === "place" ? null : watershed?.huc12.code ?? null}
           showPin={step !== "place"}
           onMapClick={onMapClick}
+          onFacilityClick={(lng, lat, name) => pickFacility(lng, lat, name)}
         />
 
         <header className="absolute inset-x-0 top-0 z-20 flex items-center px-3 py-2">
-          <p className="match-panel px-2 py-1 text-[13px] font-medium">x402GAL</p>
+          <div className="match-panel px-2.5 py-1">
+            <Lockup size={16} />
+          </div>
         </header>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-3 lg:inset-auto lg:bottom-auto lg:left-4 lg:top-14 lg:w-96 lg:p-0">
@@ -300,30 +423,18 @@ export function MatchApp() {
             {(step !== "place" || typeOpen) && (
               <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--ink)]/15 px-4 py-2">
                 {typeOpen && step === "place" ? (
-                  <button
-                    type="button"
-                    onClick={() => setTypeOpen(false)}
-                    className="text-[13px] text-[var(--water)]"
-                  >
+                  <button type="button" onClick={() => setTypeOpen(false)} className="text-[13px] text-[var(--water)]">
                     Back to the metro list
                   </button>
                 ) : step === "close" ? (
-                  <button
-                    type="button"
-                    onClick={goResolved}
-                    className="text-[13px] text-[var(--ink)]"
-                  >
+                  <button type="button" onClick={goResolved} className="text-[13px] text-[var(--ink)]">
                     Back to the watershed
                   </button>
                 ) : (
                   <span className="text-[13px] text-[var(--quiet)]">{metro.name}</span>
                 )}
                 {step !== "place" && (
-                  <button
-                    type="button"
-                    onClick={goPlace}
-                    className="text-[13px] text-[var(--water)]"
-                  >
+                  <button type="button" onClick={goPlace} className="text-[13px] text-[var(--water)]">
                     Choose another metro
                   </button>
                 )}
@@ -333,13 +444,28 @@ export function MatchApp() {
             <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
               {step === "place" && (
                 <>
-                  <h1 className="text-[1.35rem] font-medium leading-tight">Choose a metro</h1>
+                  <h1 className="text-[1.35rem] font-medium leading-tight">
+                    {typeOpen ? "Name a facility or a place" : "Choose a metro"}
+                  </h1>
                   <p className="mt-2 max-w-[40ch] text-[14px] leading-relaxed text-[var(--quiet)]">
-                    The map will show the <GlossaryTerm id="watershed" /> around it. These metros
-                    only.
+                    {typeOpen
+                      ? "A data center's name, its operator, a city, or a zip inside the metros."
+                      : <>The map will show the <GlossaryTerm id="watershed" /> around it. These metros only.</>}
                   </p>
                   {typeOpen ? (
                     <form onSubmit={submitPlace} className="mt-4 flex flex-col gap-3">
+                      <div className="flex gap-2">
+                        <input
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          placeholder="Equinix DC2, Ashburn VA, 85003"
+                          autoFocus
+                          className="match-input min-w-0 flex-1 px-3 py-2 text-[14px]"
+                        />
+                        <button type="submit" disabled={geocoding} className="match-action px-3 py-2 text-[14px]">
+                          Show the watershed
+                        </button>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setTypeOpen(false)}
@@ -347,17 +473,6 @@ export function MatchApp() {
                       >
                         Back to the metro list
                       </button>
-                      <div className="flex gap-2">
-                      <input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Ashburn VA, 85003, us-east-1"
-                        className="min-w-0 flex-1 border border-[var(--ink)] bg-white px-3 py-2 text-[14px] outline-none"
-                      />
-                      <button type="submit" disabled={geocoding} className="match-action px-3 py-2 text-[14px]">
-                        Show the watershed
-                      </button>
-                      </div>
                     </form>
                   ) : (
                     <>
@@ -372,13 +487,19 @@ export function MatchApp() {
                             {m.name}
                           </button>
                         ))}
+                        {PENDING_METROS.map((m) => (
+                          <div
+                            key={m.id}
+                            className="match-choice w-full px-3 py-2.5 text-left text-[15px] opacity-60"
+                            aria-disabled="true"
+                          >
+                            {m.name}
+                            <span className="mt-0.5 block text-[12px] leading-snug text-[var(--quiet)]">{m.waitingOn}</span>
+                          </div>
+                        ))}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setTypeOpen(true)}
-                        className="mt-3 text-[13px] text-[var(--quiet)]"
-                      >
-                        Or type a city or zip
+                      <button type="button" onClick={() => setTypeOpen(true)} className="mt-3 text-[13px] text-[var(--quiet)]">
+                        Or type a facility, city, or zip
                       </button>
                     </>
                   )}
@@ -388,19 +509,31 @@ export function MatchApp() {
 
               {step === "resolved" && (
                 <>
-                  <p className="text-[13px] text-[var(--quiet)]">{metro.name}</p>
+                  {showHandoff && handoff && (
+                    <div className="match-estimated mb-3 p-3">
+                      <p className="text-[13px] font-medium">Your AI drinks from here</p>
+                      <p className="mt-1 text-[13px] leading-relaxed">
+                        {handoff.resultLine} A representative facility in {metro.name}; the boundary below is the ground it draws from.
+                      </p>
+                    </div>
+                  )}
+                  <p className="text-[13px] text-[var(--quiet)]">
+                    {selected.source === "list" ? selected.label : metro.name}
+                  </p>
                   <h1 className="mt-1 text-[1.4rem] font-medium leading-tight">
-                    {watershed ? watershed.huc12.name : "No watershed at this point"}
+                    {watershed ? watershed.huc12.name : "No subwatershed at this point"}
                   </h1>
                   <p className="mt-2 max-w-[40ch] text-[14px] leading-relaxed">
                     This is the <GlossaryTerm id="watershed" /> that drains past the pin.
                   </p>
                   {watershed && (
-                    <p className="match-mono mt-3 text-[12px] text-[var(--quiet)]">
-                      HUC12 {watershed.huc12.code}
-                    </p>
+                    <div className="mt-3">
+                      <HucLine unit={watershed.huc12} />
+                      <HucLine unit={watershed.huc10} />
+                      <HucLine unit={watershed.huc8} />
+                    </div>
                   )}
-                  <p className="match-mono mt-1 text-[12px] text-[var(--quiet)]">
+                  <p className="match-mono mt-2 text-[12px] text-[var(--quiet)]">
                     {selected.lat.toFixed(4)}, {selected.lng.toFixed(4)}
                   </p>
                   {aquiferTitle && (
@@ -409,6 +542,61 @@ export function MatchApp() {
                     </p>
                   )}
                   {placeMsg && <p className="mt-2 text-[13px]">{placeMsg}</p>}
+
+                  <section className="mt-5 border-t border-[var(--ink)]/15 pt-3">
+                    <h2 className="text-[14px] font-medium">Data centers nearby</h2>
+                    {facilityCol === null ? (
+                      <p className="mt-1 text-[13px] text-[var(--quiet)]">Loading the facility list.</p>
+                    ) : neighbors.length === 0 ? (
+                      <p className="mt-1 text-[13px] text-[var(--quiet)]">
+                        None listed within {radiusKm} km. Widen the radius under “Adjust the map.”
+                      </p>
+                    ) : (
+                      <>
+                        <p className="mt-1 text-[13px] text-[var(--quiet)]">
+                          {neighbors.length} within {radiusKm} km
+                          {watershed ? ` · ${sameCount} in this subwatershed` : ""}
+                        </p>
+                        <ul className="mt-2 flex flex-col gap-1.5">
+                          {visibleNeighbors.map((n) => (
+                            <li key={`${n.facility.name}|${n.facility.lng}|${n.facility.lat}`}>
+                              <button
+                                type="button"
+                                onClick={() => pickFacility(n.facility.lng, n.facility.lat, n.facility.name, metroId)}
+                                className="w-full text-left"
+                              >
+                                <span className="block text-[14px] leading-snug">{n.facility.name}</span>
+                                <span className="block text-[12px] leading-snug text-[var(--quiet)]">
+                                  {n.facility.operator ? `${n.facility.operator} · ` : ""}
+                                  <span className="match-mono">{n.distanceKm < 1 ? `${Math.round(n.distanceKm * 1000)} m` : `${n.distanceKm.toFixed(1)} km`}</span>
+                                  {n.sameSubwatershed ? " · same subwatershed" : ""}
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                        {neighbors.length > 5 && !showAllNeighbors && (
+                          <button type="button" onClick={() => setShowAllNeighbors(true)} className="mt-2 text-[13px] text-[var(--water)]">
+                            Show all {neighbors.length}
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </section>
+
+                  <section className="mt-4">
+                    <h2 className="text-[14px] font-medium">Candidate projects</h2>
+                    <p className="mt-1 text-[13px] text-[var(--quiet)]">
+                      Lists when a project record is marked for public display. None are yet.
+                    </p>
+                  </section>
+                  <section className="mt-3">
+                    <h2 className="text-[14px] font-medium">Water stewardship nearby</h2>
+                    <p className="mt-1 text-[13px] text-[var(--quiet)]">
+                      Lists when the curated commitments load. Each card will carry its source.
+                    </p>
+                  </section>
+
                   <button
                     type="button"
                     onClick={() => setStep("close")}
@@ -416,6 +604,11 @@ export function MatchApp() {
                   >
                     What you just saw
                   </button>
+                  {showHandoff && (
+                    <button type="button" onClick={onLearn} className="match-link mt-2 w-full text-center text-[13px]">
+                      Skip ahead: what a verified gallon is
+                    </button>
+                  )}
                 </>
               )}
 
@@ -423,16 +616,28 @@ export function MatchApp() {
                 <>
                   <h1 className="text-[1.35rem] font-medium leading-tight">What you just saw</h1>
                   <p className="mt-2 max-w-[40ch] text-[14px] leading-relaxed">
-                    {metro.name} sits in {watershed ? watershed.huc12.name : "an unresolved HUC12"}.
-                    {watershed ? (
-                      <span className="match-mono block mt-1 text-[12px] text-[var(--quiet)]">
-                        HUC12 {watershed.huc12.code}
-                      </span>
-                    ) : null}
+                    {selected.source === "list" ? selected.label : metro.name} sits in{" "}
+                    {watershed ? watershed.huc12.name : "an unresolved subwatershed"}.
                   </p>
+                  {watershed && (
+                    <div className="mt-1">
+                      <HucLine unit={watershed.huc12} />
+                      <HucLine unit={watershed.huc10} />
+                      <HucLine unit={watershed.huc8} />
+                    </div>
+                  )}
                   {aquiferTitle && (
                     <p className="mt-2 max-w-[40ch] text-[14px]">
                       <GlossaryTerm id="aquifer" /> under the pin: {aquiferTitle}.
+                    </p>
+                  )}
+                  {facilityCol && (
+                    <p className="mt-2 max-w-[40ch] text-[14px]">
+                      {neighbors.length === 0
+                        ? `No listed data center within ${radiusKm} km.`
+                        : `${neighbors.length} listed data center${neighbors.length === 1 ? "" : "s"} within ${radiusKm} km${
+                            watershed ? `, ${sameCount} sharing this subwatershed` : ""
+                          }.`}
                     </p>
                   )}
 
@@ -442,24 +647,20 @@ export function MatchApp() {
                       <p className="mt-1 text-[13px] leading-relaxed">
                         Supply. <GlossaryTerm id="infiltration" /> after independent review.
                       </p>
-                      <p className="mt-2 text-[13px] text-[var(--quiet)]">
-                        Waits on a verified gallon.
-                      </p>
+                      <p className="mt-2 text-[13px] text-[var(--quiet)]">Waits on a verified gallon.</p>
                     </div>
                     <div className="match-estimated p-3">
                       <p className="text-[13px] font-medium">Estimated</p>
                       <p className="mt-1 text-[13px] leading-relaxed">
                         Demand. A published coefficient, not a meter.
                       </p>
-                      <p className="mt-2 text-[13px] text-[var(--quiet)]">
-                        Waits on the stewardship layer.
-                      </p>
+                      <p className="mt-2 text-[13px] text-[var(--quiet)]">Waits on the stewardship layer.</p>
                     </div>
                   </div>
 
                   <p className="mt-4 text-[13px] leading-relaxed text-[var(--quiet)]">
-                    Nearby facilities will list when the metro file is loaded. Candidate sites will
-                    list when a record is marked for public display.
+                    Facility points come from a street-level geocode of a published address list.
+                    Candidate sites list when a record is marked for public display.
                   </p>
 
                   <div className="mt-4">
@@ -467,23 +668,31 @@ export function MatchApp() {
                     <GlossaryRow />
                   </div>
 
-                  <p className="mt-4 text-[13px] leading-relaxed">
-                    This summary is local. The payment demonstration needs a network and is a
-                    testnet path.
+                  <div className="mt-5">
+                    {assessed ? (
+                      <>
+                        <button type="button" onClick={onLearn} className="match-action w-full px-3 py-2.5 text-[15px]">
+                          Continue: what a verified gallon is
+                        </button>
+                        <button type="button" onClick={onAssess} className="match-link mt-2 w-full text-center text-[13px]">
+                          Redo the estimate
+                        </button>
+                      </>
+                    ) : (
+                      <button type="button" onClick={onAssess} className="match-action w-full px-3 py-2.5 text-[15px]">
+                        Estimate your AI&apos;s water
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-3 text-[12px] leading-relaxed text-[var(--quiet)]">
+                    This summary is local. Nothing here is minted or for sale.
                   </p>
-                  <Link href="/console" className="mt-2 inline-block text-[13px] text-[var(--water)]">
-                    Open the payment demonstration
-                  </Link>
                 </>
               )}
 
               {step !== "place" && (
                 <div className="mt-4 border-t border-[var(--ink)]/20 pt-3">
-                  <button
-                    type="button"
-                    onClick={() => setAdjustOpen((v) => !v)}
-                    className="text-[13px] text-[var(--quiet)]"
-                  >
+                  <button type="button" onClick={() => setAdjustOpen((v) => !v)} className="text-[13px] text-[var(--quiet)]">
                     {adjustOpen ? "Hide map controls" : "Adjust the map"}
                   </button>
                   {adjustOpen && (
@@ -503,19 +712,11 @@ export function MatchApp() {
                       </label>
                       <div className="mt-2 flex gap-4 text-[13px]">
                         <label className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={showWbd}
-                            onChange={(e) => setShowWbd(e.target.checked)}
-                          />
-                          Watershed
+                          <input type="checkbox" checked={showWbd} onChange={(e) => setShowWbd(e.target.checked)} />
+                          Subwatershed
                         </label>
                         <label className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={showAquifer}
-                            onChange={(e) => setShowAquifer(e.target.checked)}
-                          />
+                          <input type="checkbox" checked={showAquifer} onChange={(e) => setShowAquifer(e.target.checked)} />
                           Aquifer
                         </label>
                       </div>

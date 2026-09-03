@@ -1,4 +1,5 @@
-export type HucLevel = 6 | 8 | 10 | 12;
+/** USGS hydrologic unit levels shown in the app. 12 → 10 → 8 on tap. */
+export type HucLevel = 8 | 10 | 12;
 
 export type HucUnit = {
   code: string;
@@ -6,16 +7,39 @@ export type HucUnit = {
   level: HucLevel;
 };
 
+/** USGS names for each level. The app and the engineers say the same words. */
+export const HUC_LEVEL_NAME: Record<HucLevel, string> = {
+  12: "Subwatershed",
+  10: "Watershed",
+  8: "Subbasin",
+};
+
 export type WatershedHit = {
   huc12: HucUnit;
   huc10: HucUnit | null;
   huc8: HucUnit | null;
-  huc6: HucUnit | null;
 };
 
 export type AquiferHit = {
   name: string;
   rockType: string | null;
+};
+
+export type Facility = {
+  name: string;
+  operator: string;
+  city: string;
+  state: string;
+  status: string;
+  lng: number;
+  lat: number;
+};
+
+export type FacilityHit = {
+  facility: Facility;
+  distanceKm: number;
+  /** Inside the same HUC12 as the pin. */
+  sameSubwatershed: boolean;
 };
 
 export type GeoJsonFeature = {

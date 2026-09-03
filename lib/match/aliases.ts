@@ -1,3 +1,4 @@
+import { METRO_CITIES } from "./metroCities";
 import { METROS, metroById, type MetroId } from "./metros";
 
 export type PlaceHit = {
@@ -90,6 +91,19 @@ export function matchAlias(raw: string): PlaceHit | null {
     }
   }
 
+  // Metro cities from the facility file ("Mesa", "mesa az", "Sterling, VA").
+  const cityHits = cityMetros(n);
+  if (cityHits.length === 1) {
+    const metro = metroById(cityHits[0]);
+    return {
+      metroId: metro.id,
+      label: `${metro.name} metro center`,
+      lng: metro.center[0],
+      lat: metro.center[1],
+      note: `That city is in the ${metro.name} metro.`,
+    };
+  }
+
   for (const row of ALIASES) {
     if (
       row.keys.some(
@@ -108,6 +122,35 @@ export function matchAlias(raw: string): PlaceHit | null {
   }
 
   return matchClosest(n, c);
+}
+
+/** Metros whose city list contains the typed city, with or without a state suffix. */
+function cityMetros(n: string): MetroId[] {
+  const out: MetroId[] = [];
+  for (const [id, m] of Object.entries(METRO_CITIES) as [MetroId, (typeof METRO_CITIES)[MetroId]][]) {
+    const st = m.state.toLowerCase();
+    const hit = m.cities.some((city) => {
+      const k = normalize(city);
+      return n === k || n === `${k} ${st}` || n === `${k} ${normalize(stateName(st))}`;
+    });
+    if (hit) out.push(id);
+  }
+  return out;
+}
+
+/** "Arlington" is in two metros. Say so instead of guessing. */
+export function cityAmbiguity(raw: string): string | null {
+  const hits = cityMetros(normalize(raw));
+  if (hits.length < 2) return null;
+  const names = hits.map((id) => `${metroById(id).name} (${METRO_CITIES[id].state})`).join(" or ");
+  return `${raw.trim()} is in ${names}. Add the state.`;
+}
+
+function stateName(code: string): string {
+  return (
+    ({ ny: "new york", az: "arizona", va: "virginia", tx: "texas", oh: "ohio" } as Record<string, string>)[code] ??
+    code
+  );
 }
 
 function levenshtein(a: string, b: string): number {
@@ -181,6 +224,10 @@ export function outsideMetroDirection(): string {
   return `That place is outside ${metroList()}. Choose one of those, or type a city or zip inside them.`;
 }
 
-export function waitingForFacilityList(): string {
-  return `Company names will resolve when the facility list is loaded. Choose a metro, or type a city or zip in ${metroList()}.`;
+export function facilityNotFound(): string {
+  return `No listed facility by that name in ${metroList()}. Try the operator's name, a city, or a zip — or choose a metro.`;
+}
+
+export function facilityListLoading(): string {
+  return `The facility list is still loading. Choose a metro — that path is instant.`;
 }

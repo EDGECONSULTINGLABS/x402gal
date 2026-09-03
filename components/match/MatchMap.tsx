@@ -65,10 +65,17 @@ type Props = {
   showAquifer: boolean;
   huc12: GeoJsonFeatureCollection | null;
   aquifers: GeoJsonFeatureCollection | null;
+  facilities: GeoJsonFeatureCollection | null;
   selectedHuc12: string | null;
   showPin?: boolean;
   onMapClick: (lng: number, lat: number) => void;
+  /** A listed facility was tapped. Name is the facility's `name` property. */
+  onFacilityClick?: (lng: number, lat: number, name: string) => void;
 };
+
+/** Our GeoJSON types are structural and narrower than maplibre's; the shape is identical. */
+type MlGeoJson = Parameters<maplibreImport.GeoJSONSource["setData"]>[0];
+const asMl = (data: GeoJsonFeatureCollection) => data as unknown as MlGeoJson;
 
 function setSourceData(
   map: maplibreImport.Map,
@@ -76,7 +83,7 @@ function setSourceData(
   data: GeoJsonFeatureCollection
 ) {
   const source = map.getSource(id) as maplibreImport.GeoJSONSource | undefined;
-  source?.setData(data);
+  source?.setData(asMl(data));
 }
 
 function applySelectedFilter(map: maplibreImport.Map, code: string | null) {
@@ -88,10 +95,11 @@ function applySelectedFilter(map: maplibreImport.Map, code: string | null) {
 
 function addOverlayLayers(map: maplibreImport.Map) {
   if (map.getSource("aquifers")) return;
-  map.addSource("aquifers", { type: "geojson", data: emptyCollection() });
-  map.addSource("huc12", { type: "geojson", data: emptyCollection() });
-  map.addSource("radius", { type: "geojson", data: emptyCollection() });
-  map.addSource("pin", { type: "geojson", data: emptyCollection() });
+  map.addSource("aquifers", { type: "geojson", data: asMl(emptyCollection()) });
+  map.addSource("huc12", { type: "geojson", data: asMl(emptyCollection()) });
+  map.addSource("radius", { type: "geojson", data: asMl(emptyCollection()) });
+  map.addSource("facilities", { type: "geojson", data: asMl(emptyCollection()) });
+  map.addSource("pin", { type: "geojson", data: asMl(emptyCollection()) });
 
   map.addLayer({
     id: "aquifers-fill",
@@ -144,6 +152,18 @@ function addOverlayLayers(map: maplibreImport.Map) {
     paint: { "line-color": QUIET, "line-width": 1.4, "line-dasharray": [2, 1.6] },
   });
   map.addLayer({
+    id: "facilities-circle",
+    type: "circle",
+    source: "facilities",
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 3, 12, 5, 15, 7],
+      "circle-color": INK,
+      "circle-opacity": 0.85,
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": PAPER,
+    },
+  });
+  map.addLayer({
     id: "pin-circle",
     type: "circle",
     source: "pin",
@@ -184,14 +204,18 @@ export function MatchMap({
   showAquifer,
   huc12,
   aquifers,
+  facilities,
   selectedHuc12,
   showPin = true,
   onMapClick,
+  onFacilityClick,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibreImport.Map | null>(null);
   const clickRef = useRef(onMapClick);
   clickRef.current = onMapClick;
+  const facilityClickRef = useRef(onFacilityClick);
+  facilityClickRef.current = onFacilityClick;
   const viewRef = useRef({ lng: selected.lng, lat: selected.lat, zoom, bounds: null as
     | [[number, number], [number, number]]
     | null });
@@ -272,7 +296,30 @@ export function MatchMap({
     map.on("load", onLoad);
     map.on("style.load", onLoad);
     map.on("error", onError);
-    map.on("click", (e) => clickRef.current(e.lngLat.lng, e.lngLat.lat));
+    map.on("click", (e) => {
+      if (map.getLayer("facilities-circle") && facilityClickRef.current) {
+        const hits = map.queryRenderedFeatures(
+          [
+            [e.point.x - 8, e.point.y - 8],
+            [e.point.x + 8, e.point.y + 8],
+          ],
+          { layers: ["facilities-circle"] }
+        );
+        const hit = hits[0];
+        if (hit && hit.geometry.type === "Point") {
+          const [lng, lat] = hit.geometry.coordinates as [number, number];
+          facilityClickRef.current(lng, lat, String(hit.properties?.name ?? "Listed facility"));
+          return;
+        }
+      }
+      clickRef.current(e.lngLat.lng, e.lngLat.lat);
+    });
+    map.on("mouseenter", "facilities-circle", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "facilities-circle", () => {
+      map.getCanvas().style.cursor = "";
+    });
 
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(el);
@@ -294,12 +341,13 @@ export function MatchMap({
       addOverlayLayers(map);
       if (huc12) setSourceData(map, "huc12", huc12);
       if (aquifers) setSourceData(map, "aquifers", aquifers);
+      setSourceData(map, "facilities", facilities ?? emptyCollection());
       if (huc12 && selectedHuc12) drawWatershed(map, selectedHuc12);
       else applySelectedFilter(map, selectedHuc12);
     };
     if (map.isStyleLoaded()) apply();
     else map.once("load", apply);
-  }, [huc12, aquifers, selectedHuc12]);
+  }, [huc12, aquifers, facilities, selectedHuc12]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -105,7 +105,7 @@ function GlossarySheet({
       ))}
       {showNy &&
         entry.nyParagraphs?.map((p) => (
-          <p key={p} className="mt-3 border-t border-[#14212B]/20 pt-3 text-[13px] leading-[1.55]">
+          <p key={p} className="mt-3 border-t border-[var(--hc-border-strong)] pt-3 text-[13px] leading-[1.55]">
             {p}
           </p>
         ))}
@@ -192,7 +192,7 @@ export function GlossaryTerm({
       <button
         ref={btnRef}
         type="button"
-        className="rounded-sm text-inherit underline decoration-dotted decoration-[#14607A] underline-offset-[5px]"
+        className="rounded-sm text-inherit underline decoration-dotted decoration-[var(--hc-accent)] underline-offset-[5px]"
         data-glossary-term=""
         aria-expanded={open}
         aria-describedby={open ? tipId : undefined}

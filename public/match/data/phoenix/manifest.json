@@ -1,0 +1,46 @@
+{
+  "metro": "phoenix",
+  "source": "USGS WBD MapServer (hydro.nationalmap.gov) + USGS Principal Aquifers (ScienceBase doi:10.5066/P9Y2HOUJ)",
+  "files": null,
+  "clipped": "2026-09-03",
+  "bbox": [
+    -113.15,
+    32.95,
+    -111.45,
+    34.05
+  ],
+  "layers": {
+    "huc12.geojson": {
+      "features": 237,
+      "bytes": 422336,
+      "simplify": "maxAllowableOffset=0.0008deg"
+    },
+    "huc10.geojson": {
+      "features": 42,
+      "bytes": 130010,
+      "simplify": "maxAllowableOffset=0.0015deg"
+    },
+    "huc8.geojson": {
+      "features": 11,
+      "bytes": 97505,
+      "simplify": "maxAllowableOffset=0.0015deg"
+    },
+    "aquifers.geojson": {
+      "features": 62,
+      "bytes": 112808
+    },
+    "facilities.geojson": {
+      "features": 12,
+      "bytes": 2750,
+      "source": "Master 50-state data-center workbook, sheet \"All Facilities (All States)\", Active rows in metro cities",
+      "geocoder": "US Census batch (Public_AR_Current), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox",
+      "dropped": {
+        "no match": 3,
+        "city and zip mismatch": 0,
+        "outside bbox": 0
+      },
+      "built": "2026-09-03"
+    }
+  },
+  "note": "Interim. Rebuild with --source=source-data once all four Watershed Boundary layers are on disk."
+}

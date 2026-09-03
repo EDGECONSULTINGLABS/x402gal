@@ -185,51 +185,125 @@ body {
 @keyframes x-blink { 50% { opacity: 0; } }
 
 /* ── Summit match instrument ─────────────────── */
+/* Tokens: app/match/tokens.css (HydroCoin brand). */
 .match-root {
-  --paper: #eef1f2;
-  --ink: #14212b;
-  --water: #14607a;
-  --subsurface: #8c6239;
-  --quiet: #6b7a85;
-  font-family: var(--font-match-sans), "IBM Plex Sans", sans-serif;
-  color: var(--ink);
-  background: var(--paper);
+  font-family: var(--font-match-sans), "DM Sans", system-ui, sans-serif;
+  color: var(--hc-text);
+  background: var(--hc-bg);
+  -webkit-font-smoothing: antialiased;
 }
 .match-root .match-mono {
-  font-family: var(--font-match-mono), "IBM Plex Mono", ui-monospace, monospace;
+  font-family: var(--font-match-mono), "DM Mono", ui-monospace, monospace;
 }
+/* gradient chrome; the map stays the dominant element */
 .match-panel {
-  background: #eef1f2;
-  color: #14212b;
-  border: 1px solid #14212b;
+  background: var(--hc-gradient-hero);
+  color: var(--hc-text);
+  border: 1px solid var(--hc-border-strong);
+  border-radius: var(--hc-radius);
+}
+.match-panel h1,
+.match-panel h2,
+.match-screen h1,
+.match-screen h2 {
+  color: var(--hc-text-heading);
+}
+/* full-screen step: gate, assessment, learn, badge */
+.match-screen {
+  min-height: 100dvh;
+  background: var(--hc-gradient-hero);
+  color: var(--hc-text);
+}
+.match-card {
+  background: var(--hc-bg-card);
+  border: 1px solid var(--hc-border);
+  border-radius: var(--hc-radius);
 }
 .match-glossary {
   position: fixed;
   z-index: 80;
-  background: #eef1f2;
-  color: #14212b;
-  border: 1px solid #14212b;
-  font-family: var(--font-match-sans), "IBM Plex Sans", sans-serif;
+  background: var(--hc-bg-card);
+  color: var(--hc-text);
+  border: 1px solid var(--hc-border-strong);
+  border-radius: var(--hc-radius-lg);
+  font-family: var(--font-match-sans), "DM Sans", sans-serif;
   max-height: min(22rem, calc(100dvh - 24px));
   overflow-y: auto;
   padding: 14px;
 }
+/* one primary action per screen: solid, no gradient, no glow */
 .match-action {
-  background: var(--water);
-  color: #fff;
+  background: var(--hc-primary);
+  color: #ffffff;
+  border-radius: var(--hc-radius-lg);
+  font-weight: 500;
+}
+.match-action:disabled {
+  opacity: 0.5;
 }
 .match-choice {
-  background: #fff;
-  color: var(--ink);
-  border: 1px solid var(--ink);
+  background: var(--hc-bg-card);
+  color: var(--hc-text);
+  border: 1px solid var(--hc-border-strong);
+  border-radius: var(--hc-radius-lg);
 }
+.match-choice[data-selected="true"],
+.match-choice:active {
+  background: var(--hc-bg-card-hover);
+  border-color: var(--hc-accent);
+}
+.match-input {
+  background: var(--hc-bg);
+  color: var(--hc-text);
+  border: 1px solid var(--hc-border-strong);
+  border-radius: var(--hc-radius-lg);
+  outline: none;
+}
+.match-input:focus {
+  border-color: var(--hc-accent);
+}
+.match-input::placeholder {
+  color: var(--hc-text-secondary);
+}
+.match-link {
+  color: var(--hc-accent);
+}
+.match-quiet {
+  color: var(--hc-text-muted);
+}
+/* measured vs estimated: two kinds of number, two treatments */
 .match-measured {
-  border-left: 4px solid var(--water);
-  background: #e4eef1;
+  border-left: 4px solid var(--hc-sky-2);
+  background: rgba(43, 183, 200, 0.1);
+  border-radius: 0 var(--hc-radius-lg) var(--hc-radius-lg) 0;
 }
 .match-estimated {
-  border-left: 4px solid var(--quiet);
-  background: #e8eaeb;
+  border-left: 4px dashed var(--hc-text-muted);
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 0 var(--hc-radius-lg) var(--hc-radius-lg) 0;
+}
+/* heading gradient: text only, never on controls */
+.match-gradient-text {
+  background: var(--hc-gradient-heading);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.match-code {
+  font-family: var(--font-match-mono), "DM Mono", ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--hc-border-strong);
+  border-radius: var(--hc-radius-lg);
+  background: var(--hc-bg);
+}
+.match-progress {
+  height: 3px;
+  background: var(--hc-border);
+}
+.match-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--hc-accent);
 }
 
 /* ── Summit match map ────────────────────────── */
@@ -243,17 +317,20 @@ body {
   height: 100%;
 }
 .match-map .maplibregl-ctrl-attrib {
-  background: #eef1f2;
-  color: #14212b;
+  background: rgba(13, 17, 23, 0.85);
+  color: var(--hc-text-muted);
   font-size: 10px;
 }
-.match-map .maplibregl-ctrl-attrib a { color: #14607a; }
+.match-map .maplibregl-ctrl-attrib a { color: var(--hc-accent); }
 .match-map .maplibregl-ctrl-group {
-  background: #eef1f2;
-  border: 1px solid #14212b;
+  background: var(--hc-bg-card);
+  border: 1px solid var(--hc-border-strong);
 }
 .match-map .maplibregl-ctrl-group button + button {
-  border-top-color: #14212b;
+  border-top-color: var(--hc-border-strong);
+}
+.match-map .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(0.9);
 }
 
 /* ── Reduced motion ──────────────────────────── */

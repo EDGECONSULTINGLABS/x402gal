@@ -1,0 +1,46 @@
+{
+  "metro": "columbus",
+  "source": "USGS WBD MapServer (hydro.nationalmap.gov) + USGS Principal Aquifers (ScienceBase doi:10.5066/P9Y2HOUJ)",
+  "files": null,
+  "clipped": "2026-09-03",
+  "bbox": [
+    -83.3,
+    39.8,
+    -82.7,
+    40.2
+  ],
+  "layers": {
+    "huc12.geojson": {
+      "features": 47,
+      "bytes": 81548,
+      "simplify": "maxAllowableOffset=0.0008deg"
+    },
+    "huc10.geojson": {
+      "features": 18,
+      "bytes": 49957,
+      "simplify": "maxAllowableOffset=0.0015deg"
+    },
+    "huc8.geojson": {
+      "features": 3,
+      "bytes": 39344,
+      "simplify": "maxAllowableOffset=0.0015deg"
+    },
+    "aquifers.geojson": {
+      "features": 3,
+      "bytes": 4252
+    },
+    "facilities.geojson": {
+      "features": 47,
+      "bytes": 9858,
+      "source": "Master 50-state data-center workbook, sheet \"All Facilities (All States)\", Active rows in metro cities",
+      "geocoder": "US Census batch (Public_AR_Current), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox",
+      "dropped": {
+        "no match": 12,
+        "city and zip mismatch": 0,
+        "outside bbox": 3
+      },
+      "built": "2026-09-03"
+    }
+  },
+  "note": "Interim. Rebuild with --source=source-data once all four Watershed Boundary layers are on disk."
+}

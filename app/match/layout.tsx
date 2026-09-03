@@ -1,13 +1,15 @@
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { DM_Mono, DM_Sans } from "next/font/google";
+import "./tokens.css";
 
-const sans = IBM_Plex_Sans({
+/** One family, two roles. DM Sans / DM Mono — the pair hydrocoin.com loads. */
+const sans = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-match-sans",
   display: "swap",
 });
 
-const mono = IBM_Plex_Mono({
+const mono = DM_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
   variable: "--font-match-mono",

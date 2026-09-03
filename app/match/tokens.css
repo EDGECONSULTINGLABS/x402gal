@@ -1,0 +1,46 @@
+/*
+ * HydroCoin brand tokens — one visual system across ads, hydrocoin.com, x402gal.com, this app, booth.
+ * Values are taken from hydrocoin.com/static/css/style.css and landing.css (fetched 2026-09-03).
+ * Do not invent hex values here; if the live site changes, re-pull.
+ *
+ * Avalanche red is used in the x402GAL lockup only (see components/match/Lockup.tsx).
+ */
+.match-root {
+  /* surfaces */
+  --hc-bg: #0d1117;
+  --hc-bg-card: #161b22;
+  --hc-bg-card-hover: #1c2333;
+  --hc-surface: #0f172a;
+  /* text */
+  --hc-text: #e6edf3;
+  --hc-text-heading: #ffffff;
+  --hc-text-muted: #94a3b8;
+  --hc-text-secondary: #8b949e;
+  /* brand blues */
+  --hc-primary: #0891b2;
+  --hc-accent: #2bb7c8;
+  --hc-sky: #0ea5e9;
+  --hc-sky-2: #38bdf8;
+  --hc-teal: #28b0a0;
+  --hc-pale: #a8e8e0;
+  /* lines */
+  --hc-border: rgba(43, 183, 200, 0.15);
+  --hc-border-strong: rgba(43, 183, 200, 0.3);
+  --hc-ring: rgba(8, 145, 178, 0.5);
+  /* the campaign identity: blue gradient / ombre */
+  --hc-gradient-hero: linear-gradient(135deg, #0c1a2e 0%, #1a3a5c 50%, #13152e 100%);
+  --hc-gradient-heading: linear-gradient(135deg, #0ea5e9, #2bb7c8, #38bdf8);
+  --hc-gradient-line: linear-gradient(180deg, #2bb7c8, rgba(43, 183, 200, 0.2));
+  --hc-radius: 12px;
+  --hc-radius-lg: 8px;
+
+  /* x402GAL lockup only */
+  --avalanche-red: #e84142;
+
+  /* roles used by the instrument (map + panel) */
+  --paper: var(--hc-bg);
+  --ink: var(--hc-text);
+  --water: var(--hc-sky-2);
+  --subsurface: var(--hc-teal);
+  --quiet: var(--hc-text-muted);
+}

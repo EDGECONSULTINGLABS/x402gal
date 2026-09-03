@@ -21,6 +21,7 @@
     "test:e2e": "playwright test",
     "hash:methodology": "tsx scripts/hash-methodology.ts",
     "match:clip": "tsx scripts/clip-summit-geodata.ts",
+    "match:facilities": "tsx scripts/build-facilities.ts",
     "match:check": "tsx scripts/check-resolve.ts",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:dev": "npm run pages:build && wrangler pages dev",
@@ -56,12 +57,14 @@
     "dotenv": "^17.4.2",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.18",
+    "mapshaper": "^0.7.56",
     "postcss": "^8.4.49",
     "shapefile": "^0.6.6",
     "tailwindcss": "^3.4.14",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
-    "wrangler": "^3.114.17"
+    "wrangler": "^3.114.17",
+    "xlsx": "^0.18.5"
   }
 }

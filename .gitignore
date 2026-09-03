@@ -39,6 +39,11 @@ yarn-error.log*
 /coverage/
 .level2-state.json
 
+# ── Summit geodata source (national WBD + aquifer shapefiles, ~500MB) ─────────
+# Downloaded once, clipped with `npm run match:clip -- --source=source-data`.
+# Only the clipped outputs under public/match/data/ are committed.
+source-data/
+
 # ── Misc ──────────────────────────────────────────────────────────────────────
 *.tsbuildinfo
 .vercel

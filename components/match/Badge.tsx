@@ -55,8 +55,8 @@ export function Badge({ attendee, metroName, subwatershed, onBackToMap }: Props)
           <button type="button" onClick={onBackToMap} className="match-action w-full px-4 py-3 text-[16px]">
             Back to the map
           </button>
-          <Link href="/console" className="match-link mt-3 block text-center text-[13px]">
-            Optional: the x402 payment demonstration (testnet, needs a network)
+          <Link href="/" className="match-link mt-3 block text-center text-[13px]">
+            More about x402GAL and HydroCoin
           </Link>
         </div>
       </main>

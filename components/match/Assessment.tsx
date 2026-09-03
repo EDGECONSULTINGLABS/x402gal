@@ -153,7 +153,7 @@ function Result({ result, onMapIt }: { result: AssessmentResult; onMapIt: () => 
         <p className="text-[13px] font-medium">Estimated</p>
         <p className="mt-1 text-[13px] leading-relaxed">{ESTIMATE_LABEL}</p>
         <p className="match-mono match-quiet mt-2 break-all text-[11px]">
-          {result.methodology.version} · {result.methodology.hash}
+          {result.methodology.version} edition · {result.methodology.hash}
         </p>
       </div>
 

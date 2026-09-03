@@ -3,9 +3,10 @@
  *
  * Coefficients live HERE and only here, on top of the x402GAL footprint model
  * (lib/footprint.ts — Green Grid WUE, boundary-aware, hashed). Nothing from a
- * third-party paper is typed into the UI. Until the methodology owner signs off
- * on the bucket values below, the version label reads "v1.0-draft" and the
- * estimate is rounded to one significant figure.
+ * third-party paper is typed into the UI. The methodology is identified by an
+ * edition date plus the footprint-model hash (no "vX.Y" / "draft" wording on
+ * screen — decision 2026-09-03). Until the methodology owner signs off on the
+ * bucket values below, the estimate is rounded to one significant figure.
  *
  * Tone rule: never scold. No "heavy user". The person taking it is the buyer.
  */
@@ -13,9 +14,10 @@ import { calculateFootprint, FOOTPRINT_METHODOLOGY_HASH } from "../footprint";
 import type { MetroId } from "./metros";
 
 export const METHODOLOGY_NAME = "x402GAL Water Intensity Methodology";
-export const METHODOLOGY_VERSION = "v1.0-draft";
+/** Edition date. Bump when any coefficient below changes; the hash covers the underlying model. */
+export const METHODOLOGY_VERSION = "2026-09";
 export const METHODOLOGY_HASH = FOOTPRINT_METHODOLOGY_HASH;
-/** Estimate is rounded to this many significant figures while the version is a draft. */
+/** Estimate is rounded to this many significant figures until the coefficients are signed off. */
 export const SIGNIFICANT_FIGURES = 1;
 
 export type UsageBucket = "few" | "steady" | "workflow" | "agents";
@@ -119,4 +121,4 @@ export function assess(answers: AssessmentAnswers): AssessmentResult {
 }
 
 /** Exact label from the spec §8. Render as written. */
-export const ESTIMATE_LABEL = `Estimated under the ${METHODOLOGY_NAME} ${METHODOLOGY_VERSION}. This is an estimate from published coefficients, not a measurement.`;
+export const ESTIMATE_LABEL = `Estimated under the ${METHODOLOGY_NAME}. This is an estimate from published coefficients, not a measurement.`;

@@ -46,6 +46,7 @@
       "bytes": 496,
       "source": "ESG workbook, sheet \"All Companies (All States)\", curated via data/summit/stewardship-curation.json (include only)",
       "geocoder": "US Census batch (Public_AR_Current), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox",
+      "coordinateOverrides": [],
       "sourceUrls": "verified to resolve at build",
       "built": "2026-09-03"
     }

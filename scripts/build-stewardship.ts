@@ -40,7 +40,19 @@ const CURATION = join(ROOT, "data", "summit", "stewardship-curation.json");
 const MAX_COMMITMENT = 160;
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128 Safari/537.36 x402gal-build";
 
-type Curated = { commitment: string; source_url: string; verified?: string };
+/**
+ * Narrow escape hatch for a confirmed address the Census geocoder cannot place. Bound to the
+ * exact sheet address; the point must come from an authoritative record and cite it.
+ */
+type CoordinateOverride = {
+  address: string;
+  lng: number;
+  lat: number;
+  method: string;
+  source: Record<string, unknown>;
+  why: string;
+};
+type Curated = { commitment: string; source_url: string; verified?: string; coordinate_override?: CoordinateOverride };
 type Curation = { include: Record<string, Curated>; exclude: Record<string, string> };
 
 type Row = {
@@ -134,6 +146,15 @@ async function main() {
     const c = curation.include[r.key];
     if (c.commitment.length > MAX_COMMITMENT) throw new Error(`${r.key}: commitment is ${c.commitment.length} chars (max ${MAX_COMMITMENT})`);
     if (!/^https:\/\//.test(c.source_url)) throw new Error(`${r.key}: source_url must be https`);
+    const o = c.coordinate_override;
+    if (o) {
+      if (o.address.toLowerCase() !== addrKey(r)) {
+        throw new Error(`${r.key}: coordinate_override.address "${o.address}" does not match the sheet address "${addrKey(r)}" — fix or remove the override`);
+      }
+      if (!Number.isFinite(o.lng) || !Number.isFinite(o.lat) || !o.method || !o.source || !o.why) {
+        throw new Error(`${r.key}: coordinate_override needs lng, lat, method, source and why`);
+      }
+    }
   }
   if (dry) return;
 
@@ -143,22 +164,35 @@ async function main() {
   const today = new Date().toISOString().slice(0, 10);
   const byMetro = new Map<MetroId, GeoJsonFeature[]>();
   const why: Record<string, number> = { "no match": 0, "city and zip mismatch": 0, "outside bbox": 0, "source url failed": 0 };
+  const overrides: Record<MetroId, Record<string, unknown>[]> = { nyc: [], phoenix: [], nova: [], dallas: [], columbus: [] };
 
   for (const r of included) {
     const c = curation.include[r.key];
     const g = cache[addrKey(r)];
-    if (!g || g.match !== "Match" || g.lng == null || g.lat == null) {
+    let lng: number;
+    let lat: number;
+    if (g && g.match === "Match" && g.lng != null && g.lat != null) {
+      if (!matchAgrees(g, r)) {
+        why["city and zip mismatch"]++;
+        console.log(`  drop ${r.key}: geocode disagrees on city and zip`);
+        continue;
+      }
+      lng = g.lng;
+      lat = g.lat;
+    } else if (c.coordinate_override) {
+      // The geocoder has no street match; use the cited authoritative point. Logged and recorded in the manifest.
+      const o = c.coordinate_override;
+      lng = o.lng;
+      lat = o.lat;
+      console.log(`  override ${r.key}: Census No_Match → ${o.method}`);
+      overrides[r.metro].push({ key: r.key, address: o.address, lng, lat, method: o.method, source: o.source, why: o.why });
+    } else {
       why["no match"]++;
       console.log(`  drop ${r.key}: no street-level match`);
       continue;
     }
-    if (!matchAgrees(g, r)) {
-      why["city and zip mismatch"]++;
-      console.log(`  drop ${r.key}: geocode disagrees on city and zip`);
-      continue;
-    }
     const metro = METROS.find((m) => m.id === r.metro)!;
-    if (!pointInBbox(g.lng, g.lat, metro.bbox)) {
+    if (!pointInBbox(lng, lat, metro.bbox)) {
       why["outside bbox"]++;
       console.log(`  drop ${r.key}: outside ${metro.id} bbox`);
       continue;
@@ -173,7 +207,7 @@ async function main() {
         continue;
       }
     }
-    const point: [number, number] = [Number(g.lng.toFixed(6)), Number(g.lat.toFixed(6))];
+    const point: [number, number] = [Number(lng.toFixed(6)), Number(lat.toFixed(6))];
     byMetro.set(r.metro, [
       ...(byMetro.get(r.metro) ?? []),
       {
@@ -205,6 +239,7 @@ async function main() {
       bytes: Buffer.byteLength(json),
       source: `ESG workbook, sheet "${SHEET}", curated via data/summit/stewardship-curation.json (include only)`,
       geocoder: `US Census batch (${BENCHMARK}), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox`,
+      coordinateOverrides: overrides[metro.id],
       sourceUrls: checkUrls ? "verified to resolve at build" : "not checked (--no-url-check)",
       built: today,
     });

@@ -5,7 +5,8 @@
     "include: a published, quantified water commitment, ≤160 chars, in the company's own terms, with a working company source.",
     "exclude: the goal text says none was found, the figure is performance not a commitment, the source is not the company's own, or anything uncertain.",
     "Columns J (Product Fit), K (Fit Category), M (Notes) are never read by the build.",
-    "verified = date the commitment wording was checked against the source by a person or agent. Re-verify before the event."
+    "verified = date the commitment wording was checked against the source by a person or agent. Re-verify before the event.",
+    "coordinate_override = used ONLY when the Census geocoder has no street match for an address that is independently confirmed. It is bound to the exact sheet address (street|city|state|zip); if the address changes, the override stops applying and the build drops the row again. The point must come from an authoritative record (county auditor parcel, municipal address point) and cite it. Never an interpolation or a hand-placed pin."
   ],
   "include": {
     "Intel Corporation|Ocotillo Campus": {
@@ -27,7 +28,24 @@
       "commitment": "Replenish 120% of the freshwater consumed across offices and data centers, on average, by 2030.",
       "source_url": "https://sustainability.google/commitments/water/",
       "verified": "2026-09-03",
-      "note": "Sheet address '1101 Beech Rd SW, New Albany' has no Census street match, so the card drops at build. Needs a confirmed geocodable address for the campus."
+      "coordinate_override": {
+        "address": "1101 Beech Rd SW|New Albany|OH|43054",
+        "lng": -82.763386,
+        "lat": 40.058351,
+        "method": "Licking County Auditor parcel point (ParcelsLabels layer) for the site address",
+        "source": {
+          "authority": "Licking County Auditor GIS",
+          "service": "https://gis.lickingcounty.gov/server/rest/services/Auditor/ParcelsLabels/MapServer/0",
+          "query": "SiteAddressNumber = '1101' AND UPPER(SiteStreet) LIKE 'BEECH%'",
+          "parcel": "094-106896-00.000",
+          "site_address": "1101 BEECH RD SW, NEW ALBANY 43054",
+          "owner": "MONTAUK INNOVATIONS LLC",
+          "gis_acres": 219.06,
+          "class": "Industrial",
+          "retrieved": "2026-09-03"
+        },
+        "why": "Address confirmed by the City of New Albany and the New Albany Chamber (Alula, 2026-09-03). US Census batch geocoder returns No_Match for this address: a coverage gap, not a bad address."
+      }
     }
   },
   "exclude": {

@@ -24,13 +24,13 @@ const DRIFT_DEG_PER_S = 0.4;
 function style(): maplibreImport.StyleSpecification {
   return {
     version: 8,
-    // Low, slightly rosy sun from behind-left. Above ~0.6 the clay goes brown.
+    // Low, slightly warm sun from behind-left. Above ~0.6 the clay goes brown.
     light: { anchor: "viewport", color: CLAY.light, intensity: 0.5, position: [1.3, 250, 50] },
     sources: { ofm: { type: "vector", url: TILES, attribution: "© OpenStreetMap contributors" } },
     layers: [
       // No background layer: the canvas is transparent and the ground is the CSS gradient behind it
-      // (--clay-ground, navy at the horizon to Avalanche red in the near streets). MapLibre casts no
-      // shadows; the ground is the shadow, and on a tilted view a screen-space gradient reads as depth.
+      // (--clay-ground, the HydroCoin hero gradient). MapLibre casts no shadows; the ground is the
+      // shadow, and on a tilted view a screen-space gradient reads as depth.
       { id: "water", type: "fill", source: "ofm", "source-layer": "water", paint: { "fill-color": CLAY.water } },
       { id: "park", type: "fill", source: "ofm", "source-layer": "park", paint: { "fill-color": CLAY.park, "fill-opacity": 0.9 } },
       {
@@ -77,7 +77,7 @@ function style(): maplibreImport.StyleSpecification {
 
 /**
  * The city in relief behind the gate: building footprints pulled to their heights, pale clay, the
- * ground a gradient from HydroCoin navy at the horizon to Avalanche red in the near streets, dark water. Decorative and inert — it
+ * ground the HydroCoin blue gradient, dark water. Decorative and inert — it
  * takes no pointer input and is hidden from assistive tech. Invisible until the first frame with
  * tiles has drawn, so a dead hotspot leaves the brand gradient underneath and nothing else.
  */

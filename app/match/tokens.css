@@ -3,8 +3,7 @@
  * Values are taken from hydrocoin.com/static/css/style.css and landing.css (fetched 2026-09-03).
  * Do not invent hex values here; if the live site changes, re-pull.
  *
- * Avalanche red appears in the x402GAL lockup (components/match/Lockup.tsx) and, from 2026-09-04,
- * as the ground of the clay city behind the gate (--clay-*). Nowhere else.
+ * Avalanche red is used in the x402GAL lockup only (see components/match/Lockup.tsx).
  */
 .match-root {
   /* surfaces */
@@ -35,19 +34,18 @@
   --hc-radius: 12px;
   --hc-radius-lg: 8px;
 
-  /* Avalanche red: the x402GAL lockup, and the ground of the clay city behind the gate */
+  /* x402GAL lockup only */
   --avalanche-red: #e84142;
   /*
    * The clay city (components/match/ClayCity.tsx; paint values mirrored in lib/match/theme.ts CLAY).
-   * Summit palette from avalanchesummit.com (2026-09-04): #ff394a, #e6212f, #b20f2a, #181818.
-   * Ground sits between the two deep reds so the streets read as shadow, not signage.
+   * No red anywhere in it (Alula, 4 Sep): the ground is the HydroCoin hero gradient, the buildings
+   * neutral clay, the horizon navy.
    */
-  /* the ground: HydroCoin navy at the horizon (top) → Avalanche red in the near streets (bottom) */
-  --clay-ground: linear-gradient(180deg, #0c1a2e 0%, #1a2a4a 35%, #5a1a33 65%, #a3122a 100%);
-  --clay-building: #efd9d4;
-  --clay-dusk-96: rgba(12, 12, 26, 0.96);
-  --clay-dusk-75: rgba(12, 12, 26, 0.75);
-  --clay-dusk-0: rgba(12, 12, 26, 0);
+  --clay-ground: var(--hc-gradient-hero);
+  --clay-building: #eedccf;
+  --clay-dusk-96: rgba(9, 16, 30, 0.96);
+  --clay-dusk-75: rgba(9, 16, 30, 0.75);
+  --clay-dusk-0: rgba(9, 16, 30, 0);
 
   /* roles used by the instrument (map + panel) */
   --paper: var(--hc-bg);

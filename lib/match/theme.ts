@@ -11,15 +11,14 @@ export const PRIMARY = "#0891b2"; // --hc-primary — facility markers
 
 /**
  * The clay city behind the gate (components/match/ClayCity.tsx). Mirror of the --clay-* tokens.
- * The ground itself is CSS (--clay-ground: HydroCoin navy → Avalanche red); the map canvas is
- * transparent, so only what MapLibre paints is here. Summit palette: #FF394A / #E6212F / #B20F2A
- * (avalanchesummit.com, fetched 2026-09-04).
+ * The ground itself is CSS (--clay-ground = the HydroCoin hero gradient); the map canvas is
+ * transparent, so only what MapLibre paints is here. No red: Alula, 4 Sep.
  */
 export const CLAY = {
-  water: "#070e1c", // a step darker than the navy end of the ground so the shoreline still reads
-  bridge: "#3a1a2c", // between the ground's two ends; bridges are ground, not building
-  building: "#efd9d4", // rose clay — carries the red up the shade sides
-  buildingTall: "#f9ece8",
-  park: "#778468", // muted: pure green against the red looked like a flag
-  light: "#fff0ee",
+  water: "#070e1c", // a step darker than the gradient so the shoreline still reads
+  bridge: "#1a3a5c", // the gradient's mid stop; bridges are ground, not building
+  building: "#eedccf", // neutral clay
+  buildingTall: "#f7ebe1",
+  park: "#6f8f5a",
+  light: "#fff3ea",
 } as const;

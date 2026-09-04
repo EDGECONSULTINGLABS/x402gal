@@ -248,6 +248,7 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
+  background: var(--clay-ground); /* the map has no background layer; this is the ground */
 }
 .clay-city-map .maplibregl-canvas {
   outline: none;

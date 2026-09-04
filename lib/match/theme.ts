@@ -11,12 +11,13 @@ export const PRIMARY = "#0891b2"; // --hc-primary — facility markers
 
 /**
  * The clay city behind the gate (components/match/ClayCity.tsx). Mirror of the --clay-* tokens.
- * Ground is Avalanche red — the Summit palette is #FF394A / #E6212F / #B20F2A (avalanchesummit.com,
- * fetched 2026-09-04); the ground sits between the two deep reds so it reads as shadow, not signage.
+ * The ground itself is CSS (--clay-ground: HydroCoin navy → Avalanche red); the map canvas is
+ * transparent, so only what MapLibre paints is here. Summit palette: #FF394A / #E6212F / #B20F2A
+ * (avalanchesummit.com, fetched 2026-09-04).
  */
 export const CLAY = {
-  ground: "#861323",
-  water: "#0b1526",
+  water: "#070e1c", // a step darker than the navy end of the ground so the shoreline still reads
+  bridge: "#3a1a2c", // between the ground's two ends; bridges are ground, not building
   building: "#efd9d4", // rose clay — carries the red up the shade sides
   buildingTall: "#f9ece8",
   park: "#778468", // muted: pure green against the red looked like a flag

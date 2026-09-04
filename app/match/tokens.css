@@ -42,11 +42,12 @@
    * Summit palette from avalanchesummit.com (2026-09-04): #ff394a, #e6212f, #b20f2a, #181818.
    * Ground sits between the two deep reds so the streets read as shadow, not signage.
    */
-  --clay-ground: #861323;
+  /* the ground: HydroCoin navy at the horizon (top) → Avalanche red in the near streets (bottom) */
+  --clay-ground: linear-gradient(180deg, #0c1a2e 0%, #1a2a4a 35%, #5a1a33 65%, #a3122a 100%);
   --clay-building: #efd9d4;
-  --clay-dusk-96: rgba(22, 10, 13, 0.96);
-  --clay-dusk-75: rgba(22, 10, 13, 0.75);
-  --clay-dusk-0: rgba(22, 10, 13, 0);
+  --clay-dusk-96: rgba(12, 12, 26, 0.96);
+  --clay-dusk-75: rgba(12, 12, 26, 0.75);
+  --clay-dusk-0: rgba(12, 12, 26, 0);
 
   /* roles used by the instrument (map + panel) */
   --paper: var(--hc-bg);

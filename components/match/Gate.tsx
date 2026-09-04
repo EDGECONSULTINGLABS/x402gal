@@ -16,8 +16,8 @@ import {
   type Source,
 } from "@/lib/match/attendee";
 import { METROS } from "@/lib/match/metros";
-import { ClayCity } from "./ClayCity";
 import { Lockup } from "./Lockup";
+import { WaterSurface } from "./WaterSurface";
 
 type Props = { onEntered: (record: LocalAttendee) => void };
 
@@ -33,6 +33,8 @@ export function Gate({ onEntered }: Props) {
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** What the water surface last said. Rendered as text; the canvas itself is aria-hidden. */
+  const [fact, setFact] = useState<string | null>(null);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -72,40 +74,44 @@ export function Gate({ onEntered }: Props) {
   const metroNames = METROS.map((m) => m.name).join(", ");
 
   return (
-    <div className="match-screen match-screen--city flex flex-col">
-      <ClayCity />
+    <div className="match-screen match-screen--surface flex flex-col">
+      <WaterSurface quiet={screen === "form"} onFact={(_id, text) => setFact(text)} />
       <header className="flex items-center px-4 py-3">
         <Lockup />
       </header>
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-3 pb-3">
         {screen === "intro" ? (
           <>
-            <h1 className="mt-5 px-1 text-[1.7rem] font-semibold leading-tight [text-shadow:0_2px_14px_rgba(0,0,0,.6)]">
+            <h1 className="mt-5 px-1 text-[1.7rem] font-semibold leading-tight">
               Give us a data center. We&apos;ll show you the water around it.
             </h1>
-            <p className="mt-3 px-1 text-[15px] leading-relaxed [text-shadow:0_1px_10px_rgba(0,0,0,.7)]">
+            <p className="mt-3 px-1 text-[15px] leading-relaxed">
               Pick a metro or name a facility. The map draws the watershed and the aquifer it sits on,
               lists the data centers nearby, and shows which share the same ground.
             </p>
-            <div className="match-sheet mt-auto p-4">
-              <p className="text-[14px] leading-relaxed">
-                Then three taps estimate your own AI&apos;s daily water, and the map shows where it comes from.
-                Finish the short walk-through and you have a code; show it to the x402GAL team for a coin.
-              </p>
+            <p className="match-quiet mt-3 px-1 text-[13px] leading-relaxed">Tap the water while you read. Hold it.</p>
+            <div className="match-sheet mt-auto p-4" data-control="">
+              {fact ? (
+                <p className="text-[14px] leading-relaxed" aria-live="polite">
+                  {fact}
+                </p>
+              ) : (
+                <p className="text-[14px] leading-relaxed">
+                  Then three taps estimate your own AI&apos;s daily water, and the map shows where it comes from.
+                  Finish the short walk-through and you have a code; show it to the x402GAL team for a coin.
+                </p>
+              )}
               <p className="match-quiet mt-2 text-[12px] leading-relaxed">
                 Metros today: {metroNames}. Utah follows once its footprint is confirmed.
               </p>
               <button type="button" onClick={() => setScreen("form")} className="match-action mt-4 w-full px-4 py-3 text-[16px]">
                 Start
               </button>
-              <div className="mt-3 flex items-baseline justify-between">
-                <p className="match-quiet text-[12px]">About ninety seconds.</p>
-                <p className="match-quiet text-[10px]">© OpenStreetMap contributors</p>
-              </div>
+              <p className="match-quiet mt-3 text-[12px]">About ninety seconds.</p>
             </div>
           </>
         ) : (
-          <form onSubmit={submit} className="match-sheet mt-3 flex flex-1 flex-col p-4">
+          <form onSubmit={submit} className="match-sheet mt-3 flex flex-1 flex-col p-4" data-control="">
             <h1 className="text-[1.4rem] font-semibold leading-tight">Before the map, who&apos;s asking?</h1>
             <p className="match-quiet mt-1 text-[13px]">Six fields. Your code at the end is tied to this.</p>
 

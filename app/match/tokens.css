@@ -36,16 +36,6 @@
 
   /* x402GAL lockup only */
   --avalanche-red: #e84142;
-  /*
-   * The clay city (components/match/ClayCity.tsx; paint values mirrored in lib/match/theme.ts CLAY).
-   * No red anywhere in it (Alula, 4 Sep): the ground is the HydroCoin hero gradient, the buildings
-   * neutral clay, the horizon navy.
-   */
-  --clay-ground: var(--hc-gradient-hero);
-  --clay-building: #eedccf;
-  --clay-dusk-96: rgba(9, 16, 30, 0.96);
-  --clay-dusk-75: rgba(9, 16, 30, 0.75);
-  --clay-dusk-0: rgba(9, 16, 30, 0);
 
   /* roles used by the instrument (map + panel) */
   --paper: var(--hc-bg);

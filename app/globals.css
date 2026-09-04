@@ -219,6 +219,56 @@ body {
   border: 1px solid var(--hc-border);
   border-radius: var(--hc-radius);
 }
+/* the gate: the clay city behind, the chrome in front */
+.match-screen--city {
+  position: relative;
+  isolation: isolate;
+}
+.match-screen--city > header,
+.match-screen--city > main {
+  position: relative;
+  z-index: 1;
+}
+/* fixed, not absolute: the form is taller than the viewport and scrolls over a viewport-sized city */
+.clay-city {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 900ms ease-out;
+}
+.clay-city[data-shown="true"] {
+  opacity: 1;
+}
+/* maplibre-gl.css sets .maplibregl-map { position: relative }; this has to win */
+.clay-city > .clay-city-map.maplibregl-map,
+.clay-city > .clay-city-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.clay-city-map .maplibregl-canvas {
+  outline: none;
+}
+/* the far distance: at this pitch the horizon reaches Jersey City under the heading */
+.clay-city-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--clay-dusk-96) 0%, var(--clay-dusk-75) 24%, var(--clay-dusk-0) 46%);
+}
+/* translucent sheet the form sits in, so the city stays visible around it */
+.match-sheet {
+  background: rgba(13, 17, 23, 0.8);
+  border: 1px solid var(--hc-border-strong);
+  border-radius: 16px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.match-screen--city .match-input {
+  background: var(--hc-surface);
+}
 .match-glossary {
   position: fixed;
   z-index: 80;

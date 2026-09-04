@@ -16,6 +16,7 @@ import {
   type Source,
 } from "@/lib/match/attendee";
 import { METROS } from "@/lib/match/metros";
+import { ClayCity } from "./ClayCity";
 import { Lockup } from "./Lockup";
 
 type Props = { onEntered: (record: LocalAttendee) => void };
@@ -71,37 +72,41 @@ export function Gate({ onEntered }: Props) {
   const metroNames = METROS.map((m) => m.name).join(", ");
 
   return (
-    <div className="match-screen flex flex-col">
+    <div className="match-screen match-screen--city flex flex-col">
+      <ClayCity />
       <header className="flex items-center px-4 py-3">
         <Lockup />
       </header>
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-8">
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-3 pb-3">
         {screen === "intro" ? (
           <>
-            <h1 className="mt-6 text-[1.7rem] font-semibold leading-tight">
+            <h1 className="mt-5 px-1 text-[1.7rem] font-semibold leading-tight [text-shadow:0_2px_14px_rgba(0,0,0,.6)]">
               Give us a data center. We&apos;ll show you the water around it.
             </h1>
-            <p className="mt-4 text-[15px] leading-relaxed">
+            <p className="mt-3 px-1 text-[15px] leading-relaxed [text-shadow:0_1px_10px_rgba(0,0,0,.7)]">
               Pick a metro or name a facility. The map draws the watershed and the aquifer it sits on,
               lists the data centers nearby, and shows which share the same ground.
             </p>
-            <p className="mt-3 text-[15px] leading-relaxed">
-              Then three taps estimate your own AI&apos;s daily water, and the map shows where it comes from.
-              Finish the short walk-through and you have a code; show it to the x402GAL team for a coin.
-            </p>
-            <p className="match-quiet mt-3 text-[13px] leading-relaxed">
-              Metros today: {metroNames}. Utah follows once its footprint is confirmed.
-            </p>
-            <div className="mt-auto pt-8">
-              <button type="button" onClick={() => setScreen("form")} className="match-action w-full px-4 py-3 text-[16px]">
+            <div className="match-sheet mt-auto p-4">
+              <p className="text-[14px] leading-relaxed">
+                Then three taps estimate your own AI&apos;s daily water, and the map shows where it comes from.
+                Finish the short walk-through and you have a code; show it to the x402GAL team for a coin.
+              </p>
+              <p className="match-quiet mt-2 text-[12px] leading-relaxed">
+                Metros today: {metroNames}. Utah follows once its footprint is confirmed.
+              </p>
+              <button type="button" onClick={() => setScreen("form")} className="match-action mt-4 w-full px-4 py-3 text-[16px]">
                 Start
               </button>
-              <p className="match-quiet mt-3 text-center text-[12px]">About ninety seconds.</p>
+              <div className="mt-3 flex items-baseline justify-between">
+                <p className="match-quiet text-[12px]">About ninety seconds.</p>
+                <p className="match-quiet text-[10px]">© OpenStreetMap contributors</p>
+              </div>
             </div>
           </>
         ) : (
-          <form onSubmit={submit} className="flex flex-1 flex-col">
-            <h1 className="mt-6 text-[1.4rem] font-semibold leading-tight">Before the map, who&apos;s asking?</h1>
+          <form onSubmit={submit} className="match-sheet mt-3 flex flex-1 flex-col p-4">
+            <h1 className="text-[1.4rem] font-semibold leading-tight">Before the map, who&apos;s asking?</h1>
             <p className="match-quiet mt-1 text-[13px]">Six fields. Your code at the end is tied to this.</p>
 
             <div className="mt-5 flex flex-col gap-3">

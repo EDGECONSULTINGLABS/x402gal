@@ -3,7 +3,8 @@
  * Values are taken from hydrocoin.com/static/css/style.css and landing.css (fetched 2026-09-03).
  * Do not invent hex values here; if the live site changes, re-pull.
  *
- * Avalanche red is used in the x402GAL lockup only (see components/match/Lockup.tsx).
+ * Avalanche red appears in the x402GAL lockup (components/match/Lockup.tsx) and, from 2026-09-04,
+ * as the ground of the clay city behind the gate (--clay-*). Nowhere else.
  */
 .match-root {
   /* surfaces */
@@ -34,8 +35,18 @@
   --hc-radius: 12px;
   --hc-radius-lg: 8px;
 
-  /* x402GAL lockup only */
+  /* Avalanche red: the x402GAL lockup, and the ground of the clay city behind the gate */
   --avalanche-red: #e84142;
+  /*
+   * The clay city (components/match/ClayCity.tsx; paint values mirrored in lib/match/theme.ts CLAY).
+   * Summit palette from avalanchesummit.com (2026-09-04): #ff394a, #e6212f, #b20f2a, #181818.
+   * Ground sits between the two deep reds so the streets read as shadow, not signage.
+   */
+  --clay-ground: #861323;
+  --clay-building: #efd9d4;
+  --clay-dusk-96: rgba(22, 10, 13, 0.96);
+  --clay-dusk-75: rgba(22, 10, 13, 0.75);
+  --clay-dusk-0: rgba(22, 10, 13, 0);
 
   /* roles used by the instrument (map + panel) */
   --paper: var(--hc-bg);

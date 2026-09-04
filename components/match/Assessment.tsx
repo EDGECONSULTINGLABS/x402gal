@@ -12,6 +12,7 @@ import {
   type MediaBucket,
   type UsageBucket,
 } from "@/lib/match/assessment";
+import { METHODOLOGY_PATH } from "@/lib/match/legal";
 import { METROS, PENDING_METROS } from "@/lib/match/metros";
 import { Lockup } from "./Lockup";
 
@@ -155,6 +156,14 @@ function Result({ result, onMapIt }: { result: AssessmentResult; onMapIt: () => 
         <p className="match-mono match-quiet mt-2 break-all text-[11px]">
           {result.methodology.version} edition · {result.methodology.hash}
         </p>
+        <a
+          href={METHODOLOGY_PATH}
+          target="_blank"
+          rel="noreferrer"
+          className="match-link mt-1.5 inline-block text-[12px]"
+        >
+          Read the methodology and check the hash
+        </a>
       </div>
 
       <p className="mt-6 text-[15px] leading-relaxed">

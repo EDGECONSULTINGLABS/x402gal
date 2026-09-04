@@ -181,7 +181,7 @@ Reuse the existing auth pattern (preview review gate, server-side PII endpoints)
 | Email | text, validated |
 | Company | text |
 | Role | pick: Data centers / AI or cloud / Corporate sustainability / Investor / Ecosystem or payments / Other |
-| What brought you here | pick: Saw the ad / Met at the booth / Team1 / Other |
+| What brought you here | pick: Saw the ad / Met the x402GAL team / Team1 / Other |
 | Consent | checkbox, unchecked by default |
 
 Consent copy, exactly:
@@ -215,6 +215,16 @@ Three to four questions, water-to-water result, map handoff. **No car analogy.**
 
 Tone: never scold. No "heavy user," no "lead-footed." The person taking it is the buyer.
 
+**The number will feel small, and that is correct** (review of the recorded run-through, 4 Sep). 70 mL a day, 7 gallons a year, per person — labelled, versioned, hashed. Don't inflate it; scale the frame. The bridge is the building, and the map already shows it: 37 facilities in the subwatershed. Joe's line at the handoff, said out loud every time:
+
+> *That's you. The building you're drawing from has a million of you.*
+
+**The hash is a promise.** `2026-09 edition · sha256:7f27ac…` resolves to `/match/methodology` — public, outside the preview gate, rendered from the same constants the app computes with, with the exact hashed string on the page so anyone can re-hash it. If that page ever stops matching, the version line comes off the result screen; it is never decoration.
+
+**One line on every map screen** (persistent footer of the panel, outside the scroll): *Estimates only. Nothing here is a measurement, an offer, or a water right.* Referenced from `lib/match/legal.ts`, never retyped.
+
+**No location prompt, ever.** The app does not call `navigator.geolocation`. The metro picker in question 3 is the location. The New York lesson turns on from the chosen metro or the rehearsal flag (`?at=nyc`), not from GPS.
+
 ---
 
 ## 9. LEARN → BADGE → BOOTH
@@ -223,7 +233,7 @@ Tone: never scold. No "heavy user," no "lead-footed." The person taking it is th
 
 **Badge:** completion record + a short code. Stored against the gate record. A badge screen the person can show. No wallet required. On-chain issuance (Avalanche) is optional and later — do not block the loop on it.
 
-**Booth:** the badge screen says *Show this at the HydroCoin booth for your coin.* Joe's mechanic — the physical keepsake, handed over in person. The app's job ends at producing the screen.
+**Booth:** there is no booth; the team is on the floor. One name for them everywhere on screen — **the x402GAL team** (gate, source picker, badge: *Show this to anyone on the x402GAL team for your coin.*, from `REDEEM_COPY`). Joe's mechanic — the physical keepsake, handed over in person. The app's job ends at producing the screen.
 
 **Hard rule, unchanged:** no on-chain HydroCoin allocation attaches to completion, now or promised. Supply is governed entirely by verified infiltration. The physical coin is the reward; it is a keepsake and is described as one.
 

@@ -112,8 +112,8 @@ export function Gate({ onEntered }: Props) {
           </>
         ) : (
           <form onSubmit={submit} className="match-sheet mt-3 flex flex-1 flex-col p-4" data-control="">
-            <h1 className="text-[1.4rem] font-semibold leading-tight">Before the map, who&apos;s asking?</h1>
-            <p className="match-quiet mt-1 text-[13px]">Six fields. Your code at the end is tied to this.</p>
+            <h1 className="text-[1.4rem] font-semibold leading-tight">Six fields, then the map.</h1>
+            <p className="match-quiet mt-1 text-[13px]">Your code at the end is tied to this.</p>
 
             <div className="mt-5 flex flex-col gap-3">
               <input

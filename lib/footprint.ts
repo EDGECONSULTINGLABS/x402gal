@@ -109,6 +109,31 @@ const FORMULA =
 const METHODOLOGY_HASH =
   "sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc20ca8f38413d03122b6f0";
 
+/**
+ * The exact string the hash above is computed over. Published at /match/methodology so the
+ * "sha256:…" line on the result screen resolves to something a person can open and re-hash.
+ * Key order matters — keep it identical to scripts/hash-methodology.ts.
+ */
+export const METHODOLOGY_PAYLOAD_JSON = JSON.stringify({
+  spec: SPEC,
+  formula: FORMULA,
+  refs: REFS,
+  MODEL_DEFAULTS,
+  WUE_DEFAULTS,
+  MODE_MULT,
+});
+
+/** Read-only view of the defaults for the published methodology page. */
+export const METHODOLOGY_PUBLISHED = {
+  spec: SPEC,
+  formula: FORMULA,
+  refs: REFS,
+  modelDefaults: MODEL_DEFAULTS,
+  wueDefaults: WUE_DEFAULTS,
+  modeMultipliers: MODE_MULT,
+  hash: METHODOLOGY_HASH,
+} as const;
+
 export function calculateFootprint(input: CalcInput): FootprintResult {
   const mode = input.mode ?? "site";
   const model = input.model_tier ?? "gpt4_class";

@@ -39,6 +39,7 @@ import {
   type EsgView,
 } from "@/lib/match/esg";
 import { findContainingFeature, haversineMeters, loadCollection } from "@/lib/match/geo";
+import { LEGAL_LINE } from "@/lib/match/legal";
 import { METROS, PENDING_METROS, metroById, metroForPoint, type MetroId } from "@/lib/match/metros";
 import {
   HUC_LEVEL_NAME,
@@ -1074,6 +1075,11 @@ export function MatchApp({
                 <p className="mt-3 text-[13px]">The local layer failed to load. Reload the page.</p>
               )}
             </div>
+
+            {/* On every map screen, outside the scroll — the panel can be dragged short, this stays. */}
+            <p className="shrink-0 border-t border-[var(--ink)]/15 px-4 py-1.5 text-[11px] leading-snug text-[var(--quiet)]">
+              {LEGAL_LINE}
+            </p>
           </article>
         </div>
       </div>

@@ -26,7 +26,8 @@ export const ROLES = [
 export type Role = (typeof ROLES)[number];
 export const ROLE_DETAIL_MAX = 60;
 
-export const SOURCES = ["Saw the ad", "Met the team on the floor", "Team1", "Other"] as const;
+/** One name for the people handing out coins, everywhere: "the x402GAL team". Never "booth". */
+export const SOURCES = ["Saw the ad", "Met the x402GAL team", "Team1", "Other"] as const;
 export type Source = (typeof SOURCES)[number];
 
 /**

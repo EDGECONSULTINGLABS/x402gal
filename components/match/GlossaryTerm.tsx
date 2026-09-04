@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import { GLOSSARY, type GlossaryId, glossaryById } from "@/lib/match/glossary";
-import { isNewYorkGeofencePoint, newYorkGeofenceFromEnv } from "@/lib/match/newYorkGeofence";
+import { newYorkGeofenceFromEnv } from "@/lib/match/newYorkGeofence";
 
 type GlossaryCtx = {
   openId: string | null;
@@ -125,21 +125,14 @@ export function GlossaryProvider({
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const [inNewYork, setInNewYork] = useState(newYorkLesson);
 
+  /**
+   * The New York lesson turns on when the selected metro is New York, or when rehearsal/preview
+   * says so (?at=nyc, NEXT_PUBLIC_SUMMIT_GEOFENCE). It never asks the browser for location:
+   * an automatic prompt mid-demo reads as phishing, and in Chelsea it would only ever say
+   * "New York" — which the metro picker already knows. Decision 2026-09-04.
+   */
   useEffect(() => {
-    if (newYorkLesson || newYorkGeofenceFromEnv()) {
-      setInNewYork(true);
-      return;
-    }
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        if (isNewYorkGeofencePoint(pos.coords.longitude, pos.coords.latitude)) {
-          setInNewYork(true);
-        }
-      },
-      () => undefined,
-      { maximumAge: 300000, timeout: 4000, enableHighAccuracy: false }
-    );
+    if (newYorkLesson || newYorkGeofenceFromEnv()) setInNewYork(true);
   }, [newYorkLesson]);
 
   const setOpen = useCallback((id: string | null, nextAnchor?: DOMRect) => {

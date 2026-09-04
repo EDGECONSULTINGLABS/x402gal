@@ -1,6 +1,10 @@
 import { pointInBbox, type BBox } from "./metros";
 
-/** Manhattan, including Chelsea. Used only for the watershed second panel. */
+/**
+ * Manhattan, including Chelsea. Used only for the watershed second panel.
+ * Geometry test only — the app never calls navigator.geolocation (decision 2026-09-04);
+ * a pin or metro choice is what puts a point through this.
+ */
 export const NEW_YORK_GEOFENCE: BBox = [-74.05, 40.68, -73.9, 40.88];
 
 export function isNewYorkGeofencePoint(lng: number, lat: number): boolean {

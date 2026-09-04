@@ -1,0 +1,2868 @@
+{
+ "built": "2026-09-04",
+ "facilities": 414,
+ "companies": 255,
+ "states": 50,
+ "byState": [
+  {
+   "state": "Alabama",
+   "st": "AL",
+   "listed": 8,
+   "companies": 8,
+   "placed": 8
+  },
+  {
+   "state": "Alaska",
+   "st": "AK",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Arizona",
+   "st": "AZ",
+   "listed": 10,
+   "companies": 5,
+   "placed": 10
+  },
+  {
+   "state": "Arkansas",
+   "st": "AR",
+   "listed": 6,
+   "companies": 6,
+   "placed": 6
+  },
+  {
+   "state": "California",
+   "st": "CA",
+   "listed": 25,
+   "companies": 19,
+   "placed": 25
+  },
+  {
+   "state": "Colorado",
+   "st": "CO",
+   "listed": 7,
+   "companies": 5,
+   "placed": 7
+  },
+  {
+   "state": "Connecticut",
+   "st": "CT",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Delaware",
+   "st": "DE",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Florida",
+   "st": "FL",
+   "listed": 13,
+   "companies": 10,
+   "placed": 13
+  },
+  {
+   "state": "Georgia",
+   "st": "GA",
+   "listed": 15,
+   "companies": 13,
+   "placed": 15
+  },
+  {
+   "state": "Hawaii",
+   "st": "HI",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Idaho",
+   "st": "ID",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Illinois",
+   "st": "IL",
+   "listed": 13,
+   "companies": 11,
+   "placed": 13
+  },
+  {
+   "state": "Indiana",
+   "st": "IN",
+   "listed": 15,
+   "companies": 11,
+   "placed": 15
+  },
+  {
+   "state": "Iowa",
+   "st": "IA",
+   "listed": 5,
+   "companies": 5,
+   "placed": 5
+  },
+  {
+   "state": "Kansas",
+   "st": "KS",
+   "listed": 5,
+   "companies": 5,
+   "placed": 5
+  },
+  {
+   "state": "Kentucky",
+   "st": "KY",
+   "listed": 7,
+   "companies": 6,
+   "placed": 7
+  },
+  {
+   "state": "Louisiana",
+   "st": "LA",
+   "listed": 8,
+   "companies": 7,
+   "placed": 8
+  },
+  {
+   "state": "Maine",
+   "st": "ME",
+   "listed": 5,
+   "companies": 5,
+   "placed": 5
+  },
+  {
+   "state": "Maryland",
+   "st": "MD",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Massachusetts",
+   "st": "MA",
+   "listed": 6,
+   "companies": 6,
+   "placed": 6
+  },
+  {
+   "state": "Michigan",
+   "st": "MI",
+   "listed": 45,
+   "companies": 17,
+   "placed": 45
+  },
+  {
+   "state": "Minnesota",
+   "st": "MN",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Mississippi",
+   "st": "MS",
+   "listed": 6,
+   "companies": 6,
+   "placed": 6
+  },
+  {
+   "state": "Missouri",
+   "st": "MO",
+   "listed": 6,
+   "companies": 6,
+   "placed": 6
+  },
+  {
+   "state": "Montana",
+   "st": "MT",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Nebraska",
+   "st": "NE",
+   "listed": 3,
+   "companies": 3,
+   "placed": 3
+  },
+  {
+   "state": "Nevada",
+   "st": "NV",
+   "listed": 6,
+   "companies": 6,
+   "placed": 6
+  },
+  {
+   "state": "New Hampshire",
+   "st": "NH",
+   "listed": 3,
+   "companies": 3,
+   "placed": 3
+  },
+  {
+   "state": "New Jersey",
+   "st": "NJ",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "New Mexico",
+   "st": "NM",
+   "listed": 7,
+   "companies": 6,
+   "placed": 7
+  },
+  {
+   "state": "New York",
+   "st": "NY",
+   "listed": 12,
+   "companies": 12,
+   "placed": 12
+  },
+  {
+   "state": "North Carolina",
+   "st": "NC",
+   "listed": 11,
+   "companies": 11,
+   "placed": 11
+  },
+  {
+   "state": "North Dakota",
+   "st": "ND",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Ohio",
+   "st": "OH",
+   "listed": 23,
+   "companies": 16,
+   "placed": 23
+  },
+  {
+   "state": "Oklahoma",
+   "st": "OK",
+   "listed": 4,
+   "companies": 4,
+   "placed": 4
+  },
+  {
+   "state": "Oregon",
+   "st": "OR",
+   "listed": 5,
+   "companies": 5,
+   "placed": 5
+  },
+  {
+   "state": "Pennsylvania",
+   "st": "PA",
+   "listed": 10,
+   "companies": 10,
+   "placed": 10
+  },
+  {
+   "state": "Rhode Island",
+   "st": "RI",
+   "listed": 3,
+   "companies": 3,
+   "placed": 3
+  },
+  {
+   "state": "South Carolina",
+   "st": "SC",
+   "listed": 8,
+   "companies": 8,
+   "placed": 8
+  },
+  {
+   "state": "South Dakota",
+   "st": "SD",
+   "listed": 3,
+   "companies": 3,
+   "placed": 3
+  },
+  {
+   "state": "Tennessee",
+   "st": "TN",
+   "listed": 11,
+   "companies": 11,
+   "placed": 11
+  },
+  {
+   "state": "Texas",
+   "st": "TX",
+   "listed": 20,
+   "companies": 19,
+   "placed": 20
+  },
+  {
+   "state": "Utah",
+   "st": "UT",
+   "listed": 5,
+   "companies": 4,
+   "placed": 5
+  },
+  {
+   "state": "Vermont",
+   "st": "VT",
+   "listed": 3,
+   "companies": 3,
+   "placed": 3
+  },
+  {
+   "state": "Virginia",
+   "st": "VA",
+   "listed": 8,
+   "companies": 8,
+   "placed": 8
+  },
+  {
+   "state": "Washington",
+   "st": "WA",
+   "listed": 11,
+   "companies": 8,
+   "placed": 11
+  },
+  {
+   "state": "West Virginia",
+   "st": "WV",
+   "listed": 3,
+   "companies": 3,
+   "placed": 3
+  },
+  {
+   "state": "Wisconsin",
+   "st": "WI",
+   "listed": 7,
+   "companies": 7,
+   "placed": 7
+  },
+  {
+   "state": "Wyoming",
+   "st": "WY",
+   "listed": 3,
+   "companies": 3,
+   "placed": 3
+  }
+ ],
+ "byCompany": [
+  {
+   "company": "3M Company",
+   "facilities": 1,
+   "states": "Minnesota",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Abbott Laboratories",
+   "facilities": 4,
+   "states": "Arizona, California, Illinois",
+   "fit": "Parjana",
+   "placed": 4
+  },
+  {
+   "company": "Air Products and Chemicals, Inc.",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Alabama Power Company (Southern Company)",
+   "facilities": 1,
+   "states": "Alabama",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Alexander & Baldwin, Inc.",
+   "facilities": 1,
+   "states": "Hawaii",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Alphabet Inc. (Google)",
+   "facilities": 6,
+   "states": "California, Georgia, Nevada, North Carolina, Ohio, Oregon",
+   "fit": "HydroCoin",
+   "placed": 6
+  },
+  {
+   "company": "Altria Group, Inc.",
+   "facilities": 1,
+   "states": "Virginia",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Amazon.com, Inc. / Amazon Web Services",
+   "facilities": 1,
+   "states": "Washington",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "American Airlines Group Inc.",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "American Electric Power Company, Inc.",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "American Water Works Company, Inc.",
+   "facilities": 1,
+   "states": "New Jersey",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Anheuser-Busch Companies, LLC",
+   "facilities": 2,
+   "states": "Missouri, New Hampshire",
+   "fit": "HydroCoin",
+   "placed": 2
+  },
+  {
+   "company": "Apple Inc.",
+   "facilities": 3,
+   "states": "California, Nevada, Oregon",
+   "fit": "HydroCoin",
+   "placed": 3
+  },
+  {
+   "company": "Archer-Daniels-Midland Company (ADM)",
+   "facilities": 2,
+   "states": "Illinois",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "AT&T Inc.",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "AutoZone, Inc.",
+   "facilities": 1,
+   "states": "Tennessee",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "BAE Systems, Inc.",
+   "facilities": 1,
+   "states": "New Hampshire",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Ball Corporation",
+   "facilities": 6,
+   "states": "Colorado, Indiana, New York, Ohio, Texas",
+   "fit": "HydroCoin",
+   "placed": 6
+  },
+  {
+   "company": "Bank of America Corporation",
+   "facilities": 1,
+   "states": "North Carolina",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Basin Electric Power Cooperative",
+   "facilities": 1,
+   "states": "North Dakota",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Baxter International Inc.",
+   "facilities": 4,
+   "states": "Illinois, New York, North Carolina",
+   "fit": "Parjana",
+   "placed": 4
+  },
+  {
+   "company": "Bayer Crop Science (Bayer AG)",
+   "facilities": 1,
+   "states": "Missouri",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Bayer CropScience (Bayer AG)",
+   "facilities": 1,
+   "states": "North Carolina",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Ben & Jerry's Homemade, Inc.",
+   "facilities": 1,
+   "states": "Vermont",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Berkshire Hathaway Inc.",
+   "facilities": 1,
+   "states": "Nebraska",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Biogen Inc.",
+   "facilities": 1,
+   "states": "Massachusetts",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Blue Diamond Growers",
+   "facilities": 1,
+   "states": "California",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "BlueTriton Brands (Ice Mountain)",
+   "facilities": 3,
+   "states": "Michigan",
+   "fit": "Other",
+   "placed": 3
+  },
+  {
+   "company": "BMW Manufacturing Co., LLC",
+   "facilities": 1,
+   "states": "South Carolina",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Booz Allen Hamilton Inc.",
+   "facilities": 1,
+   "states": "Virginia",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "BorgWarner Inc.",
+   "facilities": 3,
+   "states": "Michigan, Mississippi, South Carolina",
+   "fit": "Parjana",
+   "placed": 3
+  },
+  {
+   "company": "Boston Scientific Corporation",
+   "facilities": 1,
+   "states": "Massachusetts",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Bridgestone Americas, Inc.",
+   "facilities": 1,
+   "states": "Tennessee",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Brown-Forman Corporation",
+   "facilities": 1,
+   "states": "Kentucky",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Caesars Entertainment, Inc.",
+   "facilities": 1,
+   "states": "Nevada",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Cameco Resources (Cameco Corporation)",
+   "facilities": 1,
+   "states": "Wyoming",
+   "fit": "Other",
+   "placed": 1
+  },
+  {
+   "company": "Capital One Financial Corporation",
+   "facilities": 1,
+   "states": "Virginia",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Cardinal Health, Inc.",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Carnival Corporation & plc",
+   "facilities": 1,
+   "states": "Florida",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Caterpillar Inc.",
+   "facilities": 1,
+   "states": "Illinois",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "CF Industries Holdings, Inc.",
+   "facilities": 1,
+   "states": "Louisiana",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Chevron Corporation",
+   "facilities": 4,
+   "states": "California, Mississippi, Texas",
+   "fit": "Parjana",
+   "placed": 4
+  },
+  {
+   "company": "Chobani, LLC",
+   "facilities": 2,
+   "states": "Idaho, New York",
+   "fit": "HydroCoin",
+   "placed": 2
+  },
+  {
+   "company": "CHS Inc.",
+   "facilities": 1,
+   "states": "Montana",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Chugach Electric Association",
+   "facilities": 1,
+   "states": "Alaska",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Collins Aerospace (RTX Corporation)",
+   "facilities": 1,
+   "states": "Iowa",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Columbia Sportswear Company",
+   "facilities": 1,
+   "states": "Oregon",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Comcast Corporation",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "ConocoPhillips",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "ConocoPhillips Alaska",
+   "facilities": 1,
+   "states": "Alaska",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Constellation Brands, Inc.",
+   "facilities": 1,
+   "states": "New York",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Constellation Energy Corporation",
+   "facilities": 1,
+   "states": "Maryland",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Constellium Rolled Products Ravenswood, LLC",
+   "facilities": 1,
+   "states": "West Virginia",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Consumers Energy (CMS Energy)",
+   "facilities": 1,
+   "states": "Michigan",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Continental Resources, Inc.",
+   "facilities": 1,
+   "states": "Oklahoma",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Corning Incorporated",
+   "facilities": 1,
+   "states": "New York",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Corteva Agriscience",
+   "facilities": 3,
+   "states": "Indiana, Iowa, Michigan",
+   "fit": "Parjana",
+   "placed": 3
+  },
+  {
+   "company": "CSX Corporation",
+   "facilities": 1,
+   "states": "Florida",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Cummins Inc.",
+   "facilities": 1,
+   "states": "Indiana",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "CVS Health Corporation",
+   "facilities": 1,
+   "states": "Rhode Island",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Daktronics, Inc.",
+   "facilities": 1,
+   "states": "South Dakota",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Darden Restaurants, Inc.",
+   "facilities": 1,
+   "states": "Florida",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Deere & Company (John Deere)",
+   "facilities": 2,
+   "states": "Illinois, Iowa",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "Dell Technologies Inc.",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Delta Air Lines, Inc.",
+   "facilities": 1,
+   "states": "Georgia",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Devon Energy Corporation",
+   "facilities": 1,
+   "states": "Oklahoma",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Dominion Energy, Inc.",
+   "facilities": 1,
+   "states": "Virginia",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Dow Inc.",
+   "facilities": 5,
+   "states": "Louisiana, Michigan, West Virginia",
+   "fit": "HydroCoin",
+   "placed": 5
+  },
+  {
+   "company": "DTE Energy",
+   "facilities": 1,
+   "states": "Michigan",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Duke Energy Corporation",
+   "facilities": 1,
+   "states": "North Carolina",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Duke Energy Indiana, LLC",
+   "facilities": 1,
+   "states": "Indiana",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "DuPont de Nemours, Inc.",
+   "facilities": 3,
+   "states": "Delaware, South Carolina, Virginia",
+   "fit": "HydroCoin",
+   "placed": 3
+  },
+  {
+   "company": "E. & J. Gallo Winery",
+   "facilities": 1,
+   "states": "California",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Eastman Chemical Company",
+   "facilities": 1,
+   "states": "Tennessee",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Eastman Kodak Company",
+   "facilities": 1,
+   "states": "New York",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Ecolab Inc.",
+   "facilities": 1,
+   "states": "Minnesota",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Elevance Health, Inc. (formerly Anthem)",
+   "facilities": 1,
+   "states": "Indiana",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Eli Lilly and Company",
+   "facilities": 1,
+   "states": "Indiana",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Emerson Electric Co.",
+   "facilities": 1,
+   "states": "Missouri",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Entergy Arkansas, LLC",
+   "facilities": 1,
+   "states": "Arkansas",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Entergy Corporation",
+   "facilities": 1,
+   "states": "Louisiana",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "EQT Corporation",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Evergy, Inc.",
+   "facilities": 1,
+   "states": "Kansas",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Eversource Energy",
+   "facilities": 3,
+   "states": "Connecticut, Massachusetts, New Hampshire",
+   "fit": "x402gal",
+   "placed": 3
+  },
+  {
+   "company": "Exelon Corporation / Commonwealth Edison (ComEd)",
+   "facilities": 1,
+   "states": "Illinois",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Exxon Mobil Corporation",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "ExxonMobil Corporation",
+   "facilities": 1,
+   "states": "Louisiana",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "FedEx Corporation",
+   "facilities": 1,
+   "states": "Tennessee",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Ford Motor Company",
+   "facilities": 16,
+   "states": "Illinois, Kentucky, Michigan, Missouri, Ohio",
+   "fit": "HydroCoin",
+   "placed": 16
+  },
+  {
+   "company": "Freeport-McMoRan Inc.",
+   "facilities": 8,
+   "states": "Arizona, New Mexico",
+   "fit": "HydroCoin",
+   "placed": 8
+  },
+  {
+   "company": "Garmin International, Inc.",
+   "facilities": 1,
+   "states": "Kansas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "GE Aerospace",
+   "facilities": 1,
+   "states": "Massachusetts",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Genentech, Inc. (a member of the Roche Group)",
+   "facilities": 2,
+   "states": "California",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "General Dynamics Corporation",
+   "facilities": 2,
+   "states": "Maine, Virginia",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "General Mills, Inc.",
+   "facilities": 1,
+   "states": "Minnesota",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "General Motors",
+   "facilities": 8,
+   "states": "Michigan",
+   "fit": "Multiple",
+   "placed": 8
+  },
+  {
+   "company": "General Motors Company",
+   "facilities": 1,
+   "states": "Indiana",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Georgia Ports Authority",
+   "facilities": 1,
+   "states": "Georgia",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Georgia-Pacific LLC",
+   "facilities": 5,
+   "states": "Alabama, Arkansas, Georgia, Washington, Wisconsin",
+   "fit": "Parjana",
+   "placed": 5
+  },
+  {
+   "company": "Green Mountain Power Corporation",
+   "facilities": 1,
+   "states": "Vermont",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Grimmway Farms (Grimmway Enterprises, Inc.)",
+   "facilities": 1,
+   "states": "California",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "GSK (GlaxoSmithKline)",
+   "facilities": 1,
+   "states": "North Carolina",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Gulfstream Aerospace Corporation (a General Dynamics company)",
+   "facilities": 1,
+   "states": "Georgia",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Hannaford Supermarkets (Ahold Delhaize USA)",
+   "facilities": 1,
+   "states": "Maine",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Harley-Davidson, Inc.",
+   "facilities": 1,
+   "states": "Wisconsin",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Hasbro, Inc.",
+   "facilities": 1,
+   "states": "Rhode Island",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Hawaiian Electric Industries, Inc.",
+   "facilities": 1,
+   "states": "Hawaii",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "HCA Healthcare, Inc.",
+   "facilities": 1,
+   "states": "Tennessee",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "HF Sinclair Corporation",
+   "facilities": 1,
+   "states": "Wyoming",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Honda Manufacturing of Alabama",
+   "facilities": 1,
+   "states": "Alabama",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Honda Manufacturing of Indiana, LLC",
+   "facilities": 1,
+   "states": "Indiana",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Honda of America Mfg., Inc.",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Honeywell International Inc.",
+   "facilities": 1,
+   "states": "North Carolina",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Humana Inc.",
+   "facilities": 1,
+   "states": "Kentucky",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Huntington Ingalls Industries, Inc. (HII)",
+   "facilities": 1,
+   "states": "Mississippi",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Hyundai Motor Group Metaplant America (HMGMA)",
+   "facilities": 1,
+   "states": "Georgia",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Hyundai Motor Manufacturing Alabama (HMMA)",
+   "facilities": 1,
+   "states": "Alabama",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "IBM (International Business Machines Corporation)",
+   "facilities": 1,
+   "states": "New York",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Idaho Power Company",
+   "facilities": 1,
+   "states": "Idaho",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "IDEXX Laboratories, Inc.",
+   "facilities": 1,
+   "states": "Maine",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Incyte Corporation",
+   "facilities": 1,
+   "states": "Delaware",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Intel Corporation",
+   "facilities": 5,
+   "states": "Arizona, California, New Mexico, Oregon",
+   "fit": "HydroCoin",
+   "placed": 5
+  },
+  {
+   "company": "Intermountain Health",
+   "facilities": 1,
+   "states": "Utah",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "International Paper Company",
+   "facilities": 1,
+   "states": "Louisiana",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "J.B. Hunt Transport Services, Inc.",
+   "facilities": 1,
+   "states": "Arkansas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "J.R. Simplot Company",
+   "facilities": 4,
+   "states": "Idaho, North Dakota, Washington",
+   "fit": "HydroCoin",
+   "placed": 4
+  },
+  {
+   "company": "Johnson & Johnson",
+   "facilities": 1,
+   "states": "New Jersey",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Johnson Controls International plc",
+   "facilities": 1,
+   "states": "Wisconsin",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "JPMorgan Chase & Co.",
+   "facilities": 1,
+   "states": "New York",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Kellanova (Mars Snacking)",
+   "facilities": 1,
+   "states": "Tennessee",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Keurig Dr Pepper Inc.",
+   "facilities": 1,
+   "states": "Vermont",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Kia Georgia, Inc. (Kia America)",
+   "facilities": 1,
+   "states": "Georgia",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Kimberly-Clark Corporation",
+   "facilities": 2,
+   "states": "Texas, Wisconsin",
+   "fit": "HydroCoin",
+   "placed": 2
+  },
+  {
+   "company": "Koch Industries, Inc.",
+   "facilities": 1,
+   "states": "Kansas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Kohl's Corporation",
+   "facilities": 1,
+   "states": "Wisconsin",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "L.L.Bean, Inc.",
+   "facilities": 1,
+   "states": "Maine",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "La-Z-Boy Incorporated",
+   "facilities": 3,
+   "states": "Michigan, Missouri, Tennessee",
+   "fit": "Parjana",
+   "placed": 3
+  },
+  {
+   "company": "Las Vegas Sands Corp.",
+   "facilities": 1,
+   "states": "Nevada",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Leprino Foods Company",
+   "facilities": 5,
+   "states": "California, Colorado, Michigan, New Mexico",
+   "fit": "HydroCoin",
+   "placed": 5
+  },
+  {
+   "company": "Lockheed Martin Corporation",
+   "facilities": 2,
+   "states": "Florida, Maryland",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "Los Angeles Department of Water and Power (LADWP)",
+   "facilities": 1,
+   "states": "California",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Lowe's Companies, Inc.",
+   "facilities": 1,
+   "states": "North Carolina",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Mahi Pono, LLC",
+   "facilities": 1,
+   "states": "Hawaii",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Marathon Petroleum Corporation",
+   "facilities": 1,
+   "states": "North Dakota",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Marriott International, Inc.",
+   "facilities": 1,
+   "states": "Maryland",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Masco Corporation",
+   "facilities": 1,
+   "states": "Michigan",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Masco Corporation (Delta Faucet Company)",
+   "facilities": 3,
+   "states": "Indiana, Tennessee",
+   "fit": "HydroCoin",
+   "placed": 3
+  },
+  {
+   "company": "Matson, Inc.",
+   "facilities": 1,
+   "states": "Hawaii",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "McCormick & Company, Incorporated",
+   "facilities": 1,
+   "states": "Maryland",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "McDonald's Corporation",
+   "facilities": 1,
+   "states": "Illinois",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "McKesson Corporation",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Meijer Inc.",
+   "facilities": 3,
+   "states": "Michigan",
+   "fit": "Parjana",
+   "placed": 3
+  },
+  {
+   "company": "Mercedes-Benz U.S. International (MBUSI)",
+   "facilities": 1,
+   "states": "Alabama",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Merck & Co., Inc.",
+   "facilities": 1,
+   "states": "New Jersey",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Meta Platforms, Inc.",
+   "facilities": 2,
+   "states": "California, New Mexico",
+   "fit": "HydroCoin",
+   "placed": 2
+  },
+  {
+   "company": "MGM Resorts International",
+   "facilities": 1,
+   "states": "Nevada",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Michelin North America, Inc.",
+   "facilities": 1,
+   "states": "South Carolina",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Micron Technology, Inc.",
+   "facilities": 2,
+   "states": "Idaho, New York",
+   "fit": "HydroCoin",
+   "placed": 2
+  },
+  {
+   "company": "Microsoft Corporation",
+   "facilities": 2,
+   "states": "North Dakota, Washington",
+   "fit": "HydroCoin",
+   "placed": 2
+  },
+  {
+   "company": "MillerKnoll",
+   "facilities": 1,
+   "states": "Michigan",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "MillerKnoll (Knoll)",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Milliken & Company",
+   "facilities": 1,
+   "states": "South Carolina",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Molson Coors Beverage Company",
+   "facilities": 6,
+   "states": "Colorado, Georgia, Ohio, Texas, Virginia, Wisconsin",
+   "fit": "HydroCoin",
+   "placed": 6
+  },
+  {
+   "company": "Morning Fresh Dairy",
+   "facilities": 1,
+   "states": "Colorado",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Murphy USA Inc.",
+   "facilities": 1,
+   "states": "Arkansas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Nationwide Mutual Insurance Company",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "NextEra Energy, Inc. / Florida Power & Light Company",
+   "facilities": 1,
+   "states": "Florida",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Nike, Inc.",
+   "facilities": 1,
+   "states": "Oregon",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Nissan North America, Inc.",
+   "facilities": 2,
+   "states": "Mississippi, Tennessee",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "Northrop Grumman Corporation",
+   "facilities": 2,
+   "states": "California, Virginia",
+   "fit": "HydroCoin",
+   "placed": 2
+  },
+  {
+   "company": "NorthWestern Energy Group, Inc.",
+   "facilities": 1,
+   "states": "Montana",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Nucor Corporation",
+   "facilities": 3,
+   "states": "Alabama, Kentucky, South Carolina",
+   "fit": "Parjana",
+   "placed": 3
+  },
+  {
+   "company": "Nucor Steel Tuscaloosa",
+   "facilities": 1,
+   "states": "Alabama",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "OGE Energy Corp.",
+   "facilities": 1,
+   "states": "Oklahoma",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Par Pacific Holdings, Inc.",
+   "facilities": 1,
+   "states": "Montana",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Peabody Energy Corporation",
+   "facilities": 1,
+   "states": "Wyoming",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "PepsiCo, Inc.",
+   "facilities": 1,
+   "states": "New York",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Pfizer Inc.",
+   "facilities": 2,
+   "states": "Connecticut, New York",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "PG&E Corporation / Pacific Gas and Electric Company",
+   "facilities": 1,
+   "states": "California",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Phillips 66",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "PNM Resources, Inc. (TXNM Energy)",
+   "facilities": 1,
+   "states": "New Mexico",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "POET, LLC",
+   "facilities": 1,
+   "states": "South Dakota",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "PPG Industries, Inc.",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Pratt & Whitney (RTX Corporation)",
+   "facilities": 1,
+   "states": "Connecticut",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Principal Financial Group, Inc.",
+   "facilities": 1,
+   "states": "Iowa",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Publix Super Markets, Inc.",
+   "facilities": 1,
+   "states": "Florida",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Qualcomm Incorporated",
+   "facilities": 1,
+   "states": "California",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Raytheon Company (RTX Corporation)",
+   "facilities": 1,
+   "states": "Massachusetts",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Red Dog Mine (Teck Alaska Inc.)",
+   "facilities": 1,
+   "states": "Alaska",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Red Hat, Inc. (IBM)",
+   "facilities": 1,
+   "states": "North Carolina",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Rocky Mountain Power (PacifiCorp)",
+   "facilities": 1,
+   "states": "Utah",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Royal Caribbean Group",
+   "facilities": 1,
+   "states": "Florida",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Ryder System, Inc.",
+   "facilities": 1,
+   "states": "Florida",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "S.C. Johnson & Son, Inc.",
+   "facilities": 1,
+   "states": "Wisconsin",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Salt River Project (SRP)",
+   "facilities": 1,
+   "states": "Arizona",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "San Diego Gas & Electric Company (Sempra)",
+   "facilities": 1,
+   "states": "California",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Sanford Health",
+   "facilities": 1,
+   "states": "South Dakota",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "SAS Institute Inc.",
+   "facilities": 1,
+   "states": "North Carolina",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Shell USA, Inc.",
+   "facilities": 1,
+   "states": "Louisiana",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Sibanye-Stillwater Limited",
+   "facilities": 1,
+   "states": "Montana",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Southern Company / Georgia Power Company",
+   "facilities": 1,
+   "states": "Georgia",
+   "fit": "x402gal",
+   "placed": 1
+  },
+  {
+   "company": "Southwest Airlines Co.",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Spirit AeroSystems Holdings, Inc.",
+   "facilities": 1,
+   "states": "Kansas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Stanley Black & Decker, Inc.",
+   "facilities": 4,
+   "states": "Connecticut, South Carolina, Tennessee, Texas",
+   "fit": "Parjana",
+   "placed": 4
+  },
+  {
+   "company": "Starbucks Corporation",
+   "facilities": 1,
+   "states": "Washington",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Steelcase Inc.",
+   "facilities": 1,
+   "states": "Michigan",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Stellantis",
+   "facilities": 14,
+   "states": "Illinois, Indiana, Michigan, Ohio",
+   "fit": "Parjana",
+   "placed": 14
+  },
+  {
+   "company": "Swire Coca-Cola, USA",
+   "facilities": 6,
+   "states": "Colorado, New Mexico, Utah, Washington",
+   "fit": "HydroCoin",
+   "placed": 6
+  },
+  {
+   "company": "Sysco Corporation",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Target Corporation",
+   "facilities": 1,
+   "states": "Minnesota",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Tesla, Inc.",
+   "facilities": 3,
+   "states": "California, Nevada, Texas",
+   "fit": "Parjana",
+   "placed": 3
+  },
+  {
+   "company": "Textron Aviation Inc. (Cessna / Beechcraft)",
+   "facilities": 1,
+   "states": "Kansas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Textron Inc.",
+   "facilities": 1,
+   "states": "Rhode Island",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Boeing Company",
+   "facilities": 2,
+   "states": "South Carolina, Washington",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "The Campbell's Company (Campbell Soup Company)",
+   "facilities": 1,
+   "states": "New Jersey",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "The Chemours Company",
+   "facilities": 4,
+   "states": "Delaware, Mississippi, North Carolina, Texas",
+   "fit": "Parjana",
+   "placed": 4
+  },
+  {
+   "company": "The Coca-Cola Company",
+   "facilities": 1,
+   "states": "Georgia",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "The Goodyear Tire & Rubber Company",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Hershey Company",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "The Home Depot, Inc.",
+   "facilities": 1,
+   "states": "Georgia",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Kraft Heinz Company",
+   "facilities": 4,
+   "states": "Illinois, New York, Ohio",
+   "fit": "HydroCoin",
+   "placed": 4
+  },
+  {
+   "company": "The Kroger Co.",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Mosaic Company",
+   "facilities": 6,
+   "states": "Florida, Louisiana",
+   "fit": "HydroCoin",
+   "placed": 6
+  },
+  {
+   "company": "The PNC Financial Services Group, Inc.",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Procter & Gamble Company",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "The Progressive Corporation",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Sherwin-Williams Company",
+   "facilities": 1,
+   "states": "Ohio",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The TJX Companies, Inc.",
+   "facilities": 1,
+   "states": "Massachusetts",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Vanguard Group, Inc.",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Walt Disney Company",
+   "facilities": 3,
+   "states": "California, Florida",
+   "fit": "Parjana",
+   "placed": 3
+  },
+  {
+   "company": "The Williams Companies, Inc.",
+   "facilities": 1,
+   "states": "Oklahoma",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "The Wonderful Company",
+   "facilities": 2,
+   "states": "California",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "Toyota Motor Manufacturing, Indiana, Inc.",
+   "facilities": 1,
+   "states": "Indiana",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Toyota Motor Manufacturing, Kentucky, Inc.",
+   "facilities": 1,
+   "states": "Kentucky",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Toyota Motor Manufacturing, Mississippi, Inc.",
+   "facilities": 1,
+   "states": "Mississippi",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Toyota Motor Manufacturing, West Virginia, Inc.",
+   "facilities": 1,
+   "states": "West Virginia",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Toyota Motor North America, Inc.",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Trident Seafoods Corporation",
+   "facilities": 4,
+   "states": "Alaska, Washington",
+   "fit": "Parjana",
+   "placed": 4
+  },
+  {
+   "company": "TSMC Arizona",
+   "facilities": 1,
+   "states": "Arizona",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Tyson Foods, Inc.",
+   "facilities": 3,
+   "states": "Arkansas, Iowa, Missouri",
+   "fit": "HydroCoin",
+   "placed": 3
+  },
+  {
+   "company": "Union Pacific Corporation",
+   "facilities": 1,
+   "states": "Nebraska",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "United Parcel Service, Inc. (UPS)",
+   "facilities": 2,
+   "states": "Georgia, Kentucky",
+   "fit": "Parjana",
+   "placed": 2
+  },
+  {
+   "company": "United States Steel Corporation",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "USAA (United Services Automobile Association)",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Valero Energy Corporation",
+   "facilities": 1,
+   "states": "Texas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Valmont Industries, Inc.",
+   "facilities": 1,
+   "states": "Nebraska",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Vulcan Materials Company",
+   "facilities": 4,
+   "states": "Alabama, Georgia",
+   "fit": "Parjana",
+   "placed": 4
+  },
+  {
+   "company": "W. L. Gore & Associates, Inc.",
+   "facilities": 1,
+   "states": "Delaware",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Walgreens Boots Alliance, Inc.",
+   "facilities": 1,
+   "states": "Illinois",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Walmart Inc.",
+   "facilities": 1,
+   "states": "Arkansas",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Westinghouse Electric Company LLC",
+   "facilities": 1,
+   "states": "Pennsylvania",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "WEX Inc.",
+   "facilities": 1,
+   "states": "Maine",
+   "fit": "Parjana",
+   "placed": 1
+  },
+  {
+   "company": "Whirlpool Corporation",
+   "facilities": 7,
+   "states": "Michigan, Ohio, Tennessee",
+   "fit": "Parjana",
+   "placed": 7
+  },
+  {
+   "company": "WK Kellogg Co",
+   "facilities": 1,
+   "states": "Michigan",
+   "fit": "HydroCoin",
+   "placed": 1
+  },
+  {
+   "company": "Zions Bancorporation, N.A.",
+   "facilities": 1,
+   "states": "Utah",
+   "fit": "Parjana",
+   "placed": 1
+  }
+ ],
+ "byFit": {
+  "HydroCoin": 147,
+  "Parjana": 223,
+  "x402gal": 25,
+  "Multiple": 16,
+  "Other": 3
+ },
+ "byPlacement": {
+  "census": 283,
+  "osm": 29,
+  "override": 1,
+  "city": 101
+ },
+ "approximate": [
+  {
+   "company": "Georgia-Pacific LLC",
+   "facility": "Naheola Mill",
+   "city": "Pennington",
+   "st": "AL",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Honda Manufacturing of Alabama",
+   "facility": "Lincoln Auto Plant",
+   "city": "Lincoln",
+   "st": "AL",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Red Dog Mine (Teck Alaska Inc.)",
+   "facility": "Red Dog Zinc-Lead Mine",
+   "city": "Kotzebue (DeLong Mountains)",
+   "st": "AK",
+   "reason": "no house number: \"N/A -- remote mine site\""
+  },
+  {
+   "company": "Abbott Laboratories",
+   "facility": "Casa Grande (Abbott Nutrition)",
+   "city": "Casa Grande",
+   "st": "AZ",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Freeport-McMoRan Inc.",
+   "facility": "Bagdad Mine",
+   "city": "Bagdad",
+   "st": "AZ",
+   "reason": "no house number: \"N/A -- remote open-pit mine site\""
+  },
+  {
+   "company": "Freeport-McMoRan Inc.",
+   "facility": "Miami Mine",
+   "city": "Miami (Gila County)",
+   "st": "AZ",
+   "reason": "no house number: \"N/A -- remote open-pit mine/smelter complex\""
+  },
+  {
+   "company": "Freeport-McMoRan Inc.",
+   "facility": "Morenci Mine",
+   "city": "Morenci",
+   "st": "AZ",
+   "reason": "no house number: \"N/A -- mine site\""
+  },
+  {
+   "company": "Freeport-McMoRan Inc.",
+   "facility": "Safford/Lone Star Mine",
+   "city": "Safford (Graham County)",
+   "st": "AZ",
+   "reason": "no house number: \"N/A -- remote open-pit mine site\""
+  },
+  {
+   "company": "Freeport-McMoRan Inc.",
+   "facility": "Sierrita Mine",
+   "city": "Sahuarita (Pima County)",
+   "st": "AZ",
+   "reason": "no house number: \"N/A -- remote open-pit mine site\""
+  },
+  {
+   "company": "TSMC Arizona",
+   "facility": "Phoenix Fab Complex (Fab 21)",
+   "city": "Phoenix",
+   "st": "AZ",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Georgia-Pacific LLC",
+   "facility": "Crossett Paper Operations",
+   "city": "Crossett",
+   "st": "AR",
+   "reason": "no house number: \"Highway 82 / Paper Mill Rd\""
+  },
+  {
+   "company": "Abbott Laboratories",
+   "facility": "Santa Clara (Abbott Vascular)",
+   "city": "Santa Clara",
+   "st": "CA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Grimmway Farms (Grimmway Enterprises, Inc.)",
+   "facility": "Bakersfield / Kern County Growing & Processing Operations",
+   "city": "Bakersfield",
+   "st": "CA",
+   "reason": "no house number: \"N/A -- multiple farm/processing sites\""
+  },
+  {
+   "company": "The Wonderful Company",
+   "facility": "Kern County Growing Operations (almonds, pistachios, citrus)",
+   "city": "Bakersfield / Kern County",
+   "st": "CA",
+   "reason": "no house number: \"N/A -- multiple orchard/processing sites\""
+  },
+  {
+   "company": "Leprino Foods Company",
+   "facility": "Greeley Manufacturing Plant (cheese/whey processing)",
+   "city": "Greeley",
+   "st": "CO",
+   "reason": "no house number: \"N/A -- exact plant address not confirmed this pass\""
+  },
+  {
+   "company": "Morning Fresh Dairy",
+   "facility": "Bellvue Dairy & Processing Facility",
+   "city": "Bellvue",
+   "st": "CO",
+   "reason": "no house number: \"N/A -- exact plant address not confirmed this pass\""
+  },
+  {
+   "company": "Swire Coca-Cola, USA",
+   "facility": "Johnstown Plant (new, $475M facility at Peak Innovation Park)",
+   "city": "Johnstown",
+   "st": "CO",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Chemours Company",
+   "facility": "World Wide Headquarters",
+   "city": "Wilmington",
+   "st": "DE",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Darden Restaurants, Inc.",
+   "facility": "Restaurant Support Center (Corporate Headquarters)",
+   "city": "Orlando",
+   "st": "FL",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Lockheed Martin Corporation",
+   "facility": "Missiles and Fire Control -- Orlando",
+   "city": "Orlando",
+   "st": "FL",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Mosaic Company",
+   "facility": "Bartow Manufacturing Facility",
+   "city": "Bartow",
+   "st": "FL",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Mosaic Company",
+   "facility": "Riverview Manufacturing Facility",
+   "city": "Riverview",
+   "st": "FL",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Georgia Ports Authority",
+   "facility": "Port of Savannah / Garden City Terminal",
+   "city": "Garden City",
+   "st": "GA",
+   "reason": "no house number: \"N/A -- exact administrative headquarters address not confirmed this pass\""
+  },
+  {
+   "company": "Hyundai Motor Group Metaplant America (HMGMA)",
+   "facility": "Ellabell EV/Battery Plant",
+   "city": "Ellabell",
+   "st": "GA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Molson Coors Beverage Company",
+   "facility": "Albany Brewery",
+   "city": "Albany",
+   "st": "GA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Coca-Cola Company",
+   "facility": "World Headquarters",
+   "city": "Atlanta",
+   "st": "GA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Mahi Pono, LLC",
+   "facility": "Central Maui Agricultural Operations / East Maui Irrigation System",
+   "city": "Kahului",
+   "st": "HI",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Chobani, LLC",
+   "facility": "Twin Falls Manufacturing Plant",
+   "city": "Twin Falls",
+   "st": "ID",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Ball Corporation",
+   "facility": "Monticello Plant",
+   "city": "Monticello",
+   "st": "IN",
+   "reason": "no house number: \"N 6th St\""
+  },
+  {
+   "company": "Duke Energy Indiana, LLC",
+   "facility": "Indiana Corporate Office",
+   "city": "Plainfield",
+   "st": "IN",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Eli Lilly and Company",
+   "facility": "Lilly Corporate Center (World Headquarters)",
+   "city": "Indianapolis",
+   "st": "IN",
+   "reason": "no house number: \"Lilly Corporate Center\""
+  },
+  {
+   "company": "Masco Corporation (Delta Faucet Company)",
+   "facility": "Delta Faucet Greensburg Manufacturing Plant",
+   "city": "Greensburg",
+   "st": "IN",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Stellantis",
+   "facility": "Kokomo Engine Plant (KEP)",
+   "city": "Kokomo",
+   "st": "IN",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Toyota Motor Manufacturing, Indiana, Inc.",
+   "facility": "Princeton Plant",
+   "city": "Princeton",
+   "st": "IN",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Koch Industries, Inc.",
+   "facility": "World Headquarters",
+   "city": "Wichita",
+   "st": "KS",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Textron Aviation Inc. (Cessna / Beechcraft)",
+   "facility": "World Headquarters",
+   "city": "Wichita",
+   "st": "KS",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Nucor Corporation",
+   "facility": "Nucor Steel Gallatin",
+   "city": "Ghent",
+   "st": "KY",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "CF Industries Holdings, Inc.",
+   "facility": "Donaldsonville Complex",
+   "city": "Donaldsonville",
+   "st": "LA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Dow Inc.",
+   "facility": "Plaquemine Plant",
+   "city": "Plaquemine",
+   "st": "LA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Mosaic Company",
+   "facility": "Faustina Plant",
+   "city": "St. James",
+   "st": "LA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Mosaic Company",
+   "facility": "Uncle Sam Plant",
+   "city": "Convent",
+   "st": "LA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "BlueTriton Brands (Ice Mountain)",
+   "facility": "Evart public wells (Pure Life brand source)",
+   "city": "Evart",
+   "st": "MI",
+   "reason": "no house number: \"N/A -- municipal wells\""
+  },
+  {
+   "company": "BlueTriton Brands (Ice Mountain)",
+   "facility": "White Pine Springs wellfield",
+   "city": "Chippewa Township (Mecosta County)",
+   "st": "MI",
+   "reason": "no house number: \"N/A -- rural wellfield\""
+  },
+  {
+   "company": "Consumers Energy (CMS Energy)",
+   "facility": "Corporate Headquarters",
+   "city": "Jackson",
+   "st": "MI",
+   "reason": "no house number: \"One Energy Plaza\""
+  },
+  {
+   "company": "DTE Energy",
+   "facility": "Corporate Headquarters",
+   "city": "Detroit",
+   "st": "MI",
+   "reason": "no house number: \"One Energy Plaza\""
+  },
+  {
+   "company": "Dow Inc.",
+   "facility": "Bay City Uptown (corporate office)",
+   "city": "Bay City",
+   "st": "MI",
+   "reason": "no house number: \"Uptown Dr\""
+  },
+  {
+   "company": "Dow Inc.",
+   "facility": "Midland Corporate Center / Global Dow Center / Ben Branch Center / Sylvia Stoesser Center / East End / Michigan Operations (MiOps)",
+   "city": "Midland",
+   "st": "MI",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Ford Motor Company",
+   "facility": "Flat Rock Assembly Plant",
+   "city": "Flat Rock",
+   "st": "MI",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Ford Motor Company",
+   "facility": "Ford World Headquarters",
+   "city": "Dearborn",
+   "st": "MI",
+   "reason": "no house number: \"One American Rd\""
+  },
+  {
+   "company": "General Motors",
+   "facility": "Flint Assembly",
+   "city": "Flint",
+   "st": "MI",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Stellantis",
+   "facility": "Dundee Engine Plant",
+   "city": "Dundee",
+   "st": "MI",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "WK Kellogg Co",
+   "facility": "Battle Creek Cereal Plant / Corporate Offices",
+   "city": "Battle Creek",
+   "st": "MI",
+   "reason": "no house number: \"One Kellogg Square\""
+  },
+  {
+   "company": "Whirlpool Corporation",
+   "facility": "World Headquarters",
+   "city": "Benton Harbor",
+   "st": "MI",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "BorgWarner Inc.",
+   "facility": "Water Valley Plant",
+   "city": "Water Valley",
+   "st": "MS",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Chevron Corporation",
+   "facility": "Pascagoula Refinery",
+   "city": "Pascagoula",
+   "st": "MS",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Huntington Ingalls Industries, Inc. (HII)",
+   "facility": "Ingalls Shipbuilding",
+   "city": "Pascagoula",
+   "st": "MS",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Nissan North America, Inc.",
+   "facility": "Canton Vehicle Assembly Plant",
+   "city": "Canton",
+   "st": "MS",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Toyota Motor Manufacturing, Mississippi, Inc.",
+   "facility": "Blue Springs Plant",
+   "city": "Blue Springs",
+   "st": "MS",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Bayer Crop Science (Bayer AG)",
+   "facility": "Bayer Crop Science North American Headquarters",
+   "city": "Chesterfield",
+   "st": "MO",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Ford Motor Company",
+   "facility": "Kansas City Assembly Plant",
+   "city": "Claycomo",
+   "st": "MO",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Tyson Foods, Inc.",
+   "facility": "Sedalia Poultry Plant",
+   "city": "Sedalia",
+   "st": "MO",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Par Pacific Holdings, Inc.",
+   "facility": "Billings Refinery",
+   "city": "Billings",
+   "st": "MT",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Sibanye-Stillwater Limited",
+   "facility": "Stillwater Mine",
+   "city": "Nye",
+   "st": "MT",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Alphabet Inc. (Google)",
+   "facility": "Storey County Data Center",
+   "city": "Sparks",
+   "st": "NV",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Apple Inc.",
+   "facility": "Reno-area Data Center",
+   "city": "Sparks",
+   "st": "NV",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "American Water Works Company, Inc.",
+   "facility": "Corporate Headquarters",
+   "city": "Camden",
+   "st": "NJ",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Campbell's Company (Campbell Soup Company)",
+   "facility": "World Headquarters",
+   "city": "Camden",
+   "st": "NJ",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Freeport-McMoRan Inc.",
+   "facility": "Chino Mine",
+   "city": "Silver City area (Grant County)",
+   "st": "NM",
+   "reason": "no house number: \"N/A -- remote open-pit mine site\""
+  },
+  {
+   "company": "Freeport-McMoRan Inc.",
+   "facility": "Tyrone Mine",
+   "city": "Tyrone (Grant County)",
+   "st": "NM",
+   "reason": "no house number: \"N/A -- remote open-pit mine site\""
+  },
+  {
+   "company": "Baxter International Inc.",
+   "facility": "Skaneateles Manufacturing/Engineering Facility",
+   "city": "Skaneateles",
+   "st": "NY",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Corning Incorporated",
+   "facility": "World Headquarters",
+   "city": "Corning",
+   "st": "NY",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Micron Technology, Inc.",
+   "facility": "Clay, NY Megafab (under construction)",
+   "city": "Clay",
+   "st": "NY",
+   "reason": "no house number: \"N/A -- site address not yet assigned; under construction\""
+  },
+  {
+   "company": "The Kraft Heinz Company",
+   "facility": "Lowville Plant (cream cheese)",
+   "city": "Lowville",
+   "st": "NY",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Baxter International Inc.",
+   "facility": "Marion (North Cove) Facility",
+   "city": "Marion",
+   "st": "NC",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Marathon Petroleum Corporation",
+   "facility": "Mandan Refinery",
+   "city": "Mandan",
+   "st": "ND",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Microsoft Corporation",
+   "facility": "Fargo Campus",
+   "city": "Fargo",
+   "st": "ND",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Ford Motor Company",
+   "facility": "Cleveland Engine Plant No. 1",
+   "city": "Brook Park",
+   "st": "OH",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Sherwin-Williams Company",
+   "facility": "Global Headquarters (under construction)",
+   "city": "Cleveland",
+   "st": "OH",
+   "reason": "no house number: \"N/A -- new downtown Cleveland HQ address not confirmed this pass\""
+  },
+  {
+   "company": "Whirlpool Corporation",
+   "facility": "Perrysburg (new facility, $60M investment announced Apr 2026)",
+   "city": "Perrysburg",
+   "st": "OH",
+   "reason": "no house number: \"N/A -- exact street address not yet public\""
+  },
+  {
+   "company": "The Williams Companies, Inc.",
+   "facility": "One Williams Center (World Headquarters)",
+   "city": "Tulsa",
+   "st": "OK",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Apple Inc.",
+   "facility": "Prineville Data Center",
+   "city": "Prineville",
+   "st": "OR",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Nike, Inc.",
+   "facility": "World Headquarters",
+   "city": "Beaverton",
+   "st": "OR",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Air Products and Chemicals, Inc.",
+   "facility": "Global Headquarters",
+   "city": "Allentown",
+   "st": "PA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Stanley Black & Decker, Inc.",
+   "facility": "Jackson Facility",
+   "city": "Jackson",
+   "st": "TN",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "ConocoPhillips",
+   "facility": "ConocoPhillips Center (World Headquarters)",
+   "city": "Houston",
+   "st": "TX",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "McKesson Corporation",
+   "facility": "Corporate Headquarters",
+   "city": "Irving",
+   "st": "TX",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Chemours Company",
+   "facility": "Ingleside Plant (Opteon Refrigerants)",
+   "city": "Ingleside",
+   "st": "TX",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Zions Bancorporation, N.A.",
+   "facility": "Corporate Headquarters",
+   "city": "Salt Lake City",
+   "st": "UT",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Keurig Dr Pepper Inc.",
+   "facility": "Essex Junction Manufacturing Facility",
+   "city": "Essex Junction",
+   "st": "VT",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Microsoft Corporation",
+   "facility": "World Headquarters",
+   "city": "Redmond",
+   "st": "WA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "The Boeing Company",
+   "facility": "Boeing Everett Factory",
+   "city": "Everett",
+   "st": "WA",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Trident Seafoods Corporation",
+   "facility": "Anacortes Secondary Processing Plant",
+   "city": "Anacortes",
+   "st": "WA",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Trident Seafoods Corporation",
+   "facility": "Bellingham Plant",
+   "city": "Bellingham",
+   "st": "WA",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Trident Seafoods Corporation",
+   "facility": "Everett Smokehouse",
+   "city": "Everett",
+   "st": "WA",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Dow Inc.",
+   "facility": "West Virginia Operations (South Charleston / Institute)",
+   "city": "South Charleston",
+   "st": "WV",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Toyota Motor Manufacturing, West Virginia, Inc.",
+   "facility": "Buffalo Engine & Powertrain Plant",
+   "city": "Buffalo",
+   "st": "WV",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Kimberly-Clark Corporation",
+   "facility": "Neenah Mill (Founding Site)",
+   "city": "Neenah",
+   "st": "WI",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "S.C. Johnson & Son, Inc.",
+   "facility": "Global Headquarters",
+   "city": "Racine",
+   "st": "WI",
+   "reason": "no Census street match"
+  },
+  {
+   "company": "Cameco Resources (Cameco Corporation)",
+   "facility": "Smith Ranch-Highland Uranium Operation",
+   "city": "Douglas",
+   "st": "WY",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "HF Sinclair Corporation",
+   "facility": "Sinclair Wyoming Refinery",
+   "city": "Sinclair",
+   "st": "WY",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass\""
+  },
+  {
+   "company": "Peabody Energy Corporation",
+   "facility": "North Antelope Rochelle Mine",
+   "city": "Gillette",
+   "st": "WY",
+   "reason": "no house number: \"N/A -- exact street address not confirmed this pass (~65 mi south of Gillette)\""
+  }
+ ],
+ "unplaced": []
+}

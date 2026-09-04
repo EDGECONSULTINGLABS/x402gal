@@ -1,0 +1,25 @@
+{
+  "_about": [
+    "Coordinate overrides for the 50-state ESG layer (scripts/build-esg.ts), applied only when neither the Census geocoder nor an OpenStreetMap building match places the row.",
+    "Key = 'Company|Facility/Site Name' exactly as in the workbook. address must equal the sheet's 'Street Address|City|State Code|ZIP' or the build fails.",
+    "The point must come from an authoritative record (county auditor parcel, municipal address point) and cite it. Never an interpolation or a hand-placed pin."
+  ],
+  "Alphabet Inc. (Google)|New Albany Data Center Campus": {
+    "address": "1101 Beech Rd SW|New Albany|OH|43054",
+    "lng": -82.763386,
+    "lat": 40.058351,
+    "method": "Licking County Auditor parcel point (ParcelsLabels layer) for the site address",
+    "source": {
+      "authority": "Licking County Auditor GIS",
+      "service": "https://gis.lickingcounty.gov/server/rest/services/Auditor/ParcelsLabels/MapServer/0",
+      "query": "SiteAddressNumber = '1101' AND UPPER(SiteStreet) LIKE 'BEECH%'",
+      "parcel": "094-106896-00.000",
+      "site_address": "1101 BEECH RD SW, NEW ALBANY 43054",
+      "owner": "MONTAUK INNOVATIONS LLC",
+      "gis_acres": 219.06,
+      "class": "Industrial",
+      "retrieved": "2026-09-03"
+    },
+    "why": "Address confirmed by the City of New Albany and the New Albany Chamber (Alula, 2026-09-03). Census returns No_Match: a coverage gap, not a bad address. Same record as data/summit/stewardship-curation.json."
+  }
+}

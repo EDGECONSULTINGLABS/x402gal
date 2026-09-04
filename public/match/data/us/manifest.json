@@ -1,0 +1,245 @@
+{
+  "scope": "us",
+  "layers": {
+    "esg.geojson": {
+      "source": "Master_50State_ESG_Companies_All_Locations.xlsx",
+      "sourceSha256": "e59a3a2ffa4373a7f91ed8802c51cd51a633f6ed6823a5a2085e05de0f106509",
+      "sheets": [
+        "All Companies (All States)",
+        "Summary by State",
+        "Summary by Company",
+        "Legend"
+      ],
+      "columnsShipped": [
+        "Company",
+        "Facility/Site Name",
+        "City",
+        "State",
+        "State Code",
+        "Sector",
+        "Sustainability/ESG Goal",
+        "Fit Category",
+        "Source"
+      ],
+      "columnsNeverShipped": [
+        "Street Address (used for geocoding only)",
+        "Parjana Product Fit",
+        "Notes"
+      ],
+      "placement": {
+        "census": "US Census batch (Public_AR_Current), street-level Match, ZIP or city agreement",
+        "osm": "OpenStreetMap Nominatim building/campus object for the written address; road interpolations rejected. © OpenStreetMap contributors, ODbL",
+        "override": "cited authoritative record (data/summit/esg-overrides.json)",
+        "city": "OpenStreetMap Nominatim city/town centroid; drawn hollow and captioned approximate",
+        "counts": {
+          "census": 283,
+          "osm": 29,
+          "override": 1,
+          "city": 101
+        }
+      },
+      "osmPlaced": [
+        {
+          "key": "Mercedes-Benz U.S. International (MBUSI)|Vance Assembly Plant",
+          "osm": "way/485717111",
+          "object": "man_made/works",
+          "display": "Mercedes-Benz, 1, Mercedes Drive, Vance, Tuscaloosa County, Alabama, 35490, United States"
+        },
+        {
+          "key": "Apple Inc.|Apple Park",
+          "osm": "node/11334962646",
+          "object": "amenity/bench",
+          "display": "1, Apple Park Way, Cupertino, Santa Clara County, California, 94087, United States"
+        },
+        {
+          "key": "Genentech, Inc. (a member of the Roche Group)|Oceanside Biologics Manufacturing Facility",
+          "osm": "node/596550661",
+          "object": "place/house",
+          "display": "1, Antibody Way, Rancho del Oro, Oceanside, San Diego County, California, 92056, United States"
+        },
+        {
+          "key": "Meta Platforms, Inc.|Meta Headquarters",
+          "osm": "way/744433471",
+          "object": "building/office",
+          "display": "Meta MPK 22, 1, Meta Way, Meta West Campus, Belle Haven, Menlo Park, San Mateo County, California, 94025, United States"
+        },
+        {
+          "key": "PG&E Corporation / Pacific Gas and Electric Company|Corporate Headquarters",
+          "osm": "node/7289711946",
+          "object": "amenity/fast_food",
+          "display": "North Beach Sandwicheez, 300, Lakeside Drive, Financial District, Downtown Oakland, Oakland, Alameda County, California, 94612, United States"
+        },
+        {
+          "key": "Tesla, Inc.|Fremont Factory",
+          "osm": "way/38080584",
+          "object": "man_made/works",
+          "display": "Tesla Factory, 45500, Fremont Boulevard, Warm Springs District, Fremont, Alameda County, California, 94538, United States"
+        },
+        {
+          "key": "The Walt Disney Company|Disneyland Resort",
+          "osm": "node/1149646838",
+          "object": "amenity/ice_cream",
+          "display": "Ghirardelli Soda Fountain & Chocolate Shop, 1313, Disneyland Drive, Neff, Anaheim, Orange County, California, 92802, United States"
+        },
+        {
+          "key": "Pratt & Whitney (RTX Corporation)|East Hartford Headquarters",
+          "osm": "node/9165580691",
+          "object": "place/house",
+          "display": "400, Main Street, Hockanum, East Hartford, Capitol Planning Region, Connecticut, 06118, United States"
+        },
+        {
+          "key": "Publix Super Markets, Inc.|Corporate Headquarters",
+          "osm": "way/114687643",
+          "object": "office/company",
+          "display": "Publix Super Markets Corporate Office, 3300, Publix Corporate Parkway, Lakeland, Polk County, Florida, 33811, United States"
+        },
+        {
+          "key": "Abbott Laboratories|Global Headquarters",
+          "osm": "way/775617651",
+          "object": "amenity/research_institute",
+          "display": "Abbott Labs, 100, Abbott Park Road, Lake County, Illinois, 60064, United States"
+        },
+        {
+          "key": "Ford Motor Company|Louisville Assembly Plant",
+          "osm": "way/65467342",
+          "object": "man_made/works",
+          "display": "Ford Louisville Assembly Plant, 2000, Fern Valley Road, Louisville, Jefferson County, Kentucky, 40213, United States"
+        },
+        {
+          "key": "United Parcel Service, Inc. (UPS)|Worldport Global Air Hub",
+          "osm": "way/330140591",
+          "object": "building/yes",
+          "display": "Worldport AFPE Employee Entrance, 911, Grade Lane, Louisville, Jefferson County, Kentucky, 40213, United States"
+        },
+        {
+          "key": "General Dynamics Corporation|Bath Iron Works",
+          "osm": "way/1197843960",
+          "object": "building/yes",
+          "display": "700, Washington Street, Bath, Sagadahoc County, Maine, 04530, United States"
+        },
+        {
+          "key": "Ecolab Inc.|Global Headquarters",
+          "osm": "node/4244872766",
+          "object": "office/company",
+          "display": "Ecolab Inc., 1, Ecolab Place, Downtown, Saint Paul, Ramsey County, Minnesota, 55102, United States"
+        },
+        {
+          "key": "Tesla, Inc.|Gigafactory Nevada",
+          "osm": "way/422015619",
+          "object": "building/industrial",
+          "display": "Tesla Gigafactory 1, 1, Electric Avenue, Storey County, Nevada, 89437, United States"
+        },
+        {
+          "key": "BAE Systems, Inc.|Electronic Systems (Nashua Campus)",
+          "osm": "way/53332340",
+          "object": "building/yes",
+          "display": "65, Spit Brook Road, South Nashua, Ward 7, Nashua, Hillsborough County, New Hampshire, 03060, United States"
+        },
+        {
+          "key": "Johnson & Johnson|World Headquarters",
+          "osm": "way/37966778",
+          "object": "building/office",
+          "display": "Johnson & Johnson World Headquarters, 1, Johnson and Johnson Plaza, New Brunswick, Middlesex County, New Jersey, 08933, United States"
+        },
+        {
+          "key": "Meta Platforms, Inc.|Los Lunas Data Center Campus",
+          "osm": "way/626785488",
+          "object": "building/yes",
+          "display": "Meta, 4250, Messenger Loop Northwest, Meta Los Lunas Data Center, Los Lunas, Valencia County, New Mexico, 87031, United States"
+        },
+        {
+          "key": "American Electric Power Company, Inc.|AEP Building (Corporate Headquarters)",
+          "osm": "way/374899040",
+          "object": "building/office",
+          "display": "American Electric Power, 1, Riverside Plaza, Civic Center, Downtown, Columbus, Sharon, Franklin County, Ohio, 43215, United States"
+        },
+        {
+          "key": "Stellantis|Toledo Assembly Complex (Jeep Wrangler/4xe, Gladiator)",
+          "osm": "relation/12890691",
+          "object": "man_made/works",
+          "display": "Stellantis Jeep North Assembly Plant, 4400, Chrysler Drive, Stickney, Hallett, Toledo, Lucas County, Ohio, 43608, United States"
+        },
+        {
+          "key": "The Goodyear Tire & Rubber Company|Global Headquarters",
+          "osm": "way/250867266",
+          "object": "office/company",
+          "display": "Goodyear Tire and Rubber HQ, 200, Innovation Way, Akron, Summit County, Ohio, 44316, United States"
+        },
+        {
+          "key": "The Procter & Gamble Company|World Headquarters",
+          "osm": "way/28719618",
+          "object": "building/office",
+          "display": "One Procter & Gamble Plaza, 1, Procter & Gamble Plaza, Procter & Gamble General Office, Central Business District, Cincinnati, Hamilton County, Ohio, 45202, United States"
+        },
+        {
+          "key": "Intel Corporation|Ronler Acres Campus (Hillsboro)",
+          "osm": "way/1554671858",
+          "object": "building/industrial",
+          "display": "D1X MOD2, 2501, Northeast Century Boulevard, Orenco Station, Orenco, Hillsboro, Washington County, Oregon, 97124, United States"
+        },
+        {
+          "key": "EQT Corporation|Corporate Headquarters",
+          "osm": "way/294832121",
+          "object": "building/yes",
+          "display": "EQT Plaza, 625, Liberty Avenue, Cultural District, Downtown, Pittsburgh, Allegheny County, Pennsylvania, 15224, United States"
+        },
+        {
+          "key": "PPG Industries, Inc.|World Headquarters (PPG Place)",
+          "osm": "way/202809245",
+          "object": "office/company",
+          "display": "One PPG Place, 1, PPG Place Plaza, Firstside Historic District, Downtown, Pittsburgh, Allegheny County, Pennsylvania, 15262, United States"
+        },
+        {
+          "key": "American Airlines Group Inc.|Robert L. Crandall Campus (World Headquarters)",
+          "osm": "relation/18941910",
+          "object": "building/office",
+          "display": "American Airlines HDQ - Skyview 8, 1, Skyview Drive, Fort Worth, Tarrant County, Texas, 76155, United States"
+        },
+        {
+          "key": "Dell Technologies Inc.|World Headquarters",
+          "osm": "way/293428028",
+          "object": "office/it",
+          "display": "Dell Round Rock 1, 1, Dell Way, Dell Technologies - Round Rock Campus, Round Rock, Williamson County, Texas, 78682, United States"
+        },
+        {
+          "key": "Tesla, Inc.|Gigafactory Texas",
+          "osm": "way/990257143",
+          "object": "building/manufacture",
+          "display": "Tesla Gigafactory Texas Main Building, 1, Tesla Road, Austin, Travis County, Texas, 78725, United States"
+        },
+        {
+          "key": "Kohl's Corporation|Corporate Headquarters",
+          "osm": "way/1040113632",
+          "object": "building/office",
+          "display": "Kohl's Inc., N56W17000, Ridgewood Drive, Silver Spring Corporate Park, Menomonee Falls, Waukesha County, Wisconsin, 53051, United States"
+        }
+      ],
+      "coordinateOverrides": [
+        {
+          "key": "Alphabet Inc. (Google)|New Albany Data Center Campus",
+          "address": "1101 Beech Rd SW|New Albany|OH|43054",
+          "lng": -82.763386,
+          "lat": 40.058351,
+          "method": "Licking County Auditor parcel point (ParcelsLabels layer) for the site address",
+          "source": {
+            "authority": "Licking County Auditor GIS",
+            "service": "https://gis.lickingcounty.gov/server/rest/services/Auditor/ParcelsLabels/MapServer/0",
+            "query": "SiteAddressNumber = '1101' AND UPPER(SiteStreet) LIKE 'BEECH%'",
+            "parcel": "094-106896-00.000",
+            "site_address": "1101 BEECH RD SW, NEW ALBANY 43054",
+            "owner": "MONTAUK INNOVATIONS LLC",
+            "gis_acres": 219.06,
+            "class": "Industrial",
+            "retrieved": "2026-09-03"
+          },
+          "why": "Address confirmed by the City of New Albany and the New Albany Chamber (Alula, 2026-09-03). Census returns No_Match: a coverage gap, not a bad address. Same record as data/summit/stewardship-curation.json."
+        }
+      ],
+      "rows": 414,
+      "placed": 414,
+      "approximate": 101,
+      "unplaced": 0,
+      "built": "2026-09-04"
+    }
+  }
+}

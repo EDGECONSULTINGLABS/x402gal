@@ -15,6 +15,7 @@ import {
   searchFacilityIndex,
   type FacilityIndexEntry,
 } from "@/lib/match/facilities";
+import { CONUS_BBOX, FIT_CATEGORIES, bboxOf, esgSitesFrom, type BBox, type EsgSite, type EsgSummary } from "@/lib/match/esg";
 import { findContainingFeature, haversineMeters, loadCollection } from "@/lib/match/geo";
 import { METROS, PENDING_METROS, metroById, metroForPoint, type MetroId } from "@/lib/match/metros";
 import {
@@ -27,6 +28,7 @@ import {
   type WatershedHit,
 } from "@/lib/match/types";
 import { resolveAquifer, resolveWatershed } from "@/lib/match/watershed";
+import { EsgPanel, type EsgView } from "./EsgPanel";
 import { GlossaryProvider, GlossaryRow, GlossaryTerm } from "./GlossaryTerm";
 import { Lockup } from "./Lockup";
 
@@ -35,7 +37,12 @@ const MatchMap = dynamic(() => import("./MatchMap").then((m) => m.MatchMap), {
   loading: () => <div className="absolute inset-0 bg-[#0d1117]" />,
 });
 
-type Step = "place" | "resolved" | "close";
+/** "national" is the 50-state ESG company view; the other three are the metro instrument. */
+type Step = "place" | "resolved" | "close" | "national";
+
+const ESG_URL = "/match/data/us/esg.geojson";
+const ESG_SUMMARY_URL = "/match/data/us/esg-summary.json";
+const ESG_DEFAULT_VIEW: EsgView = { fits: FIT_CATEGORIES, st: null, company: null, selectedId: null };
 
 /** Where the assessment lands: a representative facility, or the metro center if none loaded. */
 export type Handoff = {
@@ -167,13 +174,62 @@ export function MatchApp({
   const [watershed, setWatershed] = useState<WatershedHit | null>(null);
   const [aquifer, setAquifer] = useState<AquiferHit | null>(null);
 
+  // National ESG view. Loaded once, on first entry; nothing national on first paint.
+  const [esgCol, setEsgCol] = useState<GeoJsonFeatureCollection | null>(null);
+  const [esgSummary, setEsgSummary] = useState<EsgSummary | null>(null);
+  const [esgError, setEsgError] = useState(false);
+  const [esgView, setEsgView] = useState<EsgView>(ESG_DEFAULT_VIEW);
+
   const metro = metroById(metroId);
   const dragRef = useRef<{ startY: number; startH: number } | null>(null);
+  const inMetro = step === "resolved" || step === "close";
 
   useEffect(() => {
-    if (step !== "place") onMetroChosen?.(metroId);
+    if (inMetro) onMetroChosen?.(metroId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metroId, step === "place"]);
+  }, [metroId, inMetro]);
+
+  useEffect(() => {
+    if (step !== "national" || esgCol || esgError) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [col, sum] = await Promise.all([
+          loadCollection(ESG_URL),
+          fetch(ESG_SUMMARY_URL).then((r) => (r.ok ? (r.json() as Promise<EsgSummary>) : Promise.reject(new Error(String(r.status))))),
+        ]);
+        if (cancelled) return;
+        setEsgCol(col);
+        setEsgSummary(sum);
+      } catch {
+        if (!cancelled) setEsgError(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [step, esgCol, esgError]);
+
+  const esgSites: EsgSite[] | null = useMemo(() => (esgCol ? esgSitesFrom(esgCol) : null), [esgCol]);
+
+  /** Camera for the national view: the lower 48, or the box around whatever is filtered/selected. */
+  const esgBounds: BBox | null = useMemo(() => {
+    if (step !== "national") return null;
+    if (!esgSites) return CONUS_BBOX;
+    if (esgView.selectedId) {
+      const s = esgSites.find((x) => x.id === esgView.selectedId);
+      if (s) return bboxOf([s]);
+    }
+    if (esgView.st || esgView.company) {
+      const box = bboxOf(
+        esgSites.filter(
+          (s) => esgView.fits.includes(s.fit) && (!esgView.st || s.st === esgView.st) && (!esgView.company || s.company === esgView.company)
+        )
+      );
+      if (box) return box;
+    }
+    return CONUS_BBOX;
+  }, [step, esgSites, esgView]);
 
   useEffect(() => {
     onContext?.({ metroName: metro.name, subwatershed: watershed?.huc12.name ?? null });
@@ -184,6 +240,7 @@ export function MatchApp({
     const max = Math.round(window.innerHeight * 0.78);
     const wide = window.innerWidth >= 1024;
     if (step === "close") setPanelH(wide ? max : Math.round(window.innerHeight * 0.56));
+    else if (step === "national") setPanelH(wide ? max : Math.round(window.innerHeight * 0.5));
     else setPanelH(wide ? Math.min(560, max) : 480);
     scrollRef.current?.scrollTo(0, 0);
     setShowAllNeighbors(false);
@@ -428,6 +485,14 @@ export function MatchApp({
     setStep("resolved");
   };
 
+  const goNational = () => {
+    setTypeOpen(false);
+    setAdjustOpen(false);
+    setPlaceMsg(null);
+    setEsgView(ESG_DEFAULT_VIEW);
+    setStep("national");
+  };
+
   const aquiferTitle =
     aquifer && aquifer.name.toLowerCase() !== "other rocks"
       ? aquifer.name
@@ -441,19 +506,24 @@ export function MatchApp({
     <GlossaryProvider newYorkLesson={metroId === "nyc"}>
       <div className="relative h-[100dvh] overflow-hidden bg-[var(--paper)]">
         <MatchMap
-          key={metroId}
+          key={step === "national" ? "us" : metroId}
           selected={selected}
           zoom={zoom}
           radiusKm={radiusKm}
-          showWbd={showWbd}
-          showAquifer={showAquifer}
-          huc12={huc12}
-          aquifers={aquifers}
-          facilities={step === "place" ? null : facilityCol}
-          selectedHuc12={step === "place" ? null : watershed?.huc12.code ?? null}
-          showPin={step !== "place"}
-          onMapClick={onMapClick}
+          showWbd={showWbd && step !== "national"}
+          showAquifer={showAquifer && step !== "national"}
+          huc12={step === "national" ? null : huc12}
+          aquifers={step === "national" ? null : aquifers}
+          facilities={inMetro ? facilityCol : null}
+          selectedHuc12={inMetro ? watershed?.huc12.code ?? null : null}
+          showPin={inMetro}
+          onMapClick={step === "national" ? () => setEsgView((v) => ({ ...v, selectedId: null })) : onMapClick}
           onFacilityClick={(lng, lat, name) => pickFacility(lng, lat, name)}
+          esg={step === "national" ? esgCol : null}
+          esgFilter={step === "national" ? esgView : null}
+          esgSelectedId={step === "national" ? esgView.selectedId : null}
+          onEsgClick={(id) => setEsgView((v) => ({ ...v, selectedId: id }))}
+          viewBounds={esgBounds}
         />
 
         <header className="absolute inset-x-0 top-0 z-20 flex items-center px-3 py-2">
@@ -488,12 +558,14 @@ export function MatchApp({
                   <button type="button" onClick={goResolved} className="text-[13px] text-[var(--ink)]">
                     Back to the watershed
                   </button>
+                ) : step === "national" ? (
+                  <span className="text-[13px] text-[var(--quiet)]">United States</span>
                 ) : (
                   <span className="text-[13px] text-[var(--quiet)]">{metro.name}</span>
                 )}
                 {step !== "place" && (
                   <button type="button" onClick={goPlace} className="text-[13px] text-[var(--water)]">
-                    Choose another metro
+                    {step === "national" ? "Back to the metros" : "Choose another metro"}
                   </button>
                 )}
               </div>
@@ -559,10 +631,24 @@ export function MatchApp({
                       <button type="button" onClick={() => setTypeOpen(true)} className="mt-3 text-[13px] text-[var(--quiet)]">
                         Or type a facility, city, or zip
                       </button>
+                      <button
+                        type="button"
+                        onClick={goNational}
+                        className="match-choice mt-4 w-full px-3 py-2.5 text-left text-[15px]"
+                      >
+                        All 50 states
+                        <span className="mt-0.5 block text-[12px] leading-snug text-[var(--quiet)]">
+                          Every company with a published water goal, coloured by fit.
+                        </span>
+                      </button>
                     </>
                   )}
                   {placeMsg && <p className="mt-2 text-[13px]">{placeMsg}</p>}
                 </>
+              )}
+
+              {step === "national" && (
+                <EsgPanel sites={esgSites} summary={esgSummary} view={esgView} onView={setEsgView} loadError={esgError} />
               )}
 
               {step === "resolved" && (
@@ -778,7 +864,7 @@ export function MatchApp({
                 </>
               )}
 
-              {step !== "place" && (
+              {inMetro && (
                 <div className="mt-4 border-t border-[var(--ink)]/20 pt-3">
                   <button type="button" onClick={() => setAdjustOpen((v) => !v)} className="text-[13px] text-[var(--quiet)]">
                     {adjustOpen ? "Hide map controls" : "Adjust the map"}

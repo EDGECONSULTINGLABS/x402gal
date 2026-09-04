@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibreImport from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { FIT, FIT_CATEGORIES, type BBox, type FitCategory } from "@/lib/match/esg";
 import { circlePolygon, emptyCollection, featureBounds, featureContains } from "@/lib/match/geo";
 import { INK, PAPER, QUIET, SUBSURFACE, WATER } from "@/lib/match/theme";
 import type { GeoJsonFeatureCollection, SelectedLocation } from "@/lib/match/types";
@@ -71,7 +72,33 @@ type Props = {
   onMapClick: (lng: number, lat: number) => void;
   /** A listed facility was tapped. Name is the facility's `name` property. */
   onFacilityClick?: (lng: number, lat: number, name: string) => void;
+  /** National ESG company layer (public/match/data/us/esg.geojson). Coloured by Fit Category. */
+  esg?: GeoJsonFeatureCollection | null;
+  esgFilter?: EsgFilter | null;
+  esgSelectedId?: string | null;
+  onEsgClick?: (id: string) => void;
+  /** When set, the camera fits this box instead of centring on `selected`. */
+  viewBounds?: BBox | null;
 };
+
+export type EsgFilter = { fits: readonly FitCategory[]; st: string | null; company: string | null };
+
+const FIT_COLOR_EXPR = [
+  "match",
+  ["get", "fit"],
+  ...FIT_CATEGORIES.flatMap((f) => [f, FIT[f].color]),
+  FIT.Other.color,
+] as unknown as maplibreImport.ExpressionSpecification;
+
+function esgFilterExpr(f: EsgFilter | null | undefined, approximate: boolean): maplibreImport.FilterSpecification {
+  const parts: unknown[] = [approximate ? ["==", ["get", "placement"], "city"] : ["!=", ["get", "placement"], "city"]];
+  if (f) {
+    parts.push(["in", ["get", "fit"], ["literal", [...f.fits]]]);
+    if (f.st) parts.push(["==", ["get", "st"], f.st]);
+    if (f.company) parts.push(["==", ["get", "company"], f.company]);
+  }
+  return ["all", ...parts] as unknown as maplibreImport.FilterSpecification;
+}
 
 /** Our GeoJSON types are structural and narrower than maplibre's; the shape is identical. */
 type MlGeoJson = Parameters<maplibreImport.GeoJSONSource["setData"]>[0];
@@ -174,6 +201,54 @@ function addOverlayLayers(map: maplibreImport.Map) {
       "circle-stroke-color": INK,
     },
   });
+
+  // National ESG layer. Solid dot = placed at the address; hollow ring = city-centre approximate.
+  map.addSource("esg", { type: "geojson", data: asMl(emptyCollection()) });
+  map.addLayer({
+    id: "esg-approx",
+    type: "circle",
+    source: "esg",
+    filter: esgFilterExpr(null, true),
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3.5, 6, 5, 10, 7],
+      "circle-color": PAPER,
+      "circle-opacity": 0.35,
+      "circle-stroke-width": 1.6,
+      "circle-stroke-color": FIT_COLOR_EXPR,
+    },
+  });
+  map.addLayer({
+    id: "esg-dot",
+    type: "circle",
+    source: "esg",
+    filter: esgFilterExpr(null, false),
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3.5, 6, 5, 10, 7],
+      "circle-color": FIT_COLOR_EXPR,
+      "circle-opacity": 0.9,
+      "circle-stroke-width": 1,
+      "circle-stroke-color": PAPER,
+    },
+  });
+  map.addLayer({
+    id: "esg-selected",
+    type: "circle",
+    source: "esg",
+    filter: ["==", ["get", "id"], ""],
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 9, 10, 13],
+      "circle-color": "rgba(0,0,0,0)",
+      "circle-stroke-width": 2.5,
+      "circle-stroke-color": INK,
+    },
+  });
+}
+
+function applyEsgFilter(map: maplibreImport.Map, f: EsgFilter | null | undefined, selectedId: string | null | undefined) {
+  if (!map.getLayer("esg-dot")) return;
+  map.setFilter("esg-approx", esgFilterExpr(f, true));
+  map.setFilter("esg-dot", esgFilterExpr(f, false));
+  map.setFilter("esg-selected", ["==", ["get", "id"], selectedId ?? ""]);
 }
 
 function drawWatershed(map: maplibreImport.Map, code: string | null) {
@@ -209,13 +284,25 @@ export function MatchMap({
   showPin = true,
   onMapClick,
   onFacilityClick,
+  esg = null,
+  esgFilter = null,
+  esgSelectedId = null,
+  onEsgClick,
+  viewBounds = null,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibreImport.Map | null>(null);
+  /**
+   * True once the style has loaded. Not map.isStyleLoaded(): that also reports false while raster
+   * tiles are still streaming, which silently dropped camera and filter updates mid-load.
+   */
+  const readyRef = useRef(false);
   const clickRef = useRef(onMapClick);
   clickRef.current = onMapClick;
   const facilityClickRef = useRef(onFacilityClick);
   facilityClickRef.current = onFacilityClick;
+  const esgClickRef = useRef(onEsgClick);
+  esgClickRef.current = onEsgClick;
   const viewRef = useRef({ lng: selected.lng, lat: selected.lat, zoom, bounds: null as
     | [[number, number], [number, number]]
     | null });
@@ -230,11 +317,15 @@ export function MatchMap({
     lng: selected.lng,
     lat: selected.lat,
     zoom,
-    bounds: aroundPin && feature ? featureBounds(feature) : null,
+    bounds: viewBounds
+      ? [[viewBounds[0], viewBounds[1]], [viewBounds[2], viewBounds[3]]]
+      : aroundPin && feature
+        ? featureBounds(feature)
+        : null,
   };
 
   const applyView = (map: maplibreImport.Map) => {
-    if (!map.isStyleLoaded()) {
+    if (!readyRef.current) {
       map.once("load", () => {
         if (mapRef.current === map) applyView(map);
       });
@@ -246,14 +337,15 @@ export function MatchMap({
       ? { top: 56, left: 420, bottom: 24, right: 16 }
       : { top: 56, left: 12, bottom: 300, right: 12 };
     map.setPadding(padding);
-    map.jumpTo({ center: [v.lng, v.lat], zoom: v.zoom });
     if (v.bounds) {
       try {
         map.fitBounds(v.bounds, { padding: 40, maxZoom: 12, duration: 0 });
+        return;
       } catch {
-        map.jumpTo({ center: [v.lng, v.lat], zoom: v.zoom });
+        /* fall through to the point camera */
       }
     }
+    map.jumpTo({ center: [v.lng, v.lat], zoom: v.zoom });
   };
 
   useEffect(() => {
@@ -282,12 +374,14 @@ export function MatchMap({
       const msg = e.error?.message ?? "";
       if (e.sourceId === "imagery" || /arcgisonline|esri/i.test(msg)) {
         if (map.getSource("osm")) return;
+        readyRef.current = false; // style.load → onLoad re-arms it and re-adds the overlays
         map.setStyle(baseStyle("osm"));
       }
     };
 
     const onLoad = () => {
       if (cancelled) return;
+      readyRef.current = true;
       addOverlayLayers(map);
       map.resize();
       applyView(map);
@@ -297,6 +391,17 @@ export function MatchMap({
     map.on("style.load", onLoad);
     map.on("error", onError);
     map.on("click", (e) => {
+      const box: [[number, number], [number, number]] = [
+        [e.point.x - 8, e.point.y - 8],
+        [e.point.x + 8, e.point.y + 8],
+      ];
+      if (map.getLayer("esg-dot") && esgClickRef.current) {
+        const hit = map.queryRenderedFeatures(box, { layers: ["esg-dot", "esg-approx"] })[0];
+        if (hit?.properties?.id) {
+          esgClickRef.current(String(hit.properties.id));
+          return;
+        }
+      }
       if (map.getLayer("facilities-circle") && facilityClickRef.current) {
         const hits = map.queryRenderedFeatures(
           [
@@ -314,12 +419,14 @@ export function MatchMap({
       }
       clickRef.current(e.lngLat.lng, e.lngLat.lat);
     });
-    map.on("mouseenter", "facilities-circle", () => {
-      map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", "facilities-circle", () => {
-      map.getCanvas().style.cursor = "";
-    });
+    for (const layer of ["facilities-circle", "esg-dot", "esg-approx"]) {
+      map.on("mouseenter", layer, () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", layer, () => {
+        map.getCanvas().style.cursor = "";
+      });
+    }
 
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(el);
@@ -330,6 +437,7 @@ export function MatchMap({
       ro.disconnect();
       map.remove();
       mapRef.current = null;
+      readyRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -345,9 +453,21 @@ export function MatchMap({
       if (huc12 && selectedHuc12) drawWatershed(map, selectedHuc12);
       else applySelectedFilter(map, selectedHuc12);
     };
-    if (map.isStyleLoaded()) apply();
+    if (readyRef.current) apply();
     else map.once("load", apply);
   }, [huc12, aquifers, facilities, selectedHuc12]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const apply = () => {
+      addOverlayLayers(map);
+      setSourceData(map, "esg", esg ?? emptyCollection());
+      applyEsgFilter(map, esgFilter, esgSelectedId);
+    };
+    if (readyRef.current) apply();
+    else map.once("load", apply);
+  }, [esg, esgFilter, esgSelectedId]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -381,19 +501,19 @@ export function MatchMap({
           : emptyCollection()
       );
     };
-    if (map.isStyleLoaded()) apply();
+    if (readyRef.current) apply();
     else map.once("load", apply);
   }, [selected.lng, selected.lat, radiusKm, selectedHuc12, showPin]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map?.isStyleLoaded() || !map.getLayer("huc12-selected-fill")) return;
+    if (!map || !readyRef.current || !map.getLayer("huc12-selected-fill")) return;
     drawWatershed(map, selectedHuc12);
   }, [selectedHuc12, huc12]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map?.isStyleLoaded()) return;
+    if (!map || !readyRef.current) return;
     const vis = (id: string, on: boolean) => {
       if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
     };
@@ -408,7 +528,8 @@ export function MatchMap({
     const map = mapRef.current;
     if (!map) return;
     applyView(map);
-  }, [selected.lng, selected.lat, zoom, selectedHuc12, huc12]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected.lng, selected.lat, zoom, selectedHuc12, huc12, viewBounds?.join(",")]);
 
   return (
     <div className="match-map absolute inset-0 bg-[#0b1220]">

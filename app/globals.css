@@ -224,6 +224,16 @@ body {
   position: relative;
   isolation: isolate;
   touch-action: manipulation; /* taps are taps; no double-tap zoom on the water */
+  /* holding a finger on the water is heat, not "select text" */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+/* people still need to fix a typo */
+.match-screen--surface input,
+.match-screen--surface textarea {
+  -webkit-user-select: text;
+  user-select: text;
 }
 .match-screen--surface > header,
 .match-screen--surface > main {

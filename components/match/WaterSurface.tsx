@@ -368,10 +368,15 @@ export function WaterSurface({ onFact, quiet = false }: Props) {
       pointer.active = false;
       if (performance.now() - pointer.downAt > 1500) fire("heat");
     };
+    // A long press on the water is heat, not a request for the copy/select menu.
+    const onContextMenu = (e: Event) => {
+      if (!isControl(e.target)) e.preventDefault();
+    };
     document.addEventListener("pointerdown", onDown, { passive: true });
     document.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerup", onUp);
     document.addEventListener("pointercancel", onUp);
+    document.addEventListener("contextmenu", onContextMenu);
 
     return () => {
       window.removeEventListener("resize", fit);
@@ -380,6 +385,7 @@ export function WaterSurface({ onFact, quiet = false }: Props) {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
       document.removeEventListener("pointercancel", onUp);
+      document.removeEventListener("contextmenu", onContextMenu);
       if (raf != null) window.cancelAnimationFrame(raf);
     };
   }, []);

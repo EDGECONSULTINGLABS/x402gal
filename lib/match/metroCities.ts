@@ -43,6 +43,12 @@ export const METRO_CITIES: Record<MetroId, MetroMembership> = {
     cities: ["Columbus", "Dublin", "New Albany", "Hilliard", "Westerville", "Gahanna", "Grove City", "Delaware", "Johnstown"],
     markets: ["Columbus"],
   },
+  utah: {
+    state: "UT",
+    /** Box Elder County corridor. The Stratos row is filed under Snowville. Not Salt Lake City. */
+    cities: ["Snowville", "Hansel Valley", "Tremonton", "Brigham City", "Corinne", "Howell"],
+    markets: ["Box Elder", "Box Elder County", "Northern Utah"],
+  },
 };
 
 function norm(s: string): string {

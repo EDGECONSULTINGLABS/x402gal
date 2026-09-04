@@ -102,7 +102,7 @@ export function Gate({ onEntered }: Props) {
                 </p>
               )}
               <p className="match-quiet mt-2 text-[12px] leading-relaxed">
-                Metros today: {metroNames}. Utah follows once its footprint is confirmed.
+                Metros today: {metroNames}.
               </p>
               <button type="button" onClick={() => setScreen("form")} className="match-action mt-4 w-full px-4 py-3 text-[16px]">
                 Start

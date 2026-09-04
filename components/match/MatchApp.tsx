@@ -109,7 +109,39 @@ function metroData(id: MetroId) {
     aquifers: `${base}/aquifers.geojson`,
     facilities: `${base}/facilities.geojson`,
     stewardship: `${base}/stewardship.geojson`,
+    /** Optional. Only metros with a delivered project footprint have one (Utah). */
+    footprint: `${base}/footprint.geojson`,
   };
+}
+
+/** One line per footprint feature within the radius: "~307 acres · Stratos Parcel — Hansel Valley Cluster". */
+type FootprintNote = { name: string; kind: string; lead: string; precision: string | null; sourceUrl: string | null };
+
+function footprintNotes(col: GeoJsonFeatureCollection | null, lng: number, lat: number, radiusKm: number): FootprintNote[] {
+  if (!col) return [];
+  const out: FootprintNote[] = [];
+  for (const f of col.features) {
+    const g = f.geometry;
+    if (!g) continue;
+    let near = false;
+    if (g.type === "Point") {
+      const [x, y] = g.coordinates as [number, number];
+      near = haversineMeters(lng, lat, x, y) / 1000 <= radiusKm;
+    } else if (g.type === "Polygon") {
+      const ring = (g.coordinates as [number, number][][])[0] ?? [];
+      near = ring.some(([x, y]) => haversineMeters(lng, lat, x, y) / 1000 <= radiusKm);
+    }
+    if (!near) continue;
+    const p = (f.properties ?? {}) as Record<string, unknown>;
+    out.push({
+      name: String(p.name ?? ""),
+      kind: String(p.kind ?? ""),
+      lead: String(p.lead ?? ""),
+      precision: p.precision ? String(p.precision) : null,
+      sourceUrl: p.source_url ? String(p.source_url) : null,
+    });
+  }
+  return out;
 }
 
 /** A curated stewardship card (spec §5): exactly these five fields, nothing else. */
@@ -199,6 +231,7 @@ export function MatchApp({
   const [aquifers, setAquifers] = useState<GeoJsonFeatureCollection | null>(null);
   const [facilityCol, setFacilityCol] = useState<GeoJsonFeatureCollection | null>(null);
   const [stewardCol, setStewardCol] = useState<GeoJsonFeatureCollection | null>(null);
+  const [footprintCol, setFootprintCol] = useState<GeoJsonFeatureCollection | null>(null);
   const [facilityIndex, setFacilityIndex] = useState<FacilityIndexEntry[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -328,6 +361,7 @@ export function MatchApp({
     setAquifers(null);
     setFacilityCol(null);
     setStewardCol(null);
+    setFootprintCol(null);
     setWatershed(null);
     setAquifer(null);
     setLoadError(null);
@@ -338,17 +372,19 @@ export function MatchApp({
         if (cancelled) return;
         setHuc12(a12);
         setAquifers(aq);
-        const [a10, a8, fac, stew] = await Promise.all([
+        const [a10, a8, fac, stew, foot] = await Promise.all([
           loadCollection(urls.huc10),
           loadCollection(urls.huc8),
           loadCollection(urls.facilities).catch(() => null),
           loadCollection(urls.stewardship).catch(() => null),
+          loadCollection(urls.footprint).catch(() => null),
         ]);
         if (cancelled) return;
         setHuc10(a10);
         setHuc8(a8);
         setFacilityCol(fac);
         setStewardCol(stew);
+        setFootprintCol(foot);
       } catch (err) {
         if (!cancelled) setLoadError((err as Error).message);
       }
@@ -406,6 +442,10 @@ export function MatchApp({
   const stewards = useMemo(
     () => stewardsFrom(stewardCol, selected.lng, selected.lat, radiusKm),
     [stewardCol, selected.lng, selected.lat, radiusKm]
+  );
+  const footprintNear = useMemo(
+    () => footprintNotes(footprintCol, selected.lng, selected.lat, radiusKm),
+    [footprintCol, selected.lng, selected.lat, radiusKm]
   );
 
   const applyPlace = (hit: {
@@ -591,6 +631,7 @@ export function MatchApp({
           huc12={national ? null : huc12}
           aquifers={national ? null : aquifers}
           facilities={inMetro ? facilityCol : null}
+          footprint={inMetro ? footprintCol : null}
           selectedHuc12={inMetro ? watershed?.huc12.code ?? null : null}
           showPin={inMetro}
           onMapClick={
@@ -837,6 +878,26 @@ export function MatchApp({
                       </>
                     )}
                   </section>
+
+                  {footprintNear.length > 0 && (
+                    <section className="mt-4">
+                      <h2 className="text-[14px] font-medium">Project footprint</h2>
+                      <ul className="mt-1 flex flex-col gap-1">
+                        {footprintNear.map((n) => (
+                          <li key={n.name} className="text-[13px] leading-snug">
+                            <span>{n.name}</span>
+                            <span className="block text-[12px] text-[var(--quiet)]">
+                              {n.lead}
+                              {n.precision ? ` · ${n.precision}` : ""}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-1.5 text-[12px] leading-snug text-[var(--quiet)]">
+                        Dashed outlines are drawn from a parcel map, not a survey.
+                      </p>
+                    </section>
+                  )}
 
                   <section className="mt-4">
                     <h2 className="text-[14px] font-medium">Candidate projects</h2>

@@ -1,0 +1,81 @@
+{
+  "metro": "utah",
+  "source": "USGS WBD MapServer (hydro.nationalmap.gov) + USGS Principal Aquifers (ScienceBase doi:10.5066/P9Y2HOUJ)",
+  "files": null,
+  "clipped": "2026-09-04",
+  "bbox": [
+    -113.25,
+    41.3,
+    -111.95,
+    42
+  ],
+  "layers": {
+    "huc12.geojson": {
+      "features": 92,
+      "bytes": 193674,
+      "simplify": "maxAllowableOffset=0.0008deg"
+    },
+    "huc10.geojson": {
+      "features": 22,
+      "bytes": 79689,
+      "simplify": "maxAllowableOffset=0.0015deg"
+    },
+    "huc8.geojson": {
+      "features": 8,
+      "bytes": 74715,
+      "simplify": "maxAllowableOffset=0.0015deg"
+    },
+    "aquifers.geojson": {
+      "features": 20,
+      "bytes": 36112
+    },
+    "footprint.geojson": {
+      "features": 4,
+      "bytes": 3621,
+      "source": "data/summit/utah/Stratos_GSL_Water_Atlas_1.kmz folder \"Stratos project\"",
+      "sha256": "dc5a5e5e9d3bdacbee5d18562260e43aaf657cd2c26134f41a9e76d8b5cbc1ce",
+      "note": "Parcel boundaries were digitized from a parcel-map screen capture and georeferenced to the confirmed site point; not surveyed. Shown as outlines, never as a fill that reads as a measured boundary.",
+      "built": "2026-09-04"
+    },
+    "facilities.geojson": {
+      "features": 1,
+      "bytes": 269,
+      "source": "Master 50-state data-center workbook, sheet \"All Facilities (All States)\", Active rows in metro cities",
+      "geocoder": "US Census batch (Public_AR_Current), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox",
+      "dropped": {
+        "no match": 0,
+        "city and zip mismatch": 0,
+        "outside bbox": 0
+      },
+      "coordinateOverrides": [
+        {
+          "key": "Stratos Hyperscale Campus|Bitzero Blockchain Inc.",
+          "address": "Salt Wells Rd & Hansel Vly Rd|Snowville|UT|84336",
+          "lng": -112.611,
+          "lat": 41.797,
+          "method": "Confirmed site centre from Joe's Great Salt Lake Water Atlas (Stratos_GSL_Water_Atlas_1.kmz, placemark 'Proposed Stratos Data Center — Hansel Valley (Phase 1)'), which cites the Baxtel listing for the Phase 1 campus",
+          "source": {
+            "authority": "Joe (HydroCoin) — Great Salt Lake Water Atlas, Stratos project folder",
+            "file": "data/summit/utah/Stratos_GSL_Water_Atlas_1.kmz",
+            "cites": "https://baxtel.com/data-center/o-leary-hansel-valley-stratos-phase-1",
+            "description": "Core Stratos development parcel — northern edge abuts I-84 at Hansel Valley Rd; Ruby Pipeline crosses the site.",
+            "received": "2026-09-04"
+          },
+          "why": "The sheet address is a road intersection in unincorporated Box Elder County; Census returns No_Match because the roads are not in its TIGER coverage there. The atlas point is the location Joe wants the Utah conversation anchored to.",
+          "status": "Proposed (Phase 1)",
+          "sheetStatus": "Active",
+          "statusWhy": "The workbook says Active. Joe's atlas calls the site proposed, and the first water-rights application (1,900 ac-ft from Salt Wells Spring) was withdrawn in May 2026 after ~3,900 protests (Utah News Dispatch, 2026-05-07). Nothing is built; the atlas is the later record."
+        }
+      ],
+      "built": "2026-09-04"
+    },
+    "stewardship.geojson": {
+      "features": 0,
+      "bytes": 40,
+      "source": "ESG workbook, sheet \"All Companies (All States)\", curated via data/summit/stewardship-curation.json (include only)",
+      "note": "No ESG workbook row falls inside the Utah bbox (checked against us/esg.geojson, 2026-09-04). Rerun match:stewardship when the workbook gains a Box Elder County row.",
+      "built": "2026-09-04"
+    }
+  },
+  "note": "Interim. Rebuild with --source=source-data once all four Watershed Boundary layers are on disk."
+}

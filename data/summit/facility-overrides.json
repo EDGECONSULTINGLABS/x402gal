@@ -1,0 +1,23 @@
+{
+  "_about": [
+    "Coordinate overrides for the per-metro facilities layer (scripts/build-facilities.ts), applied only when the Census geocoder returns No_Match for an Active row inside a Summit metro.",
+    "Key = 'Name|Operator' exactly as in the workbook. address must equal the sheet's 'Street Address|City|State Code|ZIP' or the build fails.",
+    "The point must come from a cited record (the project's own filing, a directory listing with a stated location, a parcel point) — never a hand-placed pin. Optional status replaces the workbook's Status column when the cited record contradicts it; say why."
+  ],
+  "Stratos Hyperscale Campus|Bitzero Blockchain Inc.": {
+    "address": "Salt Wells Rd & Hansel Vly Rd|Snowville|UT|84336",
+    "lng": -112.611,
+    "lat": 41.797,
+    "method": "Confirmed site centre from Joe's Great Salt Lake Water Atlas (Stratos_GSL_Water_Atlas_1.kmz, placemark 'Proposed Stratos Data Center — Hansel Valley (Phase 1)'), which cites the Baxtel listing for the Phase 1 campus",
+    "source": {
+      "authority": "Joe (HydroCoin) — Great Salt Lake Water Atlas, Stratos project folder",
+      "file": "data/summit/utah/Stratos_GSL_Water_Atlas_1.kmz",
+      "cites": "https://baxtel.com/data-center/o-leary-hansel-valley-stratos-phase-1",
+      "description": "Core Stratos development parcel — northern edge abuts I-84 at Hansel Valley Rd; Ruby Pipeline crosses the site.",
+      "received": "2026-09-04"
+    },
+    "status": "Proposed (Phase 1)",
+    "status_why": "The workbook says Active. Joe's atlas calls the site proposed, and the first water-rights application (1,900 ac-ft from Salt Wells Spring) was withdrawn in May 2026 after ~3,900 protests (Utah News Dispatch, 2026-05-07). Nothing is built; the atlas is the later record.",
+    "why": "The sheet address is a road intersection in unincorporated Box Elder County; Census returns No_Match because the roads are not in its TIGER coverage there. The atlas point is the location Joe wants the Utah conversation anchored to."
+  }
+}

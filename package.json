@@ -25,6 +25,7 @@
     "match:stewardship": "tsx scripts/build-stewardship.ts",
     "match:esg": "tsx scripts/build-esg.ts",
     "match:datacenters": "tsx scripts/build-datacenters.ts",
+    "match:footprint": "tsx scripts/build-footprint.ts",
     "match:check": "tsx scripts/check-resolve.ts",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:dev": "npm run pages:build && wrangler pages dev",

@@ -67,6 +67,11 @@ type Props = {
   huc12: GeoJsonFeatureCollection | null;
   aquifers: GeoJsonFeatureCollection | null;
   facilities: GeoJsonFeatureCollection | null;
+  /**
+   * A project's footprint where one was delivered (Utah: the Stratos parcels and the spring it
+   * applied for). Polygons draw as outlines only — they are digitized, not surveyed.
+   */
+  footprint?: GeoJsonFeatureCollection | null;
   selectedHuc12: string | null;
   showPin?: boolean;
   onMapClick: (lng: number, lat: number) => void;
@@ -122,6 +127,7 @@ function addOverlayLayers(map: maplibreImport.Map) {
   map.addSource("huc12", { type: "geojson", data: asMl(emptyCollection()) });
   map.addSource("radius", { type: "geojson", data: asMl(emptyCollection()) });
   map.addSource("facilities", { type: "geojson", data: asMl(emptyCollection()) });
+  map.addSource("footprint", { type: "geojson", data: asMl(emptyCollection()) });
   map.addSource("pin", { type: "geojson", data: asMl(emptyCollection()) });
 
   map.addLayer({
@@ -173,6 +179,34 @@ function addOverlayLayers(map: maplibreImport.Map) {
     type: "line",
     source: "radius",
     paint: { "line-color": QUIET, "line-width": 1.4, "line-dasharray": [2, 1.6] },
+  });
+  // Project footprint: parcel outlines (dashed — digitized, not surveyed) and the water source applied for.
+  map.addLayer({
+    id: "footprint-line",
+    type: "line",
+    source: "footprint",
+    filter: ["==", ["geometry-type"], "Polygon"],
+    paint: { "line-color": INK, "line-width": 1.6, "line-dasharray": [2, 1.4], "line-opacity": 0.9 },
+  });
+  map.addLayer({
+    id: "footprint-fill",
+    type: "fill",
+    source: "footprint",
+    filter: ["==", ["geometry-type"], "Polygon"],
+    paint: { "fill-color": INK, "fill-opacity": 0.06 },
+  });
+  map.addLayer({
+    id: "footprint-source",
+    type: "circle",
+    source: "footprint",
+    filter: ["all", ["==", ["geometry-type"], "Point"], ["==", ["get", "kind"], "source"]],
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 4, 12, 6],
+      "circle-color": PAPER,
+      "circle-opacity": 0.4,
+      "circle-stroke-width": 1.8,
+      "circle-stroke-color": WATER,
+    },
   });
   map.addLayer({
     id: "facilities-circle",
@@ -302,6 +336,7 @@ export function MatchMap({
   huc12,
   aquifers,
   facilities,
+  footprint = null,
   selectedHuc12,
   showPin = true,
   onMapClick,
@@ -469,11 +504,12 @@ export function MatchMap({
       if (huc12) setSourceData(map, "huc12", huc12);
       if (aquifers) setSourceData(map, "aquifers", aquifers);
       setSourceData(map, "facilities", facilities ?? emptyCollection());
+      setSourceData(map, "footprint", footprint ?? emptyCollection());
       if (huc12 && selectedHuc12) drawWatershed(map, selectedHuc12);
       else applySelectedFilter(map, selectedHuc12);
     };
     return whenReady(map, readyRef.current, apply);
-  }, [huc12, aquifers, facilities, selectedHuc12]);
+  }, [huc12, aquifers, facilities, footprint, selectedHuc12]);
 
   useEffect(() => {
     const map = mapRef.current;

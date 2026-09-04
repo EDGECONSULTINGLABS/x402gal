@@ -39,7 +39,8 @@
         "city and zip mismatch": 0,
         "outside bbox": 0
       },
-      "built": "2026-09-03"
+      "coordinateOverrides": [],
+      "built": "2026-09-04"
     },
     "stewardship.geojson": {
       "features": 2,

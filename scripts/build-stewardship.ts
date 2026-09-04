@@ -164,7 +164,10 @@ async function main() {
   const today = new Date().toISOString().slice(0, 10);
   const byMetro = new Map<MetroId, GeoJsonFeature[]>();
   const why: Record<string, number> = { "no match": 0, "city and zip mismatch": 0, "outside bbox": 0, "source url failed": 0 };
-  const overrides: Record<MetroId, Record<string, unknown>[]> = { nyc: [], phoenix: [], nova: [], dallas: [], columbus: [] };
+  const overrides = Object.fromEntries(METROS.map((m) => [m.id, [] as Record<string, unknown>[]])) as Record<
+    MetroId,
+    Record<string, unknown>[]
+  >;
 
   for (const r of included) {
     const c = curation.include[r.key];

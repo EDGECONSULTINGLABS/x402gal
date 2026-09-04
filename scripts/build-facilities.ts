@@ -12,11 +12,13 @@
  *      segment and never falls back to a ZIP or city centroid — a No_Match/Tie is dropped, not
  *      approximated. As a further guard the matched ZIP or city must agree with the input and the
  *      point must fall inside the metro bbox.
+ *      One escape hatch: data/summit/facility-overrides.json, a cited point bound to the exact sheet
+ *      address, used only on No_Match and recorded in the manifest (same rule as stewardship).
  *   5. Emit public/match/data/<metro>/facilities.geojson with properties
  *      name, operator, city, state, status — nothing else. Column J (Notes) never leaves the file.
  *      Also emit public/match/data/facilities-index.json (name, operator, metro, point) for typed input.
  */
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import * as XLSX from "xlsx";
 import { metroForCity } from "../lib/match/metroCities";
@@ -25,6 +27,7 @@ import type { GeoJsonFeature } from "../lib/match/types";
 import {
   BENCHMARK,
   OUT,
+  ROOT,
   addrKey,
   arg,
   geocodeBatch,
@@ -36,6 +39,39 @@ import {
 } from "./lib/geocode";
 
 const SHEET = "All Facilities (All States)";
+const OVERRIDES = join(ROOT, "data", "summit", "facility-overrides.json");
+
+/** Key "Name|Operator" → cited point for a row the Census geocoder cannot place. */
+type Override = {
+  address: string;
+  lng: number;
+  lat: number;
+  method: string;
+  source: Record<string, unknown>;
+  why: string;
+  /** Replaces the sheet's Status when the cited record contradicts it. */
+  status?: string;
+  status_why?: string;
+};
+
+async function loadOverrides(): Promise<Record<string, Override>> {
+  const raw = JSON.parse(await readFile(OVERRIDES, "utf8")) as Record<string, unknown>;
+  const out: Record<string, Override> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (key.startsWith("_")) continue;
+    const o = value as Override;
+    if (!o.address || !Number.isFinite(o.lng) || !Number.isFinite(o.lat) || !o.method || !o.source || !o.why) {
+      throw new Error(`facility-overrides.json "${key}": needs address, lng, lat, method, source and why`);
+    }
+    if (o.status && !o.status_why) throw new Error(`facility-overrides.json "${key}": status needs status_why`);
+    out[key] = o;
+  }
+  return out;
+}
+
+function overrideKey(r: { name: string; operator: string }): string {
+  return `${r.name}|${r.operator}`;
+}
 
 type Row = {
   name: string;
@@ -131,6 +167,15 @@ async function main() {
   if (dry) return;
 
   const targets = only ? rows.filter((r) => r.metro === only) : rows;
+  const overrides = await loadOverrides();
+  for (const r of targets) {
+    const o = overrides[overrideKey(r)];
+    if (o && o.address.toLowerCase() !== addrKey(r)) {
+      throw new Error(
+        `facility-overrides.json "${overrideKey(r)}": address "${o.address}" does not match the sheet address "${addrKey(r)}" — fix or remove the override`
+      );
+    }
+  }
   const cache = await loadCache();
   await geocodeBatch(targets, cache);
 
@@ -142,24 +187,48 @@ async function main() {
     const input = byMetro.get(metro.id) ?? [];
     const features: GeoJsonFeature[] = [];
     const why: Record<string, number> = { "no match": 0, "city and zip mismatch": 0, "outside bbox": 0 };
+    const used: Record<string, unknown>[] = [];
     for (const r of input) {
       const g = cache[addrKey(r)];
-      if (!g || g.match !== "Match" || g.lng == null || g.lat == null) {
+      let lng: number;
+      let lat: number;
+      let status = r.status;
+      if (g && g.match === "Match" && g.lng != null && g.lat != null) {
+        if (!matchAgrees(g, r)) {
+          why["city and zip mismatch"]++;
+          continue;
+        }
+        lng = g.lng;
+        lat = g.lat;
+      } else if (overrides[overrideKey(r)]) {
+        // The geocoder has no street match; use the cited point. Logged and recorded in the manifest.
+        const o = overrides[overrideKey(r)];
+        lng = o.lng;
+        lat = o.lat;
+        if (o.status) status = o.status;
+        console.log(`  override ${overrideKey(r)}: Census No_Match → ${o.method}${o.status ? ` · status "${r.status}" → "${o.status}"` : ""}`);
+        used.push({
+          key: overrideKey(r),
+          address: o.address,
+          lng,
+          lat,
+          method: o.method,
+          source: o.source,
+          why: o.why,
+          ...(o.status ? { status: o.status, sheetStatus: r.status, statusWhy: o.status_why } : {}),
+        });
+      } else {
         why["no match"]++;
         continue;
       }
-      if (!matchAgrees(g, r)) {
-        why["city and zip mismatch"]++;
-        continue;
-      }
-      if (!pointInBbox(g.lng, g.lat, metro.bbox)) {
+      if (!pointInBbox(lng, lat, metro.bbox)) {
         why["outside bbox"]++;
         continue;
       }
-      const point: [number, number] = [Number(g.lng.toFixed(6)), Number(g.lat.toFixed(6))];
+      const point: [number, number] = [Number(lng.toFixed(6)), Number(lat.toFixed(6))];
       features.push({
         type: "Feature",
-        properties: { name: r.name, operator: r.operator, city: r.city, state: r.state, status: r.status },
+        properties: { name: r.name, operator: r.operator, city: r.city, state: r.state, status },
         geometry: { type: "Point", coordinates: point },
       });
       index.push({ n: r.name, o: r.operator, m: metro.id, c: point });
@@ -175,6 +244,7 @@ async function main() {
       source: `Master 50-state data-center workbook, sheet "${SHEET}", Active rows in metro cities`,
       geocoder: `US Census batch (${BENCHMARK}), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox`,
       dropped: why,
+      coordinateOverrides: used,
       built: today,
     });
   }

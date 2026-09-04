@@ -57,7 +57,7 @@ Steps 2–3 are the instrument and must work with the network off. Steps 4–8 a
 | `nova` | Ashburn–Sterling–Manassas corridor | Densest facility set (258 rows) |
 | `dallas` | DFW | 123 rows |
 | `columbus` | Columbus / New Albany | 50 rows |
-| `utah` | Northern Utah corridor | Specific target conversation. **Confirm the facility location with Joe before clipping** — do not guess it |
+| `utah` | Hansel Valley / north Great Salt Lake, Box Elder County | Specific target conversation: the Stratos (Bitzero / O'Leary) Phase 1 campus. Confirmed by Joe 2026-09-04 via `data/summit/utah/Stratos_GSL_Water_Atlas_1.kmz`; site centre and parcel footprint come from that file |
 
 Load one metro at a time on selection. Never pull all six on first paint. Phoenix at 1.4M needs simplification (`mapshaper -simplify` at a visually lossless tolerance) — HUC12 vertex density far exceeds what a phone renders at metro zoom.
 
@@ -120,7 +120,9 @@ dallas:   Dallas, Fort Worth, Plano, Irving, Richardson, Garland, Carrollton, Le
           Allen, Frisco, Arlington, Mesquite, Grand Prairie, Denton, Farmers Branch — TX
 columbus: Columbus, Dublin, New Albany, Hilliard, Westerville, Gahanna, Grove City,
           Delaware, Johnstown — OH
-utah:     confirm with Joe
+utah:     Snowville, Hansel Valley, Tremonton, Brigham City, Corinne, Howell — UT
+          (the Stratos row is filed under Snowville with an intersection address the Census
+          geocoder cannot place; data/summit/facility-overrides.json carries Joe's confirmed point)
 ```
 
 ---

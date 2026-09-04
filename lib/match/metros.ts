@@ -1,4 +1,4 @@
-export type MetroId = "nyc" | "phoenix" | "nova" | "dallas" | "columbus";
+export type MetroId = "nyc" | "phoenix" | "nova" | "dallas" | "columbus" | "utah";
 
 export type BBox = [west: number, south: number, east: number, north: number];
 
@@ -12,8 +12,8 @@ export type Metro = {
 };
 
 /**
- * Summit metros. New York is the floor. The other four are the demand markets.
- * Utah is the sixth (see PENDING_METROS) and joins this list once its footprint is confirmed.
+ * Summit metros. New York is the floor. The other five are the demand markets.
+ * Utah joined on 2026-09-04 once Joe delivered the Stratos site (Hansel Valley, Box Elder County).
  */
 export const METROS: readonly Metro[] = [
   {
@@ -52,22 +52,28 @@ export const METROS: readonly Metro[] = [
     zoom: 10,
     bbox: [-83.3, 39.8, -82.7, 40.2],
   },
+  {
+    id: "utah",
+    name: "Utah",
+    /**
+     * Hansel Valley, north of the Great Salt Lake. The corridor, not the facility pin — the
+     * Stratos Phase 1 site itself is in facilities.geojson (Joe's atlas, 2026-09-04).
+     */
+    center: [-112.62, 41.76],
+    zoom: 10,
+    /** Snowville and the Hansel Valley parcels to the north arm (Gunnison Bay) and Bear River Bay. */
+    bbox: [-113.25, 41.3, -111.95, 42.0],
+  },
 ];
 
 /**
  * Metros named in the launch spec whose footprint is not yet confirmed.
  * No bbox, no clip, no pin — listed so the choice is visible and honest.
- * Utah: confirm the facility location with Joe before clipping. Do not guess it.
+ * Empty since 2026-09-04 (Utah confirmed); kept so the picker can show a pending metro again.
  */
 export type PendingMetro = { id: string; name: string; waitingOn: string };
 
-export const PENDING_METROS: readonly PendingMetro[] = [
-  {
-    id: "utah",
-    name: "Utah",
-    waitingOn: "Waiting on the confirmed facility location before this metro is clipped.",
-  },
-];
+export const PENDING_METROS: readonly PendingMetro[] = [];
 
 export function metroById(id: MetroId): Metro {
   const metro = METROS.find((m) => m.id === id);

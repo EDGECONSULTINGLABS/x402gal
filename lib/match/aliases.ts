@@ -59,6 +59,11 @@ const ALIASES: { keys: string[]; metroId: MetroId; note?: string }[] = [
     keys: ["columbus", "cbus", "43215", "43201", "43202", "43206", "43212", "43214", "43220"],
     metroId: "columbus",
   },
+  {
+    keys: ["hansel valley", "box elder", "great salt lake", "gsl", "stratos", "bitzero", "84336", "84337", "84302"],
+    metroId: "utah",
+    note: "That name sits in the Utah metro — Hansel Valley, north of the Great Salt Lake.",
+  },
 ];
 
 function normalize(raw: string): string {
@@ -148,7 +153,7 @@ export function cityAmbiguity(raw: string): string | null {
 
 function stateName(code: string): string {
   return (
-    ({ ny: "new york", az: "arizona", va: "virginia", tx: "texas", oh: "ohio" } as Record<string, string>)[code] ??
+    ({ ny: "new york", az: "arizona", va: "virginia", tx: "texas", oh: "ohio", ut: "utah" } as Record<string, string>)[code] ??
     code
   );
 }

@@ -1,13 +1,15 @@
 # Summit match layers
 
-Clipped public polygons plus geocoded facilities for New York, Phoenix, Northern Virginia, Dallas, and Columbus.
-Each metro is a folder so the demo only loads the geography on screen. Utah is added once its footprint is confirmed.
+Clipped public polygons plus geocoded facilities for New York, Phoenix, Northern Virginia, Dallas, Columbus, and Utah
+(Hansel Valley / north Great Salt Lake, added 2026-09-04 from Joe's atlas). Each metro is a folder so the demo only loads
+the geography on screen.
 
 Per metro:
 
 - `huc12.geojson`, `huc10.geojson`, `huc8.geojson` — USGS Watershed Boundary Dataset. Properties slimmed to `huc{n}` + `name`.
 - `aquifers.geojson` — USGS Principal Aquifers of the United States (ScienceBase doi:10.5066/P9Y2HOUJ), clipped to the metro bbox.
-- `facilities.geojson` — data centers from the master facilities workbook, filtered to the metro's cities, geocoded with the US Census batch geocoder. Street-level (rooftop / interpolated) matches only; anything the geocoder could not place is dropped, never approximated.
+- `facilities.geojson` — data centers from the master facilities workbook, filtered to the metro's cities, geocoded with the US Census batch geocoder. Street-level (rooftop / interpolated) matches only; anything the geocoder could not place is dropped, never approximated. One escape hatch: `data/summit/facility-overrides.json`, a cited point bound to the exact sheet address, used only on No_Match and listed under `coordinateOverrides` in the manifest (Utah's Stratos campus is the one row that uses it; its status is also corrected there from the workbook's "Active" to "Proposed (Phase 1)", with the reason).
+- `footprint.geojson` — optional; only where a project footprint was delivered. Utah: the three Stratos parcels and Salt Wells Spring (the source of the withdrawn 1,900 ac-ft application), taken from the "Stratos project" folder of `data/summit/utah/Stratos_GSL_Water_Atlas_1.kmz` by `npm run match:footprint`. Properties `name`, `kind` (parcel | source), `lead`, `precision`, `source_url`. Parcels are digitized from a parcel-map image, not surveyed — the map draws them as dashed outlines and the sheet says so. The rest of the atlas (contamination sites, basin water-quality zones, 55 reconnaissance wells at ±0.25–0.5 mi, the soil transect) stays in the KMZ for engineering.
 - `stewardship.geojson` — curated water commitments from the ESG workbook. A row renders only if `data/summit/stewardship-curation.json` includes it with a ≤160-char commitment in the company's own words and a company source URL that resolved at build. Properties: `company`, `facility`, `sector`, `commitment`, `source_url`. The workbook's fit/category/notes columns are never read for this layer.
 - `manifest.json` — source (`usgs-services` interim, or `source-data` once rebuilt from the delivered layers), sha256 of each source file, feature counts, and the clip bbox.
 
@@ -30,6 +32,7 @@ Regenerate:
 - Polygons: `npm run match:clip` (interim, USGS services) or `npm run match:clip -- --source=source-data` once the full delivery (HUC12/10/8 `.shp` + `.dbf` + `.shx` + `.prj`, aquifers) is in `source-data/`.
 - Facilities: `npm run match:facilities -- --xlsx=source-data/Master_50State_DataCenters_All_Locations.xlsx`.
 - Stewardship: `npm run match:stewardship -- --xlsx=source-data/Master_50State_ESG_Companies_All_Locations.xlsx` (lists any in-metro row not yet in the curation file).
+- Footprint: `npm run match:footprint -- --metro=utah --kmz=data/summit/utah/Stratos_GSL_Water_Atlas_1.kmz --folder="Stratos project"`.
 - National ESG: `npm run match:esg -- --xlsx=source-data/Master_50State_ESG_Companies_All_Locations.xlsx` (Census batch, then Nominatim at ≤1 req/s for the fallbacks — a cold run takes ~4 min; both caches live in `source-data/`).
 - National data centers: `npm run match:datacenters -- --xlsx=source-data/Master_50State_DataCenters_All_Locations.xlsx` (same pipeline; a cold run takes ~15 min because ~800 rows fall through to Nominatim).
 

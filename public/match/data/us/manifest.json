@@ -240,6 +240,48 @@
       "approximate": 101,
       "unplaced": 0,
       "built": "2026-09-04"
+    },
+    "datacenters.geojson": {
+      "source": "Master_50State_DataCenters_All_Locations.xlsx",
+      "sourceSha256": "9f52e460f824896aaa5a33e8981b338bb9c4097f2958799aa13e4021d5cc3f9a",
+      "sheets": [
+        "All Facilities (All States)",
+        "Summary by State",
+        "Summary by Operator",
+        "Summary by Market"
+      ],
+      "columnsShipped": [
+        "Name",
+        "Operator",
+        "City",
+        "State Code",
+        "Market",
+        "Status"
+      ],
+      "columnsNeverShipped": [
+        "Street Address (geocoding only)",
+        "ZIP (geocoding only)",
+        "Notes"
+      ],
+      "placement": {
+        "census": "US Census batch (Public_AR_Current), street-level Match, ZIP or city agreement",
+        "osm": "OpenStreetMap Nominatim building/campus object; road interpolations and highway/* rejected. © OpenStreetMap contributors, ODbL",
+        "city": "OpenStreetMap Nominatim city/town centroid; hollow ring, captioned approximate",
+        "market": "OpenStreetMap Nominatim centroid of the workbook's Market; hollow ring, captioned approximate",
+        "counts": {
+          "census": 2282,
+          "osm": 95,
+          "override": 0,
+          "city": 794,
+          "market": 13
+        }
+      },
+      "statusFolding": "20 workbook spellings → Active / Expanding / Building / Planned / Inactive (lib/match/datacenters.ts statusOf); raw text kept per point",
+      "rows": 3184,
+      "placed": 3184,
+      "addressNotPublic": 161,
+      "unplaced": 0,
+      "built": "2026-09-04"
     }
   }
 }

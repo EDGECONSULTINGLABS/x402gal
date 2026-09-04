@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibreImport from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { FIT, FIT_CATEGORIES, type BBox, type FitCategory } from "@/lib/match/esg";
+import type { BBox } from "@/lib/match/esg";
 import { circlePolygon, emptyCollection, featureBounds, featureContains } from "@/lib/match/geo";
 import { INK, PAPER, QUIET, SUBSURFACE, WATER } from "@/lib/match/theme";
 import type { GeoJsonFeatureCollection, SelectedLocation } from "@/lib/match/types";
@@ -72,33 +72,29 @@ type Props = {
   onMapClick: (lng: number, lat: number) => void;
   /** A listed facility was tapped. Name is the facility's `name` property. */
   onFacilityClick?: (lng: number, lat: number, name: string) => void;
-  /** National ESG company layer (public/match/data/us/esg.geojson). Coloured by Fit Category. */
-  esg?: GeoJsonFeatureCollection | null;
-  esgFilter?: EsgFilter | null;
-  esgSelectedId?: string | null;
-  onEsgClick?: (id: string) => void;
+  /**
+   * A national point layer (ESG companies or data centers). The caller supplies the colour and
+   * filter expressions; the map only knows that features have an `id` and that the `approximate`
+   * filter selects the ones to draw as hollow rings.
+   */
+  points?: NationalPoints | null;
   /** When set, the camera fits this box instead of centring on `selected`. */
   viewBounds?: BBox | null;
 };
 
-export type EsgFilter = { fits: readonly FitCategory[]; st: string | null; company: string | null };
+export type NationalPoints = {
+  data: GeoJsonFeatureCollection | null;
+  /** MapLibre `match` expression → colour. */
+  color: unknown[];
+  /** Filters for the two sub-layers; each must already include the exact/approximate split. */
+  filter: { exact: unknown[]; approximate: unknown[] };
+  selectedId: string | null;
+  onClick?: (id: string) => void;
+};
 
-const FIT_COLOR_EXPR = [
-  "match",
-  ["get", "fit"],
-  ...FIT_CATEGORIES.flatMap((f) => [f, FIT[f].color]),
-  FIT.Other.color,
-] as unknown as maplibreImport.ExpressionSpecification;
-
-function esgFilterExpr(f: EsgFilter | null | undefined, approximate: boolean): maplibreImport.FilterSpecification {
-  const parts: unknown[] = [approximate ? ["==", ["get", "placement"], "city"] : ["!=", ["get", "placement"], "city"]];
-  if (f) {
-    parts.push(["in", ["get", "fit"], ["literal", [...f.fits]]]);
-    if (f.st) parts.push(["==", ["get", "st"], f.st]);
-    if (f.company) parts.push(["==", ["get", "company"], f.company]);
-  }
-  return ["all", ...parts] as unknown as maplibreImport.FilterSpecification;
-}
+const asExpr = (e: unknown[]) => e as unknown as maplibreImport.ExpressionSpecification;
+const asFilter = (e: unknown[]) => e as unknown as maplibreImport.FilterSpecification;
+const NONE: unknown[] = ["==", ["get", "id"], ""];
 
 /** Our GeoJSON types are structural and narrower than maplibre's; the shape is identical. */
 type MlGeoJson = Parameters<maplibreImport.GeoJSONSource["setData"]>[0];
@@ -202,39 +198,39 @@ function addOverlayLayers(map: maplibreImport.Map) {
     },
   });
 
-  // National ESG layer. Solid dot = placed at the address; hollow ring = city-centre approximate.
-  map.addSource("esg", { type: "geojson", data: asMl(emptyCollection()) });
+  // National point layer. Solid dot = placed at the address; hollow ring = city/market approximate.
+  map.addSource("national", { type: "geojson", data: asMl(emptyCollection()) });
   map.addLayer({
-    id: "esg-approx",
+    id: "national-approx",
     type: "circle",
-    source: "esg",
-    filter: esgFilterExpr(null, true),
+    source: "national",
+    filter: asFilter(NONE),
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3.5, 6, 5, 10, 7],
       "circle-color": PAPER,
       "circle-opacity": 0.35,
       "circle-stroke-width": 1.6,
-      "circle-stroke-color": FIT_COLOR_EXPR,
+      "circle-stroke-color": INK,
     },
   });
   map.addLayer({
-    id: "esg-dot",
+    id: "national-dot",
     type: "circle",
-    source: "esg",
-    filter: esgFilterExpr(null, false),
+    source: "national",
+    filter: asFilter(NONE),
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 3.5, 6, 5, 10, 7],
-      "circle-color": FIT_COLOR_EXPR,
+      "circle-color": INK,
       "circle-opacity": 0.9,
       "circle-stroke-width": 1,
       "circle-stroke-color": PAPER,
     },
   });
   map.addLayer({
-    id: "esg-selected",
+    id: "national-selected",
     type: "circle",
-    source: "esg",
-    filter: ["==", ["get", "id"], ""],
+    source: "national",
+    filter: asFilter(NONE),
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 9, 10, 13],
       "circle-color": "rgba(0,0,0,0)",
@@ -244,11 +240,37 @@ function addOverlayLayers(map: maplibreImport.Map) {
   });
 }
 
-function applyEsgFilter(map: maplibreImport.Map, f: EsgFilter | null | undefined, selectedId: string | null | undefined) {
-  if (!map.getLayer("esg-dot")) return;
-  map.setFilter("esg-approx", esgFilterExpr(f, true));
-  map.setFilter("esg-dot", esgFilterExpr(f, false));
-  map.setFilter("esg-selected", ["==", ["get", "id"], selectedId ?? ""]);
+/**
+ * Run `apply` now if the style is ready, else on the next `load`. Returns an effect cleanup that
+ * cancels the pending callback: MapLibre fires `style.load` (which arms readyRef) before `load`, so a
+ * stale closure from an earlier effect run would otherwise land AFTER the fresh one and undo it.
+ */
+function whenReady(map: maplibreImport.Map, ready: boolean, apply: () => void): (() => void) | undefined {
+  if (ready) {
+    apply();
+    return undefined;
+  }
+  map.once("load", apply);
+  return () => {
+    map.off("load", apply);
+  };
+}
+
+function applyNational(map: maplibreImport.Map, p: NationalPoints | null | undefined) {
+  if (!map.getLayer("national-dot")) return;
+  const source = map.getSource("national") as maplibreImport.GeoJSONSource | undefined;
+  source?.setData(asMl(p?.data ?? emptyCollection()));
+  if (!p) {
+    map.setFilter("national-approx", asFilter(NONE));
+    map.setFilter("national-dot", asFilter(NONE));
+    map.setFilter("national-selected", asFilter(NONE));
+    return;
+  }
+  map.setPaintProperty("national-approx", "circle-stroke-color", asExpr(p.color));
+  map.setPaintProperty("national-dot", "circle-color", asExpr(p.color));
+  map.setFilter("national-approx", asFilter(p.filter.approximate));
+  map.setFilter("national-dot", asFilter(p.filter.exact));
+  map.setFilter("national-selected", asFilter(["==", ["get", "id"], p.selectedId ?? ""]));
 }
 
 function drawWatershed(map: maplibreImport.Map, code: string | null) {
@@ -284,10 +306,7 @@ export function MatchMap({
   showPin = true,
   onMapClick,
   onFacilityClick,
-  esg = null,
-  esgFilter = null,
-  esgSelectedId = null,
-  onEsgClick,
+  points = null,
   viewBounds = null,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -301,8 +320,8 @@ export function MatchMap({
   clickRef.current = onMapClick;
   const facilityClickRef = useRef(onFacilityClick);
   facilityClickRef.current = onFacilityClick;
-  const esgClickRef = useRef(onEsgClick);
-  esgClickRef.current = onEsgClick;
+  const pointClickRef = useRef(points?.onClick);
+  pointClickRef.current = points?.onClick;
   const viewRef = useRef({ lng: selected.lng, lat: selected.lat, zoom, bounds: null as
     | [[number, number], [number, number]]
     | null });
@@ -395,10 +414,10 @@ export function MatchMap({
         [e.point.x - 8, e.point.y - 8],
         [e.point.x + 8, e.point.y + 8],
       ];
-      if (map.getLayer("esg-dot") && esgClickRef.current) {
-        const hit = map.queryRenderedFeatures(box, { layers: ["esg-dot", "esg-approx"] })[0];
+      if (map.getLayer("national-dot") && pointClickRef.current) {
+        const hit = map.queryRenderedFeatures(box, { layers: ["national-dot", "national-approx"] })[0];
         if (hit?.properties?.id) {
-          esgClickRef.current(String(hit.properties.id));
+          pointClickRef.current(String(hit.properties.id));
           return;
         }
       }
@@ -419,7 +438,7 @@ export function MatchMap({
       }
       clickRef.current(e.lngLat.lng, e.lngLat.lat);
     });
-    for (const layer of ["facilities-circle", "esg-dot", "esg-approx"]) {
+    for (const layer of ["facilities-circle", "national-dot", "national-approx"]) {
       map.on("mouseenter", layer, () => {
         map.getCanvas().style.cursor = "pointer";
       });
@@ -453,8 +472,7 @@ export function MatchMap({
       if (huc12 && selectedHuc12) drawWatershed(map, selectedHuc12);
       else applySelectedFilter(map, selectedHuc12);
     };
-    if (readyRef.current) apply();
-    else map.once("load", apply);
+    return whenReady(map, readyRef.current, apply);
   }, [huc12, aquifers, facilities, selectedHuc12]);
 
   useEffect(() => {
@@ -462,12 +480,11 @@ export function MatchMap({
     if (!map) return;
     const apply = () => {
       addOverlayLayers(map);
-      setSourceData(map, "esg", esg ?? emptyCollection());
-      applyEsgFilter(map, esgFilter, esgSelectedId);
+      applyNational(map, points);
     };
-    if (readyRef.current) apply();
-    else map.once("load", apply);
-  }, [esg, esgFilter, esgSelectedId]);
+    return whenReady(map, readyRef.current, apply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [points?.data, points?.color, points?.selectedId, JSON.stringify(points?.filter ?? null)]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -501,8 +518,7 @@ export function MatchMap({
           : emptyCollection()
       );
     };
-    if (readyRef.current) apply();
-    else map.once("load", apply);
+    return whenReady(map, readyRef.current, apply);
   }, [selected.lng, selected.lat, radiusKm, selectedHuc12, showPin]);
 
   useEffect(() => {

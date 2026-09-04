@@ -15,7 +15,29 @@ import {
   searchFacilityIndex,
   type FacilityIndexEntry,
 } from "@/lib/match/facilities";
-import { CONUS_BBOX, FIT_CATEGORIES, bboxOf, esgSitesFrom, type BBox, type EsgSite, type EsgSummary } from "@/lib/match/esg";
+import {
+  DC_COLOR_EXPR,
+  STATUSES,
+  dcFilterExpr,
+  dcMatches,
+  dcSitesFrom,
+  type DcSite,
+  type DcSummary,
+  type DcView,
+} from "@/lib/match/datacenters";
+import {
+  CONUS_BBOX,
+  FIT_CATEGORIES,
+  FIT_COLOR_EXPR,
+  bboxOf,
+  esgFilterExpr,
+  esgMatches,
+  esgSitesFrom,
+  type BBox,
+  type EsgSite,
+  type EsgSummary,
+  type EsgView,
+} from "@/lib/match/esg";
 import { findContainingFeature, haversineMeters, loadCollection } from "@/lib/match/geo";
 import { METROS, PENDING_METROS, metroById, metroForPoint, type MetroId } from "@/lib/match/metros";
 import {
@@ -28,21 +50,30 @@ import {
   type WatershedHit,
 } from "@/lib/match/types";
 import { resolveAquifer, resolveWatershed } from "@/lib/match/watershed";
-import { EsgPanel, type EsgView } from "./EsgPanel";
+import { DcPanel } from "./DcPanel";
+import { EsgPanel } from "./EsgPanel";
 import { GlossaryProvider, GlossaryRow, GlossaryTerm } from "./GlossaryTerm";
 import { Lockup } from "./Lockup";
+import type { NationalPoints } from "./MatchMap";
 
 const MatchMap = dynamic(() => import("./MatchMap").then((m) => m.MatchMap), {
   ssr: false,
   loading: () => <div className="absolute inset-0 bg-[#0d1117]" />,
 });
 
-/** "national" is the 50-state ESG company view; the other three are the metro instrument. */
+/** "national" is the 50-state view (data centers or ESG companies); the other three are the metro instrument. */
 type Step = "place" | "resolved" | "close" | "national";
+type NationalLayer = "datacenters" | "esg";
 
-const ESG_URL = "/match/data/us/esg.geojson";
-const ESG_SUMMARY_URL = "/match/data/us/esg-summary.json";
+const US = "/match/data/us";
 const ESG_DEFAULT_VIEW: EsgView = { fits: FIT_CATEGORIES, st: null, company: null, selectedId: null };
+const DC_DEFAULT_VIEW: DcView = { statuses: STATUSES, st: null, operator: null, market: null, selectedId: null };
+
+async function loadJson<T>(url: string): Promise<T> {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`${url}: ${r.status}`);
+  return (await r.json()) as T;
+}
 
 /** Where the assessment lands: a representative facility, or the metro center if none loaded. */
 export type Handoff = {
@@ -174,15 +205,21 @@ export function MatchApp({
   const [watershed, setWatershed] = useState<WatershedHit | null>(null);
   const [aquifer, setAquifer] = useState<AquiferHit | null>(null);
 
-  // National ESG view. Loaded once, on first entry; nothing national on first paint.
+  // National views. Each layer loads once, on first entry; nothing national on first paint.
+  const [layer, setLayer] = useState<NationalLayer>("datacenters");
   const [esgCol, setEsgCol] = useState<GeoJsonFeatureCollection | null>(null);
   const [esgSummary, setEsgSummary] = useState<EsgSummary | null>(null);
   const [esgError, setEsgError] = useState(false);
   const [esgView, setEsgView] = useState<EsgView>(ESG_DEFAULT_VIEW);
+  const [dcCol, setDcCol] = useState<GeoJsonFeatureCollection | null>(null);
+  const [dcSummary, setDcSummary] = useState<DcSummary | null>(null);
+  const [dcError, setDcError] = useState(false);
+  const [dcView, setDcView] = useState<DcView>(DC_DEFAULT_VIEW);
 
   const metro = metroById(metroId);
   const dragRef = useRef<{ startY: number; startH: number } | null>(null);
   const inMetro = step === "resolved" || step === "close";
+  const national = step === "national";
 
   useEffect(() => {
     if (inMetro) onMetroChosen?.(metroId);
@@ -190,46 +227,82 @@ export function MatchApp({
   }, [metroId, inMetro]);
 
   useEffect(() => {
-    if (step !== "national" || esgCol || esgError) return;
+    if (!national || layer !== "esg" || esgCol || esgError) return;
     let cancelled = false;
-    (async () => {
-      try {
-        const [col, sum] = await Promise.all([
-          loadCollection(ESG_URL),
-          fetch(ESG_SUMMARY_URL).then((r) => (r.ok ? (r.json() as Promise<EsgSummary>) : Promise.reject(new Error(String(r.status))))),
-        ]);
+    Promise.all([loadCollection(`${US}/esg.geojson`), loadJson<EsgSummary>(`${US}/esg-summary.json`)])
+      .then(([col, sum]) => {
         if (cancelled) return;
         setEsgCol(col);
         setEsgSummary(sum);
-      } catch {
+      })
+      .catch(() => {
         if (!cancelled) setEsgError(true);
-      }
-    })();
+      });
     return () => {
       cancelled = true;
     };
-  }, [step, esgCol, esgError]);
+  }, [national, layer, esgCol, esgError]);
+
+  useEffect(() => {
+    if (!national || layer !== "datacenters" || dcCol || dcError) return;
+    let cancelled = false;
+    Promise.all([loadCollection(`${US}/datacenters.geojson`), loadJson<DcSummary>(`${US}/datacenters-summary.json`)])
+      .then(([col, sum]) => {
+        if (cancelled) return;
+        setDcCol(col);
+        setDcSummary(sum);
+      })
+      .catch(() => {
+        if (!cancelled) setDcError(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [national, layer, dcCol, dcError]);
 
   const esgSites: EsgSite[] | null = useMemo(() => (esgCol ? esgSitesFrom(esgCol) : null), [esgCol]);
+  const dcSites: DcSite[] | null = useMemo(() => (dcCol ? dcSitesFrom(dcCol) : null), [dcCol]);
 
   /** Camera for the national view: the lower 48, or the box around whatever is filtered/selected. */
-  const esgBounds: BBox | null = useMemo(() => {
-    if (step !== "national") return null;
-    if (!esgSites) return CONUS_BBOX;
-    if (esgView.selectedId) {
-      const s = esgSites.find((x) => x.id === esgView.selectedId);
+  const nationalBounds: BBox | null = useMemo(() => {
+    if (!national) return null;
+    if (layer === "esg") {
+      if (!esgSites) return CONUS_BBOX;
+      if (esgView.selectedId) {
+        const s = esgSites.find((x) => x.id === esgView.selectedId);
+        if (s) return bboxOf([s]);
+      }
+      if (esgView.st || esgView.company) return bboxOf(esgSites.filter((s) => esgMatches(s, esgView))) ?? CONUS_BBOX;
+      return CONUS_BBOX;
+    }
+    if (!dcSites) return CONUS_BBOX;
+    if (dcView.selectedId) {
+      const s = dcSites.find((x) => x.id === dcView.selectedId);
       if (s) return bboxOf([s]);
     }
-    if (esgView.st || esgView.company) {
-      const box = bboxOf(
-        esgSites.filter(
-          (s) => esgView.fits.includes(s.fit) && (!esgView.st || s.st === esgView.st) && (!esgView.company || s.company === esgView.company)
-        )
-      );
-      if (box) return box;
-    }
+    if (dcView.st || dcView.operator || dcView.market) return bboxOf(dcSites.filter((s) => dcMatches(s, dcView))) ?? CONUS_BBOX;
     return CONUS_BBOX;
-  }, [step, esgSites, esgView]);
+  }, [national, layer, esgSites, esgView, dcSites, dcView]);
+
+  const nationalPoints: NationalPoints | null = useMemo(() => {
+    if (!national) return null;
+    if (layer === "esg") {
+      return {
+        data: esgCol,
+        color: FIT_COLOR_EXPR,
+        filter: { exact: esgFilterExpr(esgView, false), approximate: esgFilterExpr(esgView, true) },
+        selectedId: esgView.selectedId,
+        onClick: (id) => setEsgView((v) => ({ ...v, selectedId: id })),
+      };
+    }
+    return {
+      data: dcCol,
+      color: DC_COLOR_EXPR,
+      filter: { exact: dcFilterExpr(dcView, false), approximate: dcFilterExpr(dcView, true) },
+      selectedId: dcView.selectedId,
+      onClick: (id) => setDcView((v) => ({ ...v, selectedId: id })),
+    };
+  }, [national, layer, esgCol, esgView, dcCol, dcView]);
 
   useEffect(() => {
     onContext?.({ metroName: metro.name, subwatershed: watershed?.huc12.name ?? null });
@@ -485,12 +558,15 @@ export function MatchApp({
     setStep("resolved");
   };
 
-  const goNational = () => {
+  const goNational = (which: NationalLayer) => {
     setTypeOpen(false);
     setAdjustOpen(false);
     setPlaceMsg(null);
     setEsgView(ESG_DEFAULT_VIEW);
+    setDcView(DC_DEFAULT_VIEW);
+    setLayer(which);
     setStep("national");
+    scrollRef.current?.scrollTo(0, 0);
   };
 
   const aquiferTitle =
@@ -506,24 +582,28 @@ export function MatchApp({
     <GlossaryProvider newYorkLesson={metroId === "nyc"}>
       <div className="relative h-[100dvh] overflow-hidden bg-[var(--paper)]">
         <MatchMap
-          key={step === "national" ? "us" : metroId}
+          key={national ? "us" : metroId}
           selected={selected}
           zoom={zoom}
           radiusKm={radiusKm}
-          showWbd={showWbd && step !== "national"}
-          showAquifer={showAquifer && step !== "national"}
-          huc12={step === "national" ? null : huc12}
-          aquifers={step === "national" ? null : aquifers}
+          showWbd={showWbd && !national}
+          showAquifer={showAquifer && !national}
+          huc12={national ? null : huc12}
+          aquifers={national ? null : aquifers}
           facilities={inMetro ? facilityCol : null}
           selectedHuc12={inMetro ? watershed?.huc12.code ?? null : null}
           showPin={inMetro}
-          onMapClick={step === "national" ? () => setEsgView((v) => ({ ...v, selectedId: null })) : onMapClick}
+          onMapClick={
+            national
+              ? () => {
+                  setEsgView((v) => ({ ...v, selectedId: null }));
+                  setDcView((v) => ({ ...v, selectedId: null }));
+                }
+              : onMapClick
+          }
           onFacilityClick={(lng, lat, name) => pickFacility(lng, lat, name)}
-          esg={step === "national" ? esgCol : null}
-          esgFilter={step === "national" ? esgView : null}
-          esgSelectedId={step === "national" ? esgView.selectedId : null}
-          onEsgClick={(id) => setEsgView((v) => ({ ...v, selectedId: id }))}
-          viewBounds={esgBounds}
+          points={nationalPoints}
+          viewBounds={nationalBounds}
         />
 
         <header className="absolute inset-x-0 top-0 z-20 flex items-center px-3 py-2">
@@ -631,24 +711,54 @@ export function MatchApp({
                       <button type="button" onClick={() => setTypeOpen(true)} className="mt-3 text-[13px] text-[var(--quiet)]">
                         Or type a facility, city, or zip
                       </button>
-                      <button
-                        type="button"
-                        onClick={goNational}
-                        className="match-choice mt-4 w-full px-3 py-2.5 text-left text-[15px]"
-                      >
-                        All 50 states
-                        <span className="mt-0.5 block text-[12px] leading-snug text-[var(--quiet)]">
-                          Every company with a published water goal, coloured by fit.
-                        </span>
-                      </button>
+                      <p className="mt-5 text-[13px] text-[var(--quiet)]">Or the whole country</p>
+                      <div className="mt-2 flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => goNational("datacenters")}
+                          className="match-choice w-full px-3 py-2.5 text-left text-[15px]"
+                        >
+                          Every data center, all 50 states
+                          <span className="mt-0.5 block text-[12px] leading-snug text-[var(--quiet)]">
+                            3,000+ facilities by status. See how many are in your state.
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => goNational("esg")}
+                          className="match-choice w-full px-3 py-2.5 text-left text-[15px]"
+                        >
+                          Companies with water goals
+                          <span className="mt-0.5 block text-[12px] leading-snug text-[var(--quiet)]">
+                            414 facilities with a published water commitment, coloured by fit.
+                          </span>
+                        </button>
+                      </div>
                     </>
                   )}
                   {placeMsg && <p className="mt-2 text-[13px]">{placeMsg}</p>}
                 </>
               )}
 
-              {step === "national" && (
-                <EsgPanel sites={esgSites} summary={esgSummary} view={esgView} onView={setEsgView} loadError={esgError} />
+              {national && layer === "esg" && (
+                <EsgPanel
+                  sites={esgSites}
+                  summary={esgSummary}
+                  view={esgView}
+                  onView={setEsgView}
+                  loadError={esgError}
+                  onSwitchToDc={() => goNational("datacenters")}
+                />
+              )}
+              {national && layer === "datacenters" && (
+                <DcPanel
+                  sites={dcSites}
+                  summary={dcSummary}
+                  view={dcView}
+                  onView={setDcView}
+                  loadError={dcError}
+                  onSwitchToEsg={() => goNational("esg")}
+                />
               )}
 
               {step === "resolved" && (

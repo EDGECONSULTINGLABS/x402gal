@@ -144,3 +144,23 @@ export function sourceHref(src: string): string | null {
   if (!v || /\s/.test(v)) return null;
   return /^https?:\/\//i.test(v) ? v : `https://${v}`;
 }
+
+/** The filter the panel and the map agree on. */
+export type EsgView = { fits: readonly FitCategory[]; st: string | null; company: string | null; selectedId: string | null };
+
+export function esgMatches(s: EsgSite, v: EsgView): boolean {
+  return v.fits.includes(s.fit) && (!v.st || s.st === v.st) && (!v.company || s.company === v.company);
+}
+
+/** MapLibre filter expression equivalent of esgMatches, split by approximate/exact for the two layers. */
+export function esgFilterExpr(v: EsgView | null, approximate: boolean): unknown[] {
+  const parts: unknown[] = [approximate ? ["==", ["get", "placement"], "city"] : ["!=", ["get", "placement"], "city"]];
+  if (v) {
+    parts.push(["in", ["get", "fit"], ["literal", [...v.fits]]]);
+    if (v.st) parts.push(["==", ["get", "st"], v.st]);
+    if (v.company) parts.push(["==", ["get", "company"], v.company]);
+  }
+  return ["all", ...parts];
+}
+
+export const FIT_COLOR_EXPR: unknown[] = ["match", ["get", "fit"], ...FIT_CATEGORIES.flatMap((f) => [f, FIT[f].color]), FIT.Other.color];

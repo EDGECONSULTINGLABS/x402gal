@@ -4,20 +4,16 @@ import { useMemo, useState } from "react";
 import {
   FIT,
   FIT_CATEGORIES,
+  esgMatches,
   placementNote,
   sourceHost,
   sourceHref,
   type EsgSite,
   type EsgSummary,
+  type EsgView,
   type FitCategory,
 } from "@/lib/match/esg";
-
-export type EsgView = {
-  fits: readonly FitCategory[];
-  st: string | null;
-  company: string | null;
-  selectedId: string | null;
-};
+import { Dot } from "./Dot";
 
 type Props = {
   sites: EsgSite[] | null;
@@ -25,40 +21,30 @@ type Props = {
   view: EsgView;
   onView: (next: EsgView) => void;
   loadError: boolean;
+  /** Hop to the companion national layer. */
+  onSwitchToDc: () => void;
 };
 
 const LIST_LIMIT = 40;
 
 function FitDot({ fit, hollow = false, size = 10 }: { fit: FitCategory; hollow?: boolean; size?: number }) {
-  const c = FIT[fit].color;
-  return (
-    <span
-      aria-hidden="true"
-      className="inline-block shrink-0 rounded-full"
-      style={{
-        width: size,
-        height: size,
-        background: hollow ? "transparent" : c,
-        border: `${hollow ? 1.6 : 1}px solid ${hollow ? c : "rgba(13,17,23,0.9)"}`,
-      }}
-    />
-  );
+  return <Dot color={FIT[fit].color} hollow={hollow} size={size} />;
 }
 
 /**
  * The national view: every facility in the 50-state ESG workbook, coloured by Fit Category.
  * Filters are the workbook's own tabs — Summary by State, Summary by Company, Legend.
  */
-export function EsgPanel({ sites, summary, view, onView, loadError }: Props) {
+export function EsgPanel({ sites, summary, view, onView, loadError, onSwitchToDc }: Props) {
   const [query, setQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
 
   const filtered = useMemo(() => {
     if (!sites) return [];
     return sites
-      .filter((s) => view.fits.includes(s.fit) && (!view.st || s.st === view.st) && (!view.company || s.company === view.company))
+      .filter((s) => esgMatches(s, view))
       .sort((a, b) => a.state.localeCompare(b.state) || a.company.localeCompare(b.company) || a.facility.localeCompare(b.facility));
-  }, [sites, view.fits, view.st, view.company]);
+  }, [sites, view]);
 
   const selected = view.selectedId && sites ? sites.find((s) => s.id === view.selectedId) ?? null : null;
 
@@ -256,7 +242,11 @@ export function EsgPanel({ sites, summary, view, onView, loadError }: Props) {
         )}
       </section>
 
-      <p className="mt-4 text-[12px] leading-relaxed text-[var(--quiet)]">
+      <button type="button" onClick={onSwitchToDc} className="match-link mt-4 block text-[13px]">
+        See every data center instead →
+      </button>
+
+      <p className="mt-3 text-[12px] leading-relaxed text-[var(--quiet)]">
         From the 50-state ESG workbook{summary ? ` (built ${summary.built})` : ""}. Goals are in each company&apos;s
         published words. Fit is our read of where a company could use HydroCoin, Parjana or x402gal — not a claim
         about the company. Hollow rings sit at a city centre because the workbook has no confirmed street address.

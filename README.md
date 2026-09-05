@@ -229,6 +229,7 @@ Methodology hash pinned at: [`sha256:7f27acc35d4e67bd50b60e894c30c51932d2318c6bc
 | `app/api/x402/facilitate` | XRPL facilitator endpoint (EVM pull + XRPL settle) |
 | `app/api/x402/verify` | Standalone facilitator (pluggable into any resource server) |
 | `components/Dashboard.tsx` | Live dashboard — throughput, settlement stream, AMM chart |
+| `app/match`, `components/match`, `lib/match` | **The Summit instrument** — the phone app for the Avalanche Summit floor (watershed lookup, water estimate, learn loop, coin code). Its own README: [`docs/summit/README.md`](docs/summit/README.md) |
 
 ---
 

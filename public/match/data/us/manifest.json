@@ -18,12 +18,11 @@
         "State Code",
         "Sector",
         "Sustainability/ESG Goal",
-        "Fit Category",
         "Source"
       ],
       "columnsNeverShipped": [
         "Street Address (used for geocoding only)",
-        "Parjana Product Fit",
+        "workbook columns J and K (internal-use categorisation, per Joe 2026-09-08)",
         "Notes"
       ],
       "placement": {
@@ -239,7 +238,8 @@
       "placed": 414,
       "approximate": 101,
       "unplaced": 0,
-      "built": "2026-09-04"
+      "built": "2026-09-04",
+      "internalColumnsStripped": "2026-09-08 - the workbook column-K category was removed from every feature and from esg-summary.json in place after Joe confirmed on the engineering review call that columns J and K were internal use only. scripts/build-esg.ts no longer reads them; scripts/check-fit-absent.ts fails the build if they reappear."
     },
     "datacenters.geojson": {
       "source": "Master_50State_DataCenters_All_Locations.xlsx",

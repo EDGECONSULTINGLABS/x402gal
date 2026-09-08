@@ -360,1795 +360,1533 @@
    "company": "3M Company",
    "facilities": 1,
    "states": "Minnesota",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Abbott Laboratories",
    "facilities": 4,
    "states": "Arizona, California, Illinois",
-   "fit": "Parjana",
    "placed": 4
   },
   {
    "company": "Air Products and Chemicals, Inc.",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Alabama Power Company (Southern Company)",
    "facilities": 1,
    "states": "Alabama",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Alexander & Baldwin, Inc.",
    "facilities": 1,
    "states": "Hawaii",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Alphabet Inc. (Google)",
    "facilities": 6,
    "states": "California, Georgia, Nevada, North Carolina, Ohio, Oregon",
-   "fit": "HydroCoin",
    "placed": 6
   },
   {
    "company": "Altria Group, Inc.",
    "facilities": 1,
    "states": "Virginia",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Amazon.com, Inc. / Amazon Web Services",
    "facilities": 1,
    "states": "Washington",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "American Airlines Group Inc.",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "American Electric Power Company, Inc.",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "American Water Works Company, Inc.",
    "facilities": 1,
    "states": "New Jersey",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Anheuser-Busch Companies, LLC",
    "facilities": 2,
    "states": "Missouri, New Hampshire",
-   "fit": "HydroCoin",
    "placed": 2
   },
   {
    "company": "Apple Inc.",
    "facilities": 3,
    "states": "California, Nevada, Oregon",
-   "fit": "HydroCoin",
    "placed": 3
   },
   {
    "company": "Archer-Daniels-Midland Company (ADM)",
    "facilities": 2,
    "states": "Illinois",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "AT&T Inc.",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "AutoZone, Inc.",
    "facilities": 1,
    "states": "Tennessee",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "BAE Systems, Inc.",
    "facilities": 1,
    "states": "New Hampshire",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Ball Corporation",
    "facilities": 6,
    "states": "Colorado, Indiana, New York, Ohio, Texas",
-   "fit": "HydroCoin",
    "placed": 6
   },
   {
    "company": "Bank of America Corporation",
    "facilities": 1,
    "states": "North Carolina",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Basin Electric Power Cooperative",
    "facilities": 1,
    "states": "North Dakota",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Baxter International Inc.",
    "facilities": 4,
    "states": "Illinois, New York, North Carolina",
-   "fit": "Parjana",
    "placed": 4
   },
   {
    "company": "Bayer Crop Science (Bayer AG)",
    "facilities": 1,
    "states": "Missouri",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Bayer CropScience (Bayer AG)",
    "facilities": 1,
    "states": "North Carolina",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Ben & Jerry's Homemade, Inc.",
    "facilities": 1,
    "states": "Vermont",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Berkshire Hathaway Inc.",
    "facilities": 1,
    "states": "Nebraska",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Biogen Inc.",
    "facilities": 1,
    "states": "Massachusetts",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Blue Diamond Growers",
    "facilities": 1,
    "states": "California",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "BlueTriton Brands (Ice Mountain)",
    "facilities": 3,
    "states": "Michigan",
-   "fit": "Other",
    "placed": 3
   },
   {
    "company": "BMW Manufacturing Co., LLC",
    "facilities": 1,
    "states": "South Carolina",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Booz Allen Hamilton Inc.",
    "facilities": 1,
    "states": "Virginia",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "BorgWarner Inc.",
    "facilities": 3,
    "states": "Michigan, Mississippi, South Carolina",
-   "fit": "Parjana",
    "placed": 3
   },
   {
    "company": "Boston Scientific Corporation",
    "facilities": 1,
    "states": "Massachusetts",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Bridgestone Americas, Inc.",
    "facilities": 1,
    "states": "Tennessee",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Brown-Forman Corporation",
    "facilities": 1,
    "states": "Kentucky",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Caesars Entertainment, Inc.",
    "facilities": 1,
    "states": "Nevada",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Cameco Resources (Cameco Corporation)",
    "facilities": 1,
    "states": "Wyoming",
-   "fit": "Other",
    "placed": 1
   },
   {
    "company": "Capital One Financial Corporation",
    "facilities": 1,
    "states": "Virginia",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Cardinal Health, Inc.",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Carnival Corporation & plc",
    "facilities": 1,
    "states": "Florida",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Caterpillar Inc.",
    "facilities": 1,
    "states": "Illinois",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "CF Industries Holdings, Inc.",
    "facilities": 1,
    "states": "Louisiana",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Chevron Corporation",
    "facilities": 4,
    "states": "California, Mississippi, Texas",
-   "fit": "Parjana",
    "placed": 4
   },
   {
    "company": "Chobani, LLC",
    "facilities": 2,
    "states": "Idaho, New York",
-   "fit": "HydroCoin",
    "placed": 2
   },
   {
    "company": "CHS Inc.",
    "facilities": 1,
    "states": "Montana",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Chugach Electric Association",
    "facilities": 1,
    "states": "Alaska",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Collins Aerospace (RTX Corporation)",
    "facilities": 1,
    "states": "Iowa",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Columbia Sportswear Company",
    "facilities": 1,
    "states": "Oregon",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Comcast Corporation",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "ConocoPhillips",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "ConocoPhillips Alaska",
    "facilities": 1,
    "states": "Alaska",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Constellation Brands, Inc.",
    "facilities": 1,
    "states": "New York",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Constellation Energy Corporation",
    "facilities": 1,
    "states": "Maryland",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Constellium Rolled Products Ravenswood, LLC",
    "facilities": 1,
    "states": "West Virginia",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Consumers Energy (CMS Energy)",
    "facilities": 1,
    "states": "Michigan",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Continental Resources, Inc.",
    "facilities": 1,
    "states": "Oklahoma",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Corning Incorporated",
    "facilities": 1,
    "states": "New York",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Corteva Agriscience",
    "facilities": 3,
    "states": "Indiana, Iowa, Michigan",
-   "fit": "Parjana",
    "placed": 3
   },
   {
    "company": "CSX Corporation",
    "facilities": 1,
    "states": "Florida",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Cummins Inc.",
    "facilities": 1,
    "states": "Indiana",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "CVS Health Corporation",
    "facilities": 1,
    "states": "Rhode Island",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Daktronics, Inc.",
    "facilities": 1,
    "states": "South Dakota",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Darden Restaurants, Inc.",
    "facilities": 1,
    "states": "Florida",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Deere & Company (John Deere)",
    "facilities": 2,
    "states": "Illinois, Iowa",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "Dell Technologies Inc.",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Delta Air Lines, Inc.",
    "facilities": 1,
    "states": "Georgia",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Devon Energy Corporation",
    "facilities": 1,
    "states": "Oklahoma",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Dominion Energy, Inc.",
    "facilities": 1,
    "states": "Virginia",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Dow Inc.",
    "facilities": 5,
    "states": "Louisiana, Michigan, West Virginia",
-   "fit": "HydroCoin",
    "placed": 5
   },
   {
    "company": "DTE Energy",
    "facilities": 1,
    "states": "Michigan",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Duke Energy Corporation",
    "facilities": 1,
    "states": "North Carolina",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Duke Energy Indiana, LLC",
    "facilities": 1,
    "states": "Indiana",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "DuPont de Nemours, Inc.",
    "facilities": 3,
    "states": "Delaware, South Carolina, Virginia",
-   "fit": "HydroCoin",
    "placed": 3
   },
   {
    "company": "E. & J. Gallo Winery",
    "facilities": 1,
    "states": "California",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Eastman Chemical Company",
    "facilities": 1,
    "states": "Tennessee",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Eastman Kodak Company",
    "facilities": 1,
    "states": "New York",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Ecolab Inc.",
    "facilities": 1,
    "states": "Minnesota",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Elevance Health, Inc. (formerly Anthem)",
    "facilities": 1,
    "states": "Indiana",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Eli Lilly and Company",
    "facilities": 1,
    "states": "Indiana",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Emerson Electric Co.",
    "facilities": 1,
    "states": "Missouri",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Entergy Arkansas, LLC",
    "facilities": 1,
    "states": "Arkansas",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Entergy Corporation",
    "facilities": 1,
    "states": "Louisiana",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "EQT Corporation",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Evergy, Inc.",
    "facilities": 1,
    "states": "Kansas",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Eversource Energy",
    "facilities": 3,
    "states": "Connecticut, Massachusetts, New Hampshire",
-   "fit": "x402gal",
    "placed": 3
   },
   {
    "company": "Exelon Corporation / Commonwealth Edison (ComEd)",
    "facilities": 1,
    "states": "Illinois",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Exxon Mobil Corporation",
    "facilities": 1,
    "states": "Texas",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "ExxonMobil Corporation",
    "facilities": 1,
    "states": "Louisiana",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "FedEx Corporation",
    "facilities": 1,
    "states": "Tennessee",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Ford Motor Company",
    "facilities": 16,
    "states": "Illinois, Kentucky, Michigan, Missouri, Ohio",
-   "fit": "HydroCoin",
    "placed": 16
   },
   {
    "company": "Freeport-McMoRan Inc.",
    "facilities": 8,
    "states": "Arizona, New Mexico",
-   "fit": "HydroCoin",
    "placed": 8
   },
   {
    "company": "Garmin International, Inc.",
    "facilities": 1,
    "states": "Kansas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "GE Aerospace",
    "facilities": 1,
    "states": "Massachusetts",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Genentech, Inc. (a member of the Roche Group)",
    "facilities": 2,
    "states": "California",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "General Dynamics Corporation",
    "facilities": 2,
    "states": "Maine, Virginia",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "General Mills, Inc.",
    "facilities": 1,
    "states": "Minnesota",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "General Motors",
    "facilities": 8,
    "states": "Michigan",
-   "fit": "Multiple",
    "placed": 8
   },
   {
    "company": "General Motors Company",
    "facilities": 1,
    "states": "Indiana",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Georgia Ports Authority",
    "facilities": 1,
    "states": "Georgia",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Georgia-Pacific LLC",
    "facilities": 5,
    "states": "Alabama, Arkansas, Georgia, Washington, Wisconsin",
-   "fit": "Parjana",
    "placed": 5
   },
   {
    "company": "Green Mountain Power Corporation",
    "facilities": 1,
    "states": "Vermont",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Grimmway Farms (Grimmway Enterprises, Inc.)",
    "facilities": 1,
    "states": "California",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "GSK (GlaxoSmithKline)",
    "facilities": 1,
    "states": "North Carolina",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Gulfstream Aerospace Corporation (a General Dynamics company)",
    "facilities": 1,
    "states": "Georgia",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Hannaford Supermarkets (Ahold Delhaize USA)",
    "facilities": 1,
    "states": "Maine",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Harley-Davidson, Inc.",
    "facilities": 1,
    "states": "Wisconsin",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Hasbro, Inc.",
    "facilities": 1,
    "states": "Rhode Island",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Hawaiian Electric Industries, Inc.",
    "facilities": 1,
    "states": "Hawaii",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "HCA Healthcare, Inc.",
    "facilities": 1,
    "states": "Tennessee",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "HF Sinclair Corporation",
    "facilities": 1,
    "states": "Wyoming",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Honda Manufacturing of Alabama",
    "facilities": 1,
    "states": "Alabama",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Honda Manufacturing of Indiana, LLC",
    "facilities": 1,
    "states": "Indiana",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Honda of America Mfg., Inc.",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Honeywell International Inc.",
    "facilities": 1,
    "states": "North Carolina",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Humana Inc.",
    "facilities": 1,
    "states": "Kentucky",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Huntington Ingalls Industries, Inc. (HII)",
    "facilities": 1,
    "states": "Mississippi",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Hyundai Motor Group Metaplant America (HMGMA)",
    "facilities": 1,
    "states": "Georgia",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Hyundai Motor Manufacturing Alabama (HMMA)",
    "facilities": 1,
    "states": "Alabama",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "IBM (International Business Machines Corporation)",
    "facilities": 1,
    "states": "New York",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Idaho Power Company",
    "facilities": 1,
    "states": "Idaho",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "IDEXX Laboratories, Inc.",
    "facilities": 1,
    "states": "Maine",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Incyte Corporation",
    "facilities": 1,
    "states": "Delaware",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Intel Corporation",
    "facilities": 5,
    "states": "Arizona, California, New Mexico, Oregon",
-   "fit": "HydroCoin",
    "placed": 5
   },
   {
    "company": "Intermountain Health",
    "facilities": 1,
    "states": "Utah",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "International Paper Company",
    "facilities": 1,
    "states": "Louisiana",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "J.B. Hunt Transport Services, Inc.",
    "facilities": 1,
    "states": "Arkansas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "J.R. Simplot Company",
    "facilities": 4,
    "states": "Idaho, North Dakota, Washington",
-   "fit": "HydroCoin",
    "placed": 4
   },
   {
    "company": "Johnson & Johnson",
    "facilities": 1,
    "states": "New Jersey",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Johnson Controls International plc",
    "facilities": 1,
    "states": "Wisconsin",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "JPMorgan Chase & Co.",
    "facilities": 1,
    "states": "New York",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Kellanova (Mars Snacking)",
    "facilities": 1,
    "states": "Tennessee",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Keurig Dr Pepper Inc.",
    "facilities": 1,
    "states": "Vermont",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Kia Georgia, Inc. (Kia America)",
    "facilities": 1,
    "states": "Georgia",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Kimberly-Clark Corporation",
    "facilities": 2,
    "states": "Texas, Wisconsin",
-   "fit": "HydroCoin",
    "placed": 2
   },
   {
    "company": "Koch Industries, Inc.",
    "facilities": 1,
    "states": "Kansas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Kohl's Corporation",
    "facilities": 1,
    "states": "Wisconsin",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "L.L.Bean, Inc.",
    "facilities": 1,
    "states": "Maine",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "La-Z-Boy Incorporated",
    "facilities": 3,
    "states": "Michigan, Missouri, Tennessee",
-   "fit": "Parjana",
    "placed": 3
   },
   {
    "company": "Las Vegas Sands Corp.",
    "facilities": 1,
    "states": "Nevada",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Leprino Foods Company",
    "facilities": 5,
    "states": "California, Colorado, Michigan, New Mexico",
-   "fit": "HydroCoin",
    "placed": 5
   },
   {
    "company": "Lockheed Martin Corporation",
    "facilities": 2,
    "states": "Florida, Maryland",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "Los Angeles Department of Water and Power (LADWP)",
    "facilities": 1,
    "states": "California",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Lowe's Companies, Inc.",
    "facilities": 1,
    "states": "North Carolina",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Mahi Pono, LLC",
    "facilities": 1,
    "states": "Hawaii",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Marathon Petroleum Corporation",
    "facilities": 1,
    "states": "North Dakota",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Marriott International, Inc.",
    "facilities": 1,
    "states": "Maryland",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Masco Corporation",
    "facilities": 1,
    "states": "Michigan",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Masco Corporation (Delta Faucet Company)",
    "facilities": 3,
    "states": "Indiana, Tennessee",
-   "fit": "HydroCoin",
    "placed": 3
   },
   {
    "company": "Matson, Inc.",
    "facilities": 1,
    "states": "Hawaii",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "McCormick & Company, Incorporated",
    "facilities": 1,
    "states": "Maryland",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "McDonald's Corporation",
    "facilities": 1,
    "states": "Illinois",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "McKesson Corporation",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Meijer Inc.",
    "facilities": 3,
    "states": "Michigan",
-   "fit": "Parjana",
    "placed": 3
   },
   {
    "company": "Mercedes-Benz U.S. International (MBUSI)",
    "facilities": 1,
    "states": "Alabama",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Merck & Co., Inc.",
    "facilities": 1,
    "states": "New Jersey",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Meta Platforms, Inc.",
    "facilities": 2,
    "states": "California, New Mexico",
-   "fit": "HydroCoin",
    "placed": 2
   },
   {
    "company": "MGM Resorts International",
    "facilities": 1,
    "states": "Nevada",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Michelin North America, Inc.",
    "facilities": 1,
    "states": "South Carolina",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Micron Technology, Inc.",
    "facilities": 2,
    "states": "Idaho, New York",
-   "fit": "HydroCoin",
    "placed": 2
   },
   {
    "company": "Microsoft Corporation",
    "facilities": 2,
    "states": "North Dakota, Washington",
-   "fit": "HydroCoin",
    "placed": 2
   },
   {
    "company": "MillerKnoll",
    "facilities": 1,
    "states": "Michigan",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "MillerKnoll (Knoll)",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Milliken & Company",
    "facilities": 1,
    "states": "South Carolina",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Molson Coors Beverage Company",
    "facilities": 6,
    "states": "Colorado, Georgia, Ohio, Texas, Virginia, Wisconsin",
-   "fit": "HydroCoin",
    "placed": 6
   },
   {
    "company": "Morning Fresh Dairy",
    "facilities": 1,
    "states": "Colorado",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Murphy USA Inc.",
    "facilities": 1,
    "states": "Arkansas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Nationwide Mutual Insurance Company",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "NextEra Energy, Inc. / Florida Power & Light Company",
    "facilities": 1,
    "states": "Florida",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Nike, Inc.",
    "facilities": 1,
    "states": "Oregon",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Nissan North America, Inc.",
    "facilities": 2,
    "states": "Mississippi, Tennessee",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "Northrop Grumman Corporation",
    "facilities": 2,
    "states": "California, Virginia",
-   "fit": "HydroCoin",
    "placed": 2
   },
   {
    "company": "NorthWestern Energy Group, Inc.",
    "facilities": 1,
    "states": "Montana",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Nucor Corporation",
    "facilities": 3,
    "states": "Alabama, Kentucky, South Carolina",
-   "fit": "Parjana",
    "placed": 3
   },
   {
    "company": "Nucor Steel Tuscaloosa",
    "facilities": 1,
    "states": "Alabama",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "OGE Energy Corp.",
    "facilities": 1,
    "states": "Oklahoma",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Par Pacific Holdings, Inc.",
    "facilities": 1,
    "states": "Montana",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Peabody Energy Corporation",
    "facilities": 1,
    "states": "Wyoming",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "PepsiCo, Inc.",
    "facilities": 1,
    "states": "New York",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Pfizer Inc.",
    "facilities": 2,
    "states": "Connecticut, New York",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "PG&E Corporation / Pacific Gas and Electric Company",
    "facilities": 1,
    "states": "California",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Phillips 66",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "PNM Resources, Inc. (TXNM Energy)",
    "facilities": 1,
    "states": "New Mexico",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "POET, LLC",
    "facilities": 1,
    "states": "South Dakota",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "PPG Industries, Inc.",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Pratt & Whitney (RTX Corporation)",
    "facilities": 1,
    "states": "Connecticut",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Principal Financial Group, Inc.",
    "facilities": 1,
    "states": "Iowa",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Publix Super Markets, Inc.",
    "facilities": 1,
    "states": "Florida",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Qualcomm Incorporated",
    "facilities": 1,
    "states": "California",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Raytheon Company (RTX Corporation)",
    "facilities": 1,
    "states": "Massachusetts",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Red Dog Mine (Teck Alaska Inc.)",
    "facilities": 1,
    "states": "Alaska",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Red Hat, Inc. (IBM)",
    "facilities": 1,
    "states": "North Carolina",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Rocky Mountain Power (PacifiCorp)",
    "facilities": 1,
    "states": "Utah",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Royal Caribbean Group",
    "facilities": 1,
    "states": "Florida",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Ryder System, Inc.",
    "facilities": 1,
    "states": "Florida",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "S.C. Johnson & Son, Inc.",
    "facilities": 1,
    "states": "Wisconsin",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Salt River Project (SRP)",
    "facilities": 1,
    "states": "Arizona",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "San Diego Gas & Electric Company (Sempra)",
    "facilities": 1,
    "states": "California",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Sanford Health",
    "facilities": 1,
    "states": "South Dakota",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "SAS Institute Inc.",
    "facilities": 1,
    "states": "North Carolina",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Shell USA, Inc.",
    "facilities": 1,
    "states": "Louisiana",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Sibanye-Stillwater Limited",
    "facilities": 1,
    "states": "Montana",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Southern Company / Georgia Power Company",
    "facilities": 1,
    "states": "Georgia",
-   "fit": "x402gal",
    "placed": 1
   },
   {
    "company": "Southwest Airlines Co.",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Spirit AeroSystems Holdings, Inc.",
    "facilities": 1,
    "states": "Kansas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Stanley Black & Decker, Inc.",
    "facilities": 4,
    "states": "Connecticut, South Carolina, Tennessee, Texas",
-   "fit": "Parjana",
    "placed": 4
   },
   {
    "company": "Starbucks Corporation",
    "facilities": 1,
    "states": "Washington",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Steelcase Inc.",
    "facilities": 1,
    "states": "Michigan",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Stellantis",
    "facilities": 14,
    "states": "Illinois, Indiana, Michigan, Ohio",
-   "fit": "Parjana",
    "placed": 14
   },
   {
    "company": "Swire Coca-Cola, USA",
    "facilities": 6,
    "states": "Colorado, New Mexico, Utah, Washington",
-   "fit": "HydroCoin",
    "placed": 6
   },
   {
    "company": "Sysco Corporation",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Target Corporation",
    "facilities": 1,
    "states": "Minnesota",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Tesla, Inc.",
    "facilities": 3,
    "states": "California, Nevada, Texas",
-   "fit": "Parjana",
    "placed": 3
   },
   {
    "company": "Textron Aviation Inc. (Cessna / Beechcraft)",
    "facilities": 1,
    "states": "Kansas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Textron Inc.",
    "facilities": 1,
    "states": "Rhode Island",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Boeing Company",
    "facilities": 2,
    "states": "South Carolina, Washington",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "The Campbell's Company (Campbell Soup Company)",
    "facilities": 1,
    "states": "New Jersey",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "The Chemours Company",
    "facilities": 4,
    "states": "Delaware, Mississippi, North Carolina, Texas",
-   "fit": "Parjana",
    "placed": 4
   },
   {
    "company": "The Coca-Cola Company",
    "facilities": 1,
    "states": "Georgia",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "The Goodyear Tire & Rubber Company",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Hershey Company",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "The Home Depot, Inc.",
    "facilities": 1,
    "states": "Georgia",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Kraft Heinz Company",
    "facilities": 4,
    "states": "Illinois, New York, Ohio",
-   "fit": "HydroCoin",
    "placed": 4
   },
   {
    "company": "The Kroger Co.",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Mosaic Company",
    "facilities": 6,
    "states": "Florida, Louisiana",
-   "fit": "HydroCoin",
    "placed": 6
   },
   {
    "company": "The PNC Financial Services Group, Inc.",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Procter & Gamble Company",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "The Progressive Corporation",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Sherwin-Williams Company",
    "facilities": 1,
    "states": "Ohio",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The TJX Companies, Inc.",
    "facilities": 1,
    "states": "Massachusetts",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Vanguard Group, Inc.",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Walt Disney Company",
    "facilities": 3,
    "states": "California, Florida",
-   "fit": "Parjana",
    "placed": 3
   },
   {
    "company": "The Williams Companies, Inc.",
    "facilities": 1,
    "states": "Oklahoma",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "The Wonderful Company",
    "facilities": 2,
    "states": "California",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "Toyota Motor Manufacturing, Indiana, Inc.",
    "facilities": 1,
    "states": "Indiana",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Toyota Motor Manufacturing, Kentucky, Inc.",
    "facilities": 1,
    "states": "Kentucky",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Toyota Motor Manufacturing, Mississippi, Inc.",
    "facilities": 1,
    "states": "Mississippi",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Toyota Motor Manufacturing, West Virginia, Inc.",
    "facilities": 1,
    "states": "West Virginia",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Toyota Motor North America, Inc.",
    "facilities": 1,
    "states": "Texas",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Trident Seafoods Corporation",
    "facilities": 4,
    "states": "Alaska, Washington",
-   "fit": "Parjana",
    "placed": 4
   },
   {
    "company": "TSMC Arizona",
    "facilities": 1,
    "states": "Arizona",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Tyson Foods, Inc.",
    "facilities": 3,
    "states": "Arkansas, Iowa, Missouri",
-   "fit": "HydroCoin",
    "placed": 3
   },
   {
    "company": "Union Pacific Corporation",
    "facilities": 1,
    "states": "Nebraska",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "United Parcel Service, Inc. (UPS)",
    "facilities": 2,
    "states": "Georgia, Kentucky",
-   "fit": "Parjana",
    "placed": 2
   },
   {
    "company": "United States Steel Corporation",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "USAA (United Services Automobile Association)",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Valero Energy Corporation",
    "facilities": 1,
    "states": "Texas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Valmont Industries, Inc.",
    "facilities": 1,
    "states": "Nebraska",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Vulcan Materials Company",
    "facilities": 4,
    "states": "Alabama, Georgia",
-   "fit": "Parjana",
    "placed": 4
   },
   {
    "company": "W. L. Gore & Associates, Inc.",
    "facilities": 1,
    "states": "Delaware",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Walgreens Boots Alliance, Inc.",
    "facilities": 1,
    "states": "Illinois",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Walmart Inc.",
    "facilities": 1,
    "states": "Arkansas",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Westinghouse Electric Company LLC",
    "facilities": 1,
    "states": "Pennsylvania",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "WEX Inc.",
    "facilities": 1,
    "states": "Maine",
-   "fit": "Parjana",
    "placed": 1
   },
   {
    "company": "Whirlpool Corporation",
    "facilities": 7,
    "states": "Michigan, Ohio, Tennessee",
-   "fit": "Parjana",
    "placed": 7
   },
   {
    "company": "WK Kellogg Co",
    "facilities": 1,
    "states": "Michigan",
-   "fit": "HydroCoin",
    "placed": 1
   },
   {
    "company": "Zions Bancorporation, N.A.",
    "facilities": 1,
    "states": "Utah",
-   "fit": "Parjana",
    "placed": 1
   }
  ],
- "byFit": {
-  "HydroCoin": 147,
-  "Parjana": 223,
-  "x402gal": 25,
-  "Multiple": 16,
-  "Other": 3
- },
  "byPlacement": {
   "census": 283,
   "osm": 29,

@@ -4,9 +4,9 @@
  *   npm run match:esg -- --xlsx="<path to workbook>"
  *
  * Reads three tabs:
- *   "All Companies (All States)"  one row per facility → one point, coloured by Fit Category
+ *   "All Companies (All States)"  one row per facility → one point
  *   "Summary by State"            per-state counts (shipped as the state filter)
- *   "Summary by Company"          per-company facilities / states / fit (shipped as the company list)
+ *   "Summary by Company"          per-company facilities / states (shipped as the company list)
  *
  * Every row is attempted, in tiers (recorded per point as `placement`):
  *   1. census    US Census street-level match
@@ -16,21 +16,15 @@
  *                captioned approximate, and listed in esg-summary.json → approximate for follow-up.
  * Rows with no city match either go to esg-summary.json → unplaced.
  *
- * Never shipped: column J (fit rationale prose), column M (Notes).
+ * Never read, never shipped (Joe, engineering review 2026-09-08: internal use only): column J
+ * "Parjana Product Fit", column K "Fit Category", column M "Notes". scripts/check-fit-absent.ts
+ * fails the build if any of them reaches the output.
  */
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import * as XLSX from "xlsx";
-import {
-  FIT_CATEGORIES,
-  PLACEMENTS,
-  fitCategory,
-  type EsgProps,
-  type EsgSummary,
-  type FitCategory,
-  type Placement,
-} from "../lib/match/esg";
+import { PLACEMENTS, type EsgProps, type EsgSummary, type Placement } from "../lib/match/esg";
 import { placeAddress, placeCity } from "./lib/nominatim";
 import type { GeoJsonFeature } from "../lib/match/types";
 import {
@@ -68,7 +62,6 @@ type Row = {
   facility: string;
   sector: string;
   goal: string;
-  fit: FitCategory;
   state: string;
   st: string;
   city: string;
@@ -106,9 +99,8 @@ function readAll(wb: XLSX.WorkBook): Row[] {
     zip: col("ZIP"),
     sector: col("Sector"),
     goal: col("Sustainability/ESG Goal"),
-    fit: col("Fit Category"),
     source: col("Source"),
-    // "Parjana Product Fit" (J) and "Notes" (M) are deliberately not read.
+    // The two fit columns (J, K) and "Notes" (M) are deliberately not read — internal use only.
   };
   const rows: Row[] = [];
   for (const r of table.slice(1)) {
@@ -124,7 +116,6 @@ function readAll(wb: XLSX.WorkBook): Row[] {
       facility,
       sector: s(r[i.sector]),
       goal: s(r[i.goal]),
-      fit: fitCategory(s(r[i.fit])),
       state: s(r[i.state]),
       st,
       city: s(r[i.city]),
@@ -150,11 +141,11 @@ function readStates(wb: XLSX.WorkBook) {
 function readCompanies(wb: XLSX.WorkBook) {
   const table = sheetTable(wb, SHEET_COMPANY, 0);
   const col = columns(table[0] ?? []);
-  const iCo = col("Company"), iFac = col("Facilities Nationwide"), iStates = col("States Present"), iFit = col("Fit Category");
+  const iCo = col("Company"), iFac = col("Facilities Nationwide"), iStates = col("States Present");
   return table
     .slice(1)
     .filter((r) => s(r[iCo]))
-    .map((r) => ({ company: s(r[iCo]), facilities: Number(r[iFac]) || 0, states: s(r[iStates]), fit: fitCategory(s(r[iFit])) }));
+    .map((r) => ({ company: s(r[iCo]), facilities: Number(r[iFac]) || 0, states: s(r[iStates]) }));
 }
 
 async function loadOverrides(): Promise<Record<string, Override>> {
@@ -190,7 +181,6 @@ async function main() {
   const approximate: EsgSummary["approximate"] = [];
   const placedByState = new Map<string, number>();
   const placedByCompany = new Map<string, number>();
-  const byFit = Object.fromEntries(FIT_CATEGORIES.map((f) => [f, 0])) as Record<FitCategory, number>;
   const byPlacement = Object.fromEntries(PLACEMENTS.map((p) => [p, 0])) as Record<Placement, number>;
   const usedOverrides: Record<string, unknown>[] = [];
   const osmPlaced: Record<string, unknown>[] = [];
@@ -260,7 +250,6 @@ async function main() {
       facility: r.facility,
       sector: r.sector,
       goal: r.goal,
-      fit: r.fit,
       state: r.state,
       st: r.st,
       city: r.city,
@@ -272,7 +261,6 @@ async function main() {
       properties: props,
       geometry: { type: "Point", coordinates: [Number(lng.toFixed(6)), Number(lat.toFixed(6))] },
     });
-    byFit[r.fit]++;
     placedByState.set(r.st, (placedByState.get(r.st) ?? 0) + 1);
     placedByCompany.set(r.company, (placedByCompany.get(r.company) ?? 0) + 1);
   }
@@ -287,7 +275,6 @@ async function main() {
     byCompany: companies
       .map((c) => ({ ...c, placed: placedByCompany.get(c.company) ?? 0 }))
       .sort((a, b) => a.company.localeCompare(b.company)),
-    byFit,
     byPlacement,
     approximate,
     unplaced,
@@ -307,8 +294,8 @@ async function main() {
             source: "Master_50State_ESG_Companies_All_Locations.xlsx",
             sourceSha256: createHash("sha256").update(workbook).digest("hex"),
             sheets: [SHEET_ALL, SHEET_STATE, SHEET_COMPANY, "Legend"],
-            columnsShipped: ["Company", "Facility/Site Name", "City", "State", "State Code", "Sector", "Sustainability/ESG Goal", "Fit Category", "Source"],
-            columnsNeverShipped: ["Street Address (used for geocoding only)", "Parjana Product Fit", "Notes"],
+            columnsShipped: ["Company", "Facility/Site Name", "City", "State", "State Code", "Sector", "Sustainability/ESG Goal", "Source"],
+            columnsNeverShipped: ["Street Address (used for geocoding only)", "workbook columns J and K (internal-use categorisation, per Joe 2026-09-08)", "Notes"],
             placement: {
               census: `US Census batch (${BENCHMARK}), street-level Match, ZIP or city agreement`,
               osm: "OpenStreetMap Nominatim building/campus object for the written address; road interpolations rejected. © OpenStreetMap contributors, ODbL",
@@ -332,7 +319,6 @@ async function main() {
   );
 
   console.log(`placed ${features.length}/${rows.length} · ${placedByCompany.size} companies · ${placedByState.size} states`);
-  console.log("by fit:", byFit);
   console.log("by placement:", byPlacement);
   if (approximate.length) {
     console.log(`approximate (city centre) ${approximate.length}:`);

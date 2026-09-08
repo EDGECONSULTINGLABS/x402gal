@@ -1,35 +1,16 @@
 /**
  * The 50-state ESG / water-goal company layer (Master_50State_ESG_Companies_All_Locations.xlsx).
- * One point per facility row, coloured by the workbook's Fit Category (Legend tab).
- * Built by scripts/build-esg.ts into public/match/data/us/. Shared by the build and the UI.
+ * One point per facility row. Built by scripts/build-esg.ts into public/match/data/us/. Shared by
+ * the build and the UI.
  *
- * Decision 2026-09-04 (Alula): every facility in the workbook goes on the map, categorised by
- * Fit Category. This supersedes the stewardship rule that columns J/K are never read — for THIS
- * layer only. Column M (Notes: "verify before outreach" etc.) and column J (fit rationale prose)
- * still never ship; the category (K) does.
+ * Decision 2026-09-08 (Joe, on the engineering review call; recorded by Zina): the workbook's fit
+ * columns — J "Parjana Product Fit" and K "Fit Category" — were for internal use only. Neither is
+ * read by the build, neither ships, and `npm run build` fails if either column name or a category
+ * value turns up in the output (scripts/check-fit-absent.ts). This reverses the 2026-09-04 decision
+ * that shipped column K as the point colour. Column M (Notes) never shipped and still does not.
  */
+import { WATER } from "./theme";
 import type { GeoJsonFeatureCollection } from "./types";
-
-export const FIT_CATEGORIES = ["HydroCoin", "Parjana", "x402gal", "Multiple", "Other"] as const;
-export type FitCategory = (typeof FIT_CATEGORIES)[number];
-
-/** Legend tab, verbatim meaning; colour follows the KMZ pin colour on the dark map. */
-export const FIT: Record<FitCategory, { label: string; meaning: string; color: string }> = {
-  HydroCoin: { label: "HydroCoin", meaning: "Verified-gallon water credits", color: "#38bdf8" },
-  Parjana: { label: "Parjana / IRIS", meaning: "Stormwater infiltration hardware", color: "#34d399" },
-  x402gal: { label: "x402gal", meaning: "Usage-based payment rail", color: "#c084fc" },
-  Multiple: { label: "Multiple fits", meaning: "Strongest combined leads", color: "#f87171" },
-  Other: { label: "Other", meaning: "Special case, not a typical buyer", color: "#e6edf3" },
-};
-
-export function fitCategory(raw: string): FitCategory {
-  const v = raw.trim().toLowerCase();
-  if (v.startsWith("hydro")) return "HydroCoin";
-  if (v.startsWith("parjana")) return "Parjana";
-  if (v.startsWith("x402")) return "x402gal";
-  if (v.startsWith("multi")) return "Multiple";
-  return "Other";
-}
 
 /** GeoJSON feature properties written by the build. Keep flat: MapLibre filters read them. */
 export type EsgProps = {
@@ -38,7 +19,6 @@ export type EsgProps = {
   facility: string;
   sector: string;
   goal: string;
-  fit: FitCategory;
   state: string; // full name
   st: string; // two-letter code
   city: string;
@@ -72,8 +52,7 @@ export type EsgSummary = {
   /** Summary by State tab, plus how many of each state's rows placed on the map. */
   byState: { state: string; st: string; listed: number; companies: number; placed: number }[];
   /** Summary by Company tab. */
-  byCompany: { company: string; facilities: number; states: string; fit: FitCategory; placed: number }[];
-  byFit: Record<FitCategory, number>;
+  byCompany: { company: string; facilities: number; states: string; placed: number }[];
   byPlacement: Record<Placement, number>;
   /** Rows placed only at city centre — the list to take back to the workbook owner. */
   approximate: { company: string; facility: string; city: string; st: string; reason: string }[];
@@ -94,7 +73,6 @@ export function esgSitesFrom(col: GeoJsonFeatureCollection | null): EsgSite[] {
       facility: String(p.facility ?? ""),
       sector: String(p.sector ?? ""),
       goal: String(p.goal ?? ""),
-      fit: (p.fit as FitCategory) ?? "Other",
       state: String(p.state ?? ""),
       st: String(p.st ?? ""),
       city: String(p.city ?? ""),
@@ -146,21 +124,22 @@ export function sourceHref(src: string): string | null {
 }
 
 /** The filter the panel and the map agree on. */
-export type EsgView = { fits: readonly FitCategory[]; st: string | null; company: string | null; selectedId: string | null };
+export type EsgView = { st: string | null; company: string | null; selectedId: string | null };
 
 export function esgMatches(s: EsgSite, v: EsgView): boolean {
-  return v.fits.includes(s.fit) && (!v.st || s.st === v.st) && (!v.company || s.company === v.company);
+  return (!v.st || s.st === v.st) && (!v.company || s.company === v.company);
 }
 
 /** MapLibre filter expression equivalent of esgMatches, split by approximate/exact for the two layers. */
 export function esgFilterExpr(v: EsgView | null, approximate: boolean): unknown[] {
   const parts: unknown[] = [approximate ? ["==", ["get", "placement"], "city"] : ["!=", ["get", "placement"], "city"]];
   if (v) {
-    parts.push(["in", ["get", "fit"], ["literal", [...v.fits]]]);
     if (v.st) parts.push(["==", ["get", "st"], v.st]);
     if (v.company) parts.push(["==", ["get", "company"], v.company]);
   }
   return ["all", ...parts];
 }
 
-export const FIT_COLOR_EXPR: unknown[] = ["match", ["get", "fit"], ...FIT_CATEGORIES.flatMap((f) => [f, FIT[f].color]), FIT.Other.color];
+/** One colour for every company point. Solid = placed at the address, hollow = city centre. */
+export const ESG_COLOR = WATER;
+export const ESG_COLOR_EXPR: unknown[] = ["to-color", ESG_COLOR];

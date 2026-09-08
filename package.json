@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && tsx scripts/check-fit-absent.ts",
     "start": "next start",
     "lint": "next lint",
     "demo:agent": "tsx scripts/demo-agent.ts",
@@ -27,6 +27,7 @@
     "match:datacenters": "tsx scripts/build-datacenters.ts",
     "match:footprint": "tsx scripts/build-footprint.ts",
     "match:check": "tsx scripts/check-resolve.ts",
+    "match:check-fit": "tsx scripts/check-fit-absent.ts",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:dev": "npm run pages:build && wrangler pages dev",
     "pages:deploy": "npm run pages:build && wrangler pages deploy"

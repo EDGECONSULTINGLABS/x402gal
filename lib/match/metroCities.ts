@@ -45,9 +45,32 @@ export const METRO_CITIES: Record<MetroId, MetroMembership> = {
   },
   utah: {
     state: "UT",
-    /** Box Elder County corridor. The Stratos row is filed under Snowville. Not Salt Lake City. */
-    cities: ["Snowville", "Hansel Valley", "Tremonton", "Brigham City", "Corinne", "Howell"],
-    markets: ["Box Elder", "Box Elder County", "Northern Utah"],
+    /**
+     * The workbook's own "Salt Lake City" and "Ogden" markets (8 Sep 2026 review): Snowville — where
+     * the Stratos row is filed — down through Ogden, Salt Lake City and its suburbs to Provo. The
+     * workbook's Orem, Santaquin, Delta, Cedar City and St. George markets are not this metro.
+     */
+    cities: [
+      "Snowville",
+      "Hansel Valley",
+      "Tremonton",
+      "Brigham City",
+      "Corinne",
+      "Howell",
+      "Ogden",
+      "Salt Lake City",
+      "West Valley City",
+      "West Jordan",
+      "South Jordan",
+      "Midvale",
+      "Draper",
+      "Bluffdale",
+      "Sandy",
+      "Murray",
+      "Fairfield",
+      "Provo",
+    ],
+    markets: ["Box Elder", "Box Elder County", "Northern Utah", "Salt Lake City", "Salt Lake", "Ogden"],
   },
 };
 

@@ -2,32 +2,32 @@
   "metro": "utah",
   "source": "USGS WBD MapServer (hydro.nationalmap.gov) + USGS Principal Aquifers (ScienceBase doi:10.5066/P9Y2HOUJ)",
   "files": null,
-  "clipped": "2026-09-04",
+  "clipped": "2026-09-08",
   "bbox": [
-    -113.25,
-    41.3,
-    -111.95,
-    42
+    -113.07,
+    39.94,
+    -111.3,
+    42.23
   ],
   "layers": {
     "huc12.geojson": {
-      "features": 92,
-      "bytes": 193674,
+      "features": 427,
+      "bytes": 783409,
       "simplify": "maxAllowableOffset=0.0008deg"
     },
     "huc10.geojson": {
-      "features": 22,
-      "bytes": 79689,
+      "features": 94,
+      "bytes": 265196,
       "simplify": "maxAllowableOffset=0.0015deg"
     },
     "huc8.geojson": {
-      "features": 8,
-      "bytes": 74715,
+      "features": 20,
+      "bytes": 177104,
       "simplify": "maxAllowableOffset=0.0015deg"
     },
     "aquifers.geojson": {
-      "features": 20,
-      "bytes": 36112
+      "features": 54,
+      "bytes": 124961
     },
     "footprint.geojson": {
       "features": 4,
@@ -38,12 +38,12 @@
       "built": "2026-09-04"
     },
     "facilities.geojson": {
-      "features": 1,
-      "bytes": 269,
+      "features": 19,
+      "bytes": 4138,
       "source": "Master 50-state data-center workbook, sheet \"All Facilities (All States)\", Active rows in metro cities",
       "geocoder": "US Census batch (Public_AR_Current), Match + Exact/Non_Exact, ZIP or city agreement, inside metro bbox",
       "dropped": {
-        "no match": 0,
+        "no match": 2,
         "city and zip mismatch": 0,
         "outside bbox": 0
       },
@@ -67,15 +67,16 @@
           "statusWhy": "The workbook says Active. Joe's atlas calls the site proposed, and the first water-rights application (1,900 ac-ft from Salt Wells Spring) was withdrawn in May 2026 after ~3,900 protests (Utah News Dispatch, 2026-05-07). Nothing is built; the atlas is the later record."
         }
       ],
-      "built": "2026-09-04"
+      "built": "2026-09-08"
     },
     "stewardship.geojson": {
       "features": 0,
       "bytes": 40,
       "source": "ESG workbook, sheet \"All Companies (All States)\", curated via data/summit/stewardship-curation.json (include only)",
-      "note": "No ESG workbook row falls inside the Utah bbox (checked against us/esg.geojson, 2026-09-04). Rerun match:stewardship when the workbook gains a Box Elder County row.",
+      "note": "Empty. data/summit/stewardship-curation.json has no Utah row, so nothing renders here until one is curated; the ESG workbook is not on the build machine to check for candidates in the widened box.",
       "built": "2026-09-04"
     }
   },
-  "note": "Interim. Rebuild with --source=source-data once all four Watershed Boundary layers are on disk."
+  "note": "Interim. Rebuild with --source=source-data once all four Watershed Boundary layers are on disk.",
+  "bboxDerivation": "Engineering review 2026-09-08: box around every Utah facility point the data-center workbook files under its Salt Lake City and Ogden markets (22 rows, Snowville to Provo; us/datacenters.geojson mkt) plus the confirmed Stratos Phase 1 site, buffered 30 km (0.269 deg lat, 0.358 deg lng at 41.1N). Raw extent -112.710..-111.656, 40.214..41.965. Replaces the 2026-09-04 Hansel Valley corridor box [-113.25, 41.3, -111.95, 42.0]."
 }

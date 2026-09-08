@@ -5,7 +5,8 @@ import maplibreImport from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { BBox } from "@/lib/match/esg";
 import { circlePolygon, emptyCollection, featureBounds, featureContains } from "@/lib/match/geo";
-import { INK, PAPER, QUIET, SUBSURFACE, WATER } from "@/lib/match/theme";
+import { ALL_VISIBLE, HUC_MINZOOM, HUC_WIDTH, basemapGroup, type LayerKey, type LayerVisibility } from "@/lib/match/legend";
+import { CANDIDATE, HUC10, HUC12, HUC8, INK, PAPER, QUIET, STEWARD, SUBSURFACE, WATER } from "@/lib/match/theme";
 import type { GeoJsonFeatureCollection, SelectedLocation } from "@/lib/match/types";
 
 type Maplibre = typeof maplibreImport;
@@ -14,47 +15,28 @@ const maplibregl: Maplibre =
     ? maplibreImport
     : ((maplibreImport as unknown as { default: Maplibre }).default ?? maplibreImport);
 
-const IMAGERY =
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-const LABELS =
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}";
+/**
+ * Basemap: a vector style whose hydrography, boundaries, roads and land use are separate layers the
+ * legend can switch off (engineering review, Zina, 8 Sep 2026 — "nothing on the map that isn't in
+ * the legend"). Dark, because every overlay colour here was chosen against a dark ground. OpenFreeMap
+ * serves OpenMapTiles with no key and no quota; if the style or its tiles fail, the map falls back
+ * to OSM raster tiles so the demo never shows a black screen.
+ */
+const VECTOR_STYLE = "https://tiles.openfreemap.org/styles/dark";
 const OSM = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-function baseStyle(tiles: "imagery" | "osm"): maplibreImport.StyleSpecification {
-  if (tiles === "osm") {
-    return {
-      version: 8,
-      sources: {
-        osm: {
-          type: "raster",
-          tiles: [OSM],
-          tileSize: 256,
-          attribution: "© OpenStreetMap contributors",
-        },
-      },
-      layers: [{ id: "osm", type: "raster", source: "osm" }],
-    };
-  }
+function rasterFallback(): maplibreImport.StyleSpecification {
   return {
     version: 8,
     sources: {
-      imagery: {
+      osm: {
         type: "raster",
-        tiles: [IMAGERY],
+        tiles: [OSM],
         tileSize: 256,
-        attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics",
-        maxzoom: 19,
-      },
-      labels: {
-        type: "raster",
-        tiles: [LABELS],
-        tileSize: 256,
+        attribution: "© OpenStreetMap contributors",
       },
     },
-    layers: [
-      { id: "imagery", type: "raster", source: "imagery" },
-      { id: "labels", type: "raster", source: "labels" },
-    ],
+    layers: [{ id: "osm", type: "raster", source: "osm" }],
   };
 }
 
@@ -62,11 +44,17 @@ type Props = {
   selected: SelectedLocation;
   zoom: number;
   radiusKm: number;
-  showWbd: boolean;
-  showAquifer: boolean;
+  /** Legend state. Rows are the toggles; the map only obeys. */
+  layers?: LayerVisibility;
   huc12: GeoJsonFeatureCollection | null;
+  huc10?: GeoJsonFeatureCollection | null;
+  huc8?: GeoJsonFeatureCollection | null;
   aquifers: GeoJsonFeatureCollection | null;
   facilities: GeoJsonFeatureCollection | null;
+  /** Curated stewardship points (spec §5). Listed in the panel and drawn here so the legend row is true. */
+  stewardship?: GeoJsonFeatureCollection | null;
+  /** Candidate project records marked for public display. None yet; the source exists so the row is honest. */
+  candidates?: GeoJsonFeatureCollection | null;
   /**
    * A project's footprint where one was delivered (Utah: the Stratos parcels and the spring it
    * applied for). Polygons draw as outlines only — they are digitized, not surveyed.
@@ -74,7 +62,11 @@ type Props = {
   footprint?: GeoJsonFeatureCollection | null;
   selectedHuc12: string | null;
   showPin?: boolean;
+  /** Extra right-hand camera padding in px while the legend is open, so it never covers the fitted polygon. */
+  legendPad?: number;
   onMapClick: (lng: number, lat: number) => void;
+  /** Live camera zoom after each move, so the legend can say which levels are drawn right now. */
+  onZoomChange?: (zoom: number) => void;
   /** A listed facility was tapped. Name is the facility's `name` property. */
   onFacilityClick?: (lng: number, lat: number, name: string) => void;
   /**
@@ -105,11 +97,7 @@ const NONE: unknown[] = ["==", ["get", "id"], ""];
 type MlGeoJson = Parameters<maplibreImport.GeoJSONSource["setData"]>[0];
 const asMl = (data: GeoJsonFeatureCollection) => data as unknown as MlGeoJson;
 
-function setSourceData(
-  map: maplibreImport.Map,
-  id: string,
-  data: GeoJsonFeatureCollection
-) {
+function setSourceData(map: maplibreImport.Map, id: string, data: GeoJsonFeatureCollection) {
   const source = map.getSource(id) as maplibreImport.GeoJSONSource | undefined;
   source?.setData(asMl(data));
 }
@@ -121,80 +109,172 @@ function applySelectedFilter(map: maplibreImport.Map, code: string | null) {
   map.setFilter("huc12-selected-line", ["==", ["get", "huc12"], value]);
 }
 
+/** Layer ids behind each legend row, for the rows we draw ourselves. Basemap rows are matched by source-layer. */
+const OVERLAY_IDS: Partial<Record<LayerKey, string[]>> = {
+  huc8: ["huc8-line"],
+  huc10: ["huc10-line"],
+  huc12: ["huc12-line"],
+  selected: ["huc12-selected-fill", "huc12-selected-line"],
+  aquifer: ["aquifers-fill", "aquifers-line"],
+  facilities: ["facilities-circle"],
+  candidates: ["candidates-ring"],
+  stewardship: ["stewardship-circle"],
+  footprint: ["footprint-line", "footprint-fill", "footprint-source"],
+  radius: ["radius-fill", "radius-line"],
+  pin: ["pin-circle"],
+  national: ["national-approx", "national-dot", "national-selected"],
+};
+
+const OVERLAY_SOURCES = new Set([
+  "aquifers", "huc8", "huc10", "huc12", "radius", "facilities", "stewardship", "candidates", "footprint", "pin", "national",
+]);
+
+function applyVisibility(map: maplibreImport.Map, vis: LayerVisibility) {
+  const set = (id: string, on: boolean) => {
+    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+  };
+  for (const [key, ids] of Object.entries(OVERLAY_IDS) as [LayerKey, string[]][]) {
+    for (const id of ids) set(id, vis[key]);
+  }
+  // Basemap layers, grouped by what the line is. The raster fallback has one layer and no groups.
+  for (const layer of map.getStyle()?.layers ?? []) {
+    if (layer.type === "background" || layer.type === "raster") continue;
+    if ("source" in layer && OVERLAY_SOURCES.has(String(layer.source))) continue;
+    const group = basemapGroup("source-layer" in layer ? layer["source-layer"] : undefined);
+    if (group) set(layer.id, vis[group]);
+  }
+}
+
+/** Diagonal hatch for the aquifer fill — the certification GIS convention for a subsurface unit. */
+function hatchImage(color: string): ImageData | null {
+  if (typeof document === "undefined") return null;
+  // 28 device px at pixelRatio 2 = a 14 css-px stripe spacing: readable as a hatch, quiet enough
+  // that a basin-fill aquifer under a whole metro (Utah, Phoenix) does not shout over the lines.
+  const size = 28;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.clearRect(0, 0, size, size);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineCap = "square";
+  ctx.beginPath();
+  // Two strokes so the tile joins seamlessly at the edges.
+  ctx.moveTo(-size / 2, size);
+  ctx.lineTo(size, -size / 2);
+  ctx.moveTo(size / 2, size * 1.5);
+  ctx.lineTo(size * 1.5, size / 2);
+  ctx.stroke();
+  return ctx.getImageData(0, 0, size, size);
+}
+
+/** The first basemap label layer — our fills and lines slot in under it so place names stay legible. */
+function firstSymbolLayer(map: maplibreImport.Map): string | undefined {
+  return map.getStyle()?.layers?.find((l) => l.type === "symbol")?.id;
+}
+
 function addOverlayLayers(map: maplibreImport.Map) {
   if (map.getSource("aquifers")) return;
-  map.addSource("aquifers", { type: "geojson", data: asMl(emptyCollection()) });
-  map.addSource("huc12", { type: "geojson", data: asMl(emptyCollection()) });
-  map.addSource("radius", { type: "geojson", data: asMl(emptyCollection()) });
-  map.addSource("facilities", { type: "geojson", data: asMl(emptyCollection()) });
-  map.addSource("footprint", { type: "geojson", data: asMl(emptyCollection()) });
-  map.addSource("pin", { type: "geojson", data: asMl(emptyCollection()) });
+  for (const id of OVERLAY_SOURCES) map.addSource(id, { type: "geojson", data: asMl(emptyCollection()) });
 
-  map.addLayer({
+  if (!map.hasImage("aquifer-hatch")) {
+    const img = hatchImage(SUBSURFACE);
+    if (img) map.addImage("aquifer-hatch", img, { pixelRatio: 2 });
+  }
+
+  const under = firstSymbolLayer(map);
+  const area = (layer: maplibreImport.AddLayerObject) => map.addLayer(layer, under);
+
+  const aquiferFilter: maplibreImport.FilterSpecification = ["all", ["has", "AQ_NAME"], ["!=", ["get", "AQ_NAME"], "Other rocks"]];
+  area({
     id: "aquifers-fill",
     type: "fill",
     source: "aquifers",
-    filter: ["all", ["has", "AQ_NAME"], ["!=", ["get", "AQ_NAME"], "Other rocks"]],
-    paint: { "fill-color": SUBSURFACE, "fill-opacity": 0.22 },
+    filter: aquiferFilter,
+    paint: map.hasImage("aquifer-hatch")
+      ? { "fill-pattern": "aquifer-hatch", "fill-opacity": 0.4 }
+      : { "fill-color": SUBSURFACE, "fill-opacity": 0.22 },
   });
-  map.addLayer({
+  area({
     id: "aquifers-line",
     type: "line",
     source: "aquifers",
-    filter: ["all", ["has", "AQ_NAME"], ["!=", ["get", "AQ_NAME"], "Other rocks"]],
-    paint: { "line-color": SUBSURFACE, "line-width": 1.4 },
+    filter: aquiferFilter,
+    paint: { "line-color": SUBSURFACE, "line-width": 1.2, "line-opacity": 0.9 },
   });
-  map.addLayer({
-    id: "huc12-line",
-    type: "line",
-    source: "huc12",
-    paint: { "line-color": WATER, "line-width": 0.7, "line-opacity": 0.35 },
-  });
-  map.addLayer({
+
+  // The selected HUC12 keeps its fill; every other unit is outline only.
+  area({
     id: "huc12-selected-fill",
     type: "fill",
     source: "huc12",
     filter: ["==", ["get", "huc12"], ""],
-    paint: { "fill-color": WATER, "fill-opacity": 0 },
+    paint: { "fill-color": HUC12, "fill-opacity": 0 },
   });
-  map.addLayer({
+  // Three nested levels, three hues, coarser = heavier, revealed as you zoom in.
+  area({
+    id: "huc12-line",
+    type: "line",
+    source: "huc12",
+    minzoom: HUC_MINZOOM.huc12,
+    paint: { "line-color": HUC12, "line-width": HUC_WIDTH.huc12, "line-opacity": 0.85 },
+  });
+  area({
+    id: "huc10-line",
+    type: "line",
+    source: "huc10",
+    minzoom: HUC_MINZOOM.huc10,
+    paint: { "line-color": HUC10, "line-width": HUC_WIDTH.huc10, "line-opacity": 0.9 },
+  });
+  area({
+    id: "huc8-line",
+    type: "line",
+    source: "huc8",
+    minzoom: HUC_MINZOOM.huc8,
+    paint: { "line-color": HUC8, "line-width": HUC_WIDTH.huc8, "line-opacity": 0.95 },
+  });
+  area({
     id: "huc12-selected-line",
     type: "line",
     source: "huc12",
     filter: ["==", ["get", "huc12"], ""],
     paint: {
-      "line-color": WATER,
-      "line-width": 2.8,
+      "line-color": HUC12,
+      "line-width": 3,
       "line-dasharray": [0, 4],
     },
   });
-  map.addLayer({
+  area({
     id: "radius-fill",
     type: "fill",
     source: "radius",
     paint: { "fill-color": QUIET, "fill-opacity": 0.08 },
   });
-  map.addLayer({
+  area({
     id: "radius-line",
     type: "line",
     source: "radius",
     paint: { "line-color": QUIET, "line-width": 1.4, "line-dasharray": [2, 1.6] },
   });
   // Project footprint: parcel outlines (dashed — digitized, not surveyed) and the water source applied for.
-  map.addLayer({
+  area({
     id: "footprint-line",
     type: "line",
     source: "footprint",
     filter: ["==", ["geometry-type"], "Polygon"],
     paint: { "line-color": INK, "line-width": 1.6, "line-dasharray": [2, 1.4], "line-opacity": 0.9 },
   });
-  map.addLayer({
+  area({
     id: "footprint-fill",
     type: "fill",
     source: "footprint",
     filter: ["==", ["geometry-type"], "Polygon"],
     paint: { "fill-color": INK, "fill-opacity": 0.06 },
   });
+
+  // Points sit above the basemap labels.
   map.addLayer({
     id: "footprint-source",
     type: "circle",
@@ -206,6 +286,29 @@ function addOverlayLayers(map: maplibreImport.Map) {
       "circle-opacity": 0.4,
       "circle-stroke-width": 1.8,
       "circle-stroke-color": WATER,
+    },
+  });
+  map.addLayer({
+    id: "stewardship-circle",
+    type: "circle",
+    source: "stewardship",
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 3.5, 12, 5.5, 15, 7],
+      "circle-color": STEWARD,
+      "circle-opacity": 0.95,
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": PAPER,
+    },
+  });
+  map.addLayer({
+    id: "candidates-ring",
+    type: "circle",
+    source: "candidates",
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 5, 12, 8],
+      "circle-color": "rgba(0,0,0,0)",
+      "circle-stroke-width": 2.2,
+      "circle-stroke-color": CANDIDATE,
     },
   });
   map.addLayer({
@@ -228,12 +331,11 @@ function addOverlayLayers(map: maplibreImport.Map) {
       "circle-radius": 7,
       "circle-color": PAPER,
       "circle-stroke-width": 2.5,
-      "circle-stroke-color": INK,
+      "circle-stroke-color": WATER,
     },
   });
 
   // National point layer. Solid dot = placed at the address; hollow ring = city/market approximate.
-  map.addSource("national", { type: "geojson", data: asMl(emptyCollection()) });
   map.addLayer({
     id: "national-approx",
     type: "circle",
@@ -314,14 +416,14 @@ function drawWatershed(map: maplibreImport.Map, code: string | null) {
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!code || reduce) {
     map.setPaintProperty("huc12-selected-line", "line-dasharray", [1, 0]);
-    map.setPaintProperty("huc12-selected-fill", "fill-opacity", 0.32);
+    map.setPaintProperty("huc12-selected-fill", "fill-opacity", 0.28);
     return;
   }
   const start = performance.now();
   const tick = (now: number) => {
     const t = Math.min(1, (now - start) / 600);
     map.setPaintProperty("huc12-selected-line", "line-dasharray", [t * 4, 4 - t * 4]);
-    map.setPaintProperty("huc12-selected-fill", "fill-opacity", 0.32 * t);
+    map.setPaintProperty("huc12-selected-fill", "fill-opacity", 0.28 * t);
     if (t < 1) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
@@ -331,15 +433,20 @@ export function MatchMap({
   selected,
   zoom,
   radiusKm,
-  showWbd,
-  showAquifer,
+  layers = ALL_VISIBLE,
   huc12,
+  huc10 = null,
+  huc8 = null,
   aquifers,
   facilities,
+  stewardship = null,
+  candidates = null,
   footprint = null,
   selectedHuc12,
   showPin = true,
+  legendPad = 0,
   onMapClick,
+  onZoomChange,
   onFacilityClick,
   points = null,
   viewBounds = null,
@@ -347,16 +454,22 @@ export function MatchMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibreImport.Map | null>(null);
   /**
-   * True once the style has loaded. Not map.isStyleLoaded(): that also reports false while raster
-   * tiles are still streaming, which silently dropped camera and filter updates mid-load.
+   * True once the style has loaded. Not map.isStyleLoaded(): that also reports false while tiles
+   * are still streaming, which silently dropped camera and filter updates mid-load.
    */
   const readyRef = useRef(false);
   const clickRef = useRef(onMapClick);
   clickRef.current = onMapClick;
   const facilityClickRef = useRef(onFacilityClick);
   facilityClickRef.current = onFacilityClick;
+  const zoomRef = useRef(onZoomChange);
+  zoomRef.current = onZoomChange;
   const pointClickRef = useRef(points?.onClick);
   pointClickRef.current = points?.onClick;
+  const visRef = useRef<LayerVisibility>(layers);
+  visRef.current = { ...layers, pin: layers.pin && showPin, radius: layers.radius && showPin };
+  const padRef = useRef(legendPad);
+  padRef.current = legendPad;
   const viewRef = useRef({ lng: selected.lng, lat: selected.lat, zoom, bounds: null as
     | [[number, number], [number, number]]
     | null });
@@ -387,9 +500,10 @@ export function MatchMap({
     }
     const v = viewRef.current;
     const wide = window.innerWidth >= 1024;
+    // On a phone the open legend is a deliberate look-up, so pad only as far as still leaves the polygon room.
     const padding = wide
-      ? { top: 56, left: 420, bottom: 24, right: 16 }
-      : { top: 56, left: 12, bottom: 300, right: 12 };
+      ? { top: 56, left: 420, bottom: 24, right: 16 + padRef.current }
+      : { top: 56, left: 12, bottom: 300, right: 12 + Math.min(padRef.current, Math.round(window.innerWidth * 0.4)) };
     map.setPadding(padding);
     if (v.bounds) {
       try {
@@ -411,7 +525,7 @@ export function MatchMap({
     try {
       map = new maplibregl.Map({
         container: el,
-        style: baseStyle("imagery"),
+        style: VECTOR_STYLE,
         center: [selected.lng, selected.lat],
         zoom,
         attributionControl: { compact: true },
@@ -426,10 +540,10 @@ export function MatchMap({
 
     const onError = (e: { error?: { message?: string }; sourceId?: string }) => {
       const msg = e.error?.message ?? "";
-      if (e.sourceId === "imagery" || /arcgisonline|esri/i.test(msg)) {
+      if (e.sourceId === "openmaptiles" || e.sourceId === "ne2_shaded" || /openfreemap/i.test(msg)) {
         if (map.getSource("osm")) return;
         readyRef.current = false; // style.load → onLoad re-arms it and re-adds the overlays
-        map.setStyle(baseStyle("osm"));
+        map.setStyle(rasterFallback());
       }
     };
 
@@ -437,6 +551,7 @@ export function MatchMap({
       if (cancelled) return;
       readyRef.current = true;
       addOverlayLayers(map);
+      applyVisibility(map, visRef.current);
       map.resize();
       applyView(map);
     };
@@ -444,6 +559,7 @@ export function MatchMap({
     map.on("load", onLoad);
     map.on("style.load", onLoad);
     map.on("error", onError);
+    map.on("moveend", () => zoomRef.current?.(map.getZoom()));
     map.on("click", (e) => {
       const box: [[number, number], [number, number]] = [
         [e.point.x - 8, e.point.y - 8],
@@ -457,14 +573,7 @@ export function MatchMap({
         }
       }
       if (map.getLayer("facilities-circle") && facilityClickRef.current) {
-        const hits = map.queryRenderedFeatures(
-          [
-            [e.point.x - 8, e.point.y - 8],
-            [e.point.x + 8, e.point.y + 8],
-          ],
-          { layers: ["facilities-circle"] }
-        );
-        const hit = hits[0];
+        const hit = map.queryRenderedFeatures(box, { layers: ["facilities-circle"] })[0];
         if (hit && hit.geometry.type === "Point") {
           const [lng, lat] = hit.geometry.coordinates as [number, number];
           facilityClickRef.current(lng, lat, String(hit.properties?.name ?? "Listed facility"));
@@ -502,14 +611,18 @@ export function MatchMap({
     const apply = () => {
       addOverlayLayers(map);
       if (huc12) setSourceData(map, "huc12", huc12);
+      setSourceData(map, "huc10", huc10 ?? emptyCollection());
+      setSourceData(map, "huc8", huc8 ?? emptyCollection());
       if (aquifers) setSourceData(map, "aquifers", aquifers);
       setSourceData(map, "facilities", facilities ?? emptyCollection());
+      setSourceData(map, "stewardship", stewardship ?? emptyCollection());
+      setSourceData(map, "candidates", candidates ?? emptyCollection());
       setSourceData(map, "footprint", footprint ?? emptyCollection());
       if (huc12 && selectedHuc12) drawWatershed(map, selectedHuc12);
       else applySelectedFilter(map, selectedHuc12);
     };
     return whenReady(map, readyRef.current, apply);
-  }, [huc12, aquifers, facilities, footprint, selectedHuc12]);
+  }, [huc12, huc10, huc8, aquifers, facilities, stewardship, candidates, footprint, selectedHuc12]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -565,23 +678,17 @@ export function MatchMap({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !readyRef.current) return;
-    const vis = (id: string, on: boolean) => {
-      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
-    };
-    vis("huc12-line", showWbd);
-    vis("huc12-selected-fill", showWbd);
-    vis("huc12-selected-line", showWbd);
-    vis("aquifers-fill", showAquifer);
-    vis("aquifers-line", showAquifer);
-  }, [showWbd, showAquifer]);
+    if (!map) return;
+    return whenReady(map, readyRef.current, () => applyVisibility(map, visRef.current));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(layers), showPin]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     applyView(map);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected.lng, selected.lat, zoom, selectedHuc12, huc12, viewBounds?.join(",")]);
+  }, [selected.lng, selected.lat, zoom, selectedHuc12, huc12, viewBounds?.join(","), legendPad]);
 
   return (
     <div className="match-map absolute inset-0 bg-[#0b1220]">

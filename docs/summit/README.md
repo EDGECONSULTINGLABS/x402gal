@@ -18,7 +18,7 @@ gracefully.
 |---|---|---|---|
 | 1 | **Gate** | A living water surface (canvas: ripples on tap, heat on hold, lava-lamp blobs underneath; no map, no tile request). "Six fields, then the map." Name, email, company, role, what brought you here, consent. A returning phone skips this. | `components/match/Gate.tsx`, `WaterSurface.tsx`, `lib/match/attendee.ts` |
 | 2 | **Place** | Choose a metro (New York, Phoenix, Northern Virginia, Dallas, Columbus, Utah), or type a facility / city / zip (local, instant, sloppy input accepted), or open the national views. | `components/match/MatchApp.tsx`, `lib/match/aliases.ts` |
-| 3 | **Watershed** | Satellite map, a pin, and the USGS hierarchy that drains past it: subwatershed (HUC12) → watershed (HUC10) → subbasin (HUC8), plus the principal aquifer. Data centers within the radius, flagged when they share the subwatershed. Curated water-stewardship commitments nearby. In Utah, the project footprint. Tap any glossary word for a definition; in New York the definition adds the "your tap water comes from upstate" lesson. | `MatchApp.tsx`, `MatchMap.tsx`, `lib/match/watershed.ts`, `GlossaryTerm.tsx` |
+| 3 | **Watershed** | Dark vector map, a pin, and the USGS hierarchy that drains past it drawn as three nested boundaries in three colours — subbasin (HUC8, purple, every zoom) → watershed (HUC10, orange, from z8) → subwatershed (HUC12, green, from z10; the selected one filled) — plus the principal aquifer as a teal hatch. Data centers within the radius, flagged when they share the subwatershed. Curated water-stewardship commitments nearby, on the map and in the list. In Utah, the project footprint. One legend, top-right, same convention as the certification GIS: swatch left, name right, and every row is the layer's on/off switch — including the basemap's own water, boundaries, roads and land use, so nothing drawn is unnamed. Tap any glossary word for a definition; in New York the definition adds the "your tap water comes from upstate" lesson. | `MatchApp.tsx`, `MatchMap.tsx`, `Legend.tsx`, `lib/match/legend.ts`, `lib/match/watershed.ts`, `GlossaryTerm.tsx` |
 | 4 | **Assess** | Three taps: how much text AI a day, how often images/video, where you are based. | `components/match/Assessment.tsx`, `lib/match/assessment.ts` |
 | 5 | **Result** | "About 70 mL a day", bottles and gallons a year, in a dashed **Estimated** block with the methodology name, edition, hash and a link to the published methodology. Then: *Your AI's water didn't come from here* → tap to see the watershed it draws from. | `Assessment.tsx`, `app/match/methodology/page.tsx` |
 | 6 | **Map handoff** | Back to the map, pin on the listed facility nearest that metro's centre. The **What you just saw** screen puts Measured (watershed lines, facility points) and Estimated (the number) side by side, one sentence each. | `MatchApp.tsx` (`step === "close"`) |
@@ -28,7 +28,8 @@ gracefully.
 
 Two national views hang off the Place screen: every data center in the 50 states (3,184 rows,
 coloured by status, "where do you live" state counts) and every company with a published water
-goal (414 rows, coloured by fit). They are browse-everything companions to the per-metro layers.
+goal (414 rows, one colour, filtered by state and company). They are browse-everything companions
+to the per-metro layers.
 
 ---
 
@@ -108,7 +109,16 @@ people type. Utah was the sixth, added 2026-09-04 once Joe delivered the Stratos
 (Hansel Valley, Box Elder County); its facility row is placed by a cited override in
 `data/summit/facility-overrides.json` because the sheet address is a road intersection the Census
 geocoder cannot match, and its status is corrected from the workbook's "Active" to
-"Proposed (Phase 1)" with the reason recorded.
+"Proposed (Phase 1)" with the reason recorded. Its bbox was widened on 2026-09-08 (engineering
+review): derived from the workbook's own "Salt Lake City" and "Ogden" market rows plus the Stratos
+site, buffered 30 km, so Snowville and the Salt Lake City cluster (19 facilities) are both inside.
+
+**Colours and the legend.** The three HUC strokes are `--huc8` / `--huc10` / `--huc12` in
+`app/match/tokens.css`, every hex taken from the certification GIS legend
+(`hydrocoin/gis_prototype … layer-registry.ts`, `STYLES`) so the two tools read the same to the
+same engineers; the provenance note beside the tokens says which row each came from.
+`lib/match/legend.ts` is the one list of what is drawn; `components/match/Legend.tsx` renders it
+and toggles it; `MatchMap.tsx` obeys it. Add a layer → add a row, or it is not drawn.
 
 **Provenance still to close.** The polygons are currently clipped from USGS services ("interim"
 in every manifest). The spec wants them rebuilt from Zina's Drive layers so the demo polygons are
@@ -134,7 +144,9 @@ provenance value (Joe's KMZ, the GSL salinity chart, curation and override files
   phone.
 - **Export**: `GET /api/match/attendees` returns CSV, gated by the existing `/leads` session cookie.
 - **What is never stored**: device location (never requested), the workbook's Notes columns, the
-  ESG file's fit/notes columns, anything from the glossary or learn taps.
+  ESG file's two fit columns and Notes (internal use only — Joe, 2026-09-08; `npm run build` fails
+  if they reach the bundle, see `scripts/check-fit-absent.ts`), anything from the glossary or
+  learn taps.
 - Consent copy is rendered verbatim from `CONSENT_COPY` in `lib/match/attendee.ts`.
 
 ---
@@ -164,9 +176,11 @@ on the URL does the same).
 - One metro's layers load on selection, never all six on first paint. Phoenix HUC12 is simplified
   (`mapshaper -simplify`, visually lossless at metro zoom) because raw vertex density exceeds what a
   phone renders.
-- Base map is Esri World Imagery with an automatic fall-back to OpenStreetMap raster tiles when the
-  imagery source errors. The base map is the one thing that needs the network; the polygons, points
-  and the resolver do not, so on a dead hotspot the sheet still tells you the watershed.
+- Base map is OpenFreeMap's dark vector style (OpenMapTiles, no key, no quota), chosen so its
+  hydrography, boundaries, roads and land use are separate layers the legend can switch off, with an
+  automatic fall-back to OpenStreetMap raster tiles when the style or its tiles error. The base map
+  is the one thing that needs the network; the polygons, points and the resolver do not, so on a
+  dead hotspot the sheet still tells you the watershed.
 - The gate makes zero external requests (verified). The first thing a stranger sees is not a tile.
 - `prefers-reduced-motion` stops the watershed draw animation, freezes the lava lamp and reduces a
   tap on the water to one fading ring.

@@ -60,9 +60,17 @@ export const METROS: readonly Metro[] = [
      * Stratos Phase 1 site itself is in facilities.geojson (Joe's atlas, 2026-09-04).
      */
     center: [-112.62, 41.76],
-    zoom: 10,
-    /** Snowville and the Hansel Valley parcels to the north arm (Gunnison Bay) and Bear River Bay. */
-    bbox: [-113.25, 41.3, -111.95, 42.0],
+    zoom: 9,
+    /**
+     * Derived, not drawn (engineering review, Zina, 8 Sep 2026): the box around every Utah facility
+     * point the workbook itself files under the "Salt Lake City" and "Ogden" markets — 22 rows,
+     * Snowville down to Provo (public/match/data/us/datacenters.geojson, `mkt`) — plus the confirmed
+     * Stratos Phase 1 site (data/summit/facility-overrides.json), buffered 30 km (0.269° lat,
+     * 0.358° lng at 41.1°N). Raw extent −112.710…−111.656, 40.214…41.965. Both the Snowville site
+     * and the Salt Lake City cluster are inside. The workbook's other Utah markets (Orem, Santaquin,
+     * Delta, Cedar City, St. George) are not this metro and are left out.
+     */
+    bbox: [-113.07, 39.94, -111.3, 42.23],
   },
 ];
 

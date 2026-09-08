@@ -27,8 +27,7 @@ import {
 } from "@/lib/match/datacenters";
 import {
   CONUS_BBOX,
-  FIT_CATEGORIES,
-  FIT_COLOR_EXPR,
+  ESG_COLOR_EXPR,
   bboxOf,
   esgFilterExpr,
   esgMatches,
@@ -40,6 +39,7 @@ import {
 } from "@/lib/match/esg";
 import { findContainingFeature, haversineMeters, loadCollection } from "@/lib/match/geo";
 import { LEGAL_LINE } from "@/lib/match/legal";
+import { ALL_VISIBLE, type LayerKey, type LayerVisibility } from "@/lib/match/legend";
 import { METROS, PENDING_METROS, metroById, metroForPoint, type MetroId } from "@/lib/match/metros";
 import {
   HUC_LEVEL_NAME,
@@ -54,6 +54,7 @@ import { resolveAquifer, resolveWatershed } from "@/lib/match/watershed";
 import { DcPanel } from "./DcPanel";
 import { EsgPanel } from "./EsgPanel";
 import { GlossaryProvider, GlossaryRow, GlossaryTerm } from "./GlossaryTerm";
+import { LEGEND_WIDTH, Legend } from "./Legend";
 import { Lockup } from "./Lockup";
 import type { NationalPoints } from "./MatchMap";
 
@@ -67,7 +68,7 @@ type Step = "place" | "resolved" | "close" | "national";
 type NationalLayer = "datacenters" | "esg";
 
 const US = "/match/data/us";
-const ESG_DEFAULT_VIEW: EsgView = { fits: FIT_CATEGORIES, st: null, company: null, selectedId: null };
+const ESG_DEFAULT_VIEW: EsgView = { st: null, company: null, selectedId: null };
 const DC_DEFAULT_VIEW: DcView = { statuses: STATUSES, st: null, operator: null, market: null, selectedId: null };
 
 async function loadJson<T>(url: string): Promise<T> {
@@ -215,8 +216,11 @@ export function MatchApp({
   );
   const [showHandoff, setShowHandoff] = useState(Boolean(handoff));
   const [radiusKm, setRadiusKm] = useState(25);
-  const [showWbd, setShowWbd] = useState(true);
-  const [showAquifer, setShowAquifer] = useState(true);
+  /** Legend rows are the layer toggles. Everything starts drawn. */
+  const [layerVis, setLayerVis] = useState<LayerVisibility>(ALL_VISIBLE);
+  /** Open where the map has room (desktop); a chip on phones until tapped. */
+  const [legendOpen, setLegendOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 1024);
+  const [liveZoom, setLiveZoom] = useState<number | undefined>(undefined);
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -323,7 +327,7 @@ export function MatchApp({
     if (layer === "esg") {
       return {
         data: esgCol,
-        color: FIT_COLOR_EXPR,
+        color: ESG_COLOR_EXPR,
         filter: { exact: esgFilterExpr(esgView, false), approximate: esgFilterExpr(esgView, true) },
         selectedId: esgView.selectedId,
         onClick: (id) => setEsgView((v) => ({ ...v, selectedId: id })),
@@ -627,14 +631,18 @@ export function MatchApp({
           selected={selected}
           zoom={zoom}
           radiusKm={radiusKm}
-          showWbd={showWbd && !national}
-          showAquifer={showAquifer && !national}
+          layers={layerVis}
           huc12={national ? null : huc12}
+          huc10={national ? null : huc10}
+          huc8={national ? null : huc8}
           aquifers={national ? null : aquifers}
           facilities={inMetro ? facilityCol : null}
+          stewardship={inMetro ? stewardCol : null}
           footprint={inMetro ? footprintCol : null}
           selectedHuc12={inMetro ? watershed?.huc12.code ?? null : null}
           showPin={inMetro}
+          legendPad={legendOpen && (inMetro || national) ? LEGEND_WIDTH + 12 : 0}
+          onZoomChange={setLiveZoom}
           onMapClick={
             national
               ? () => {
@@ -653,6 +661,20 @@ export function MatchApp({
             <Lockup size={16} />
           </div>
         </header>
+
+        {(inMetro || national) && (
+          <div className="pointer-events-none absolute right-3 top-12 z-20 flex justify-end">
+            <Legend
+              scope={national ? "national" : "metro"}
+              visibility={layerVis}
+              onToggle={(key: LayerKey) => setLayerVis((v) => ({ ...v, [key]: !v[key] }))}
+              open={legendOpen}
+              onOpen={setLegendOpen}
+              hidden={footprintCol?.features.length ? [] : ["footprint"]}
+              zoom={liveZoom}
+            />
+          </div>
+        )}
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-3 lg:inset-auto lg:bottom-auto lg:left-4 lg:top-14 lg:w-96 lg:p-0">
           <article
@@ -772,7 +794,7 @@ export function MatchApp({
                         >
                           Companies with water goals
                           <span className="mt-0.5 block text-[12px] leading-snug text-[var(--quiet)]">
-                            414 facilities with a published water commitment, coloured by fit.
+                            414 facilities with a published water commitment, by state and company.
                           </span>
                         </button>
                       </div>
@@ -1056,16 +1078,9 @@ export function MatchApp({
                           className="mt-1 w-full accent-[var(--water)]"
                         />
                       </label>
-                      <div className="mt-2 flex gap-4 text-[13px]">
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={showWbd} onChange={(e) => setShowWbd(e.target.checked)} />
-                          Subwatershed
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={showAquifer} onChange={(e) => setShowAquifer(e.target.checked)} />
-                          Aquifer
-                        </label>
-                      </div>
+                      <p className="mt-2 text-[12px] leading-snug text-[var(--quiet)]">
+                        Layers are switched on and off from the legend on the map.
+                      </p>
                     </div>
                   )}
                 </div>

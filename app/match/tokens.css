@@ -43,4 +43,22 @@
   --water: var(--hc-sky-2);
   --subsurface: var(--hc-teal);
   --quiet: var(--hc-text-muted);
+
+  /*
+   * Hydrologic-unit strokes. Three hues, not three weights (engineering review, Zina, 8 Sep 2026).
+   * Every hex is taken from the HydroCoin certification GIS legend
+   * (hydrocoin/gis_prototype/src/api/external-layers/layer-registry.ts, STYLES), never invented:
+   *   --huc12  STYLES.watershed  #22c55e  — the colour gis_prototype draws WBD units in
+   *   --huc10  STYLES.risk       #f97316
+   *   --huc8   STYLES.pfas       #a855f7
+   * gis_prototype draws HUC-8 and HUC-12 in the one watershed green; this tool keeps that green for
+   * the HUC12 (the unit both tools select against) and takes the other two from the same table.
+   * If gis_prototype splits its levels, change them there first and re-pull here.
+   */
+  --huc12: #22c55e;
+  --huc10: #f97316;
+  --huc8: #a855f7;
+  /* Stewardship and candidate points, from the brand tokens above. */
+  --steward: var(--hc-pale);
+  --candidate: var(--hc-accent);
 }

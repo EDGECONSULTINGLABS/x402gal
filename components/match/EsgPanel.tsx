@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
-  FIT,
-  FIT_CATEGORIES,
+  ESG_COLOR,
   esgMatches,
   placementNote,
   sourceHost,
@@ -11,7 +10,6 @@ import {
   type EsgSite,
   type EsgSummary,
   type EsgView,
-  type FitCategory,
 } from "@/lib/match/esg";
 import { Dot } from "./Dot";
 
@@ -27,13 +25,14 @@ type Props = {
 
 const LIST_LIMIT = 40;
 
-function FitDot({ fit, hollow = false, size = 10 }: { fit: FitCategory; hollow?: boolean; size?: number }) {
-  return <Dot color={FIT[fit].color} hollow={hollow} size={size} />;
+function SiteDot({ hollow = false, size = 10 }: { hollow?: boolean; size?: number }) {
+  return <Dot color={ESG_COLOR} hollow={hollow} size={size} />;
 }
 
 /**
- * The national view: every facility in the 50-state ESG workbook, coloured by Fit Category.
- * Filters are the workbook's own tabs — Summary by State, Summary by Company, Legend.
+ * The national view: every facility in the 50-state ESG workbook, one colour, filtered by the
+ * workbook's own tabs — Summary by State, Summary by Company. The workbook's fit columns are internal
+ * and are not read (lib/match/esg.ts).
  */
 export function EsgPanel({ sites, summary, view, onView, loadError, onSwitchToDc }: Props) {
   const [query, setQuery] = useState("");
@@ -56,13 +55,6 @@ export function EsgPanel({ sites, summary, view, onView, loadError, onSwitchToDc
 
   const approxCount = filtered.filter((s) => s.placement === "city").length;
 
-  const toggleFit = (f: FitCategory) => {
-    const on = view.fits.includes(f);
-    const next = on ? view.fits.filter((x) => x !== f) : [...view.fits, f];
-    // Never leave the map empty: tapping the last lit category turns everything back on.
-    onView({ ...view, fits: next.length ? next : FIT_CATEGORIES, selectedId: null });
-  };
-
   if (loadError) {
     return <p className="mt-3 text-[13px]">The company layer failed to load. Reload the page.</p>;
   }
@@ -72,32 +64,9 @@ export function EsgPanel({ sites, summary, view, onView, loadError, onSwitchToDc
       <h1 className="text-[1.35rem] font-medium leading-tight">Companies with water goals</h1>
       <p className="mt-2 max-w-[42ch] text-[14px] leading-relaxed text-[var(--quiet)]">
         {summary
-          ? `${summary.facilities} facilities · ${summary.companies} companies · ${summary.states} states. Coloured by where each company fits.`
+          ? `${summary.facilities} facilities · ${summary.companies} companies · ${summary.states} states. Each has a published water goal.`
           : "Loading the 50-state list."}
       </p>
-
-      {/* Legend tab: tap to filter */}
-      <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Fit category">
-        {FIT_CATEGORIES.map((f) => {
-          const on = view.fits.includes(f);
-          const n = summary?.byFit[f] ?? 0;
-          return (
-            <button
-              key={f}
-              type="button"
-              onClick={() => toggleFit(f)}
-              data-selected={on}
-              className="match-choice flex items-center gap-1.5 px-2.5 py-1.5 text-[13px]"
-              style={{ opacity: on ? 1 : 0.45 }}
-              title={FIT[f].meaning}
-            >
-              <FitDot fit={f} />
-              {FIT[f].label}
-              <span className="match-mono text-[11px] text-[var(--quiet)]">{n}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* Summary by State tab */}
       <label className="mt-3 block text-[13px] text-[var(--quiet)]">
@@ -147,12 +116,12 @@ export function EsgPanel({ sites, summary, view, onView, loadError, onSwitchToDc
               <button
                 type="button"
                 onClick={() => {
-                  onView({ ...view, company: c.company, st: null, fits: FIT_CATEGORIES, selectedId: null });
+                  onView({ ...view, company: c.company, st: null, selectedId: null });
                   setQuery("");
                 }}
                 className="flex w-full items-center gap-2 px-1 py-1.5 text-left text-[14px]"
               >
-                <FitDot fit={c.fit} />
+                <SiteDot />
                 <span className="min-w-0 flex-1 truncate">{c.company}</span>
                 <span className="match-mono shrink-0 text-[11px] text-[var(--quiet)]">
                   {c.facilities} · {c.states.split(",").length} {c.states.includes(",") ? "states" : "state"}
@@ -184,11 +153,6 @@ export function EsgPanel({ sites, summary, view, onView, loadError, onSwitchToDc
               Close
             </button>
           </div>
-          <p className="mt-2 flex items-center gap-1.5 text-[13px]">
-            <FitDot fit={selected.fit} hollow={selected.placement === "city"} />
-            <span>{FIT[selected.fit].label}</span>
-            <span className="text-[var(--quiet)]">— {FIT[selected.fit].meaning}</span>
-          </p>
           {selected.goal && <p className="mt-2 text-[13px] leading-relaxed">{selected.goal}</p>}
           {sourceHref(selected.source) ? (
             <a
@@ -224,7 +188,7 @@ export function EsgPanel({ sites, summary, view, onView, loadError, onSwitchToDc
                 data-selected={view.selectedId === s.id}
                 className="flex w-full items-start gap-2 rounded px-1 py-1 text-left data-[selected=true]:bg-[var(--hc-bg-card-hover)]"
               >
-                <FitDot fit={s.fit} hollow={s.placement === "city"} size={9} />
+                <SiteDot hollow={s.placement === "city"} size={9} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px] leading-snug">{s.company}</span>
                   <span className="block truncate text-[12px] leading-snug text-[var(--quiet)]">
@@ -248,8 +212,8 @@ export function EsgPanel({ sites, summary, view, onView, loadError, onSwitchToDc
 
       <p className="mt-3 text-[12px] leading-relaxed text-[var(--quiet)]">
         From the 50-state ESG workbook{summary ? ` (built ${summary.built})` : ""}. Goals are in each company&apos;s
-        published words. Fit is our read of where a company could use HydroCoin, Parjana or x402gal — not a claim
-        about the company. Hollow rings sit at a city centre because the workbook has no confirmed street address.
+        published words — not a ranking, not a claim about performance. Hollow rings sit at a city centre because
+        the workbook has no confirmed street address.
       </p>
     </>
   );

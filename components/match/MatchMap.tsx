@@ -18,12 +18,145 @@ const maplibregl: Maplibre =
 /**
  * Basemap: a vector style whose hydrography, boundaries, roads and land use are separate layers the
  * legend can switch off (engineering review, Zina, 8 Sep 2026 — "nothing on the map that isn't in
- * the legend"). Dark, because every overlay colour here was chosen against a dark ground. OpenFreeMap
- * serves OpenMapTiles with no key and no quota; if the style or its tiles fail, the map falls back
- * to OSM raster tiles so the demo never shows a black screen.
+ * the legend"). Dark, because every overlay colour here was chosen against a dark ground — but
+ * repainted on load (see GROUND) so land, water, roads and borders are actually visible, with
+ * terrain relief from keyless AWS elevation tiles. OpenFreeMap serves OpenMapTiles with no key and
+ * no quota; if the style or its tiles fail, the map falls back to OSM raster tiles so the demo never
+ * shows a black screen.
  */
 const VECTOR_STYLE = "https://tiles.openfreemap.org/styles/dark";
 const OSM = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+/** Mapzen/AWS Open Data terrain tiles: keyless, no quota, Terrarium-encoded elevation. */
+const TERRAIN_DEM = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
+
+/**
+ * OpenFreeMap's `dark` style ships land at rgb(12,12,12) and water at rgb(27,27,29) — a 15-unit gap,
+ * so oceans, lakes and coastlines read as one black screen. These are the colours the basemap is
+ * repainted to on load so the geography is actually visible under the overlays, while staying dark
+ * enough that every overlay colour (chosen against a dark ground) keeps its contrast.
+ */
+const GROUND = {
+  land: "#111a24",
+  water: "#1d4d78",
+  waterLabel: "#a7c8e8",
+  waterLabelHalo: "#0d2740",
+  green: "#193029",
+  ice: "#2a3644",
+  residential: "#182231",
+  building: "#212d3b",
+  buildingOutline: "#2c394a",
+  road: "#3a4757",
+  roadCasing: "#525f70",
+  roadMinor: "#2e3a49",
+  rail: "#465364",
+  stateLine: "#7a8594",
+  countryLine: "#98a3b2",
+  label: "#b3bcc8",
+  labelHalo: "rgba(10,16,24,0.85)",
+  hillHighlight: "#5a6e88",
+  hillShadow: "#04080d",
+} as const;
+
+/**
+ * Repaint the vector basemap by source-layer so land, water, roads and borders are distinguishable.
+ * Idempotent; a no-op on the raster fallback (no `openmaptiles` source).
+ */
+function restyleBasemap(map: maplibreImport.Map) {
+  if (!map.getSource("openmaptiles")) return;
+  const paint = (id: string, prop: string, value: unknown) => {
+    try {
+      map.setPaintProperty(id, prop, value as never);
+    } catch {
+      /* the style may have changed under us; skip the property */
+    }
+  };
+  for (const layer of map.getStyle()?.layers ?? []) {
+    if ("source" in layer && OUR_SOURCES.has(String(layer.source))) continue;
+    const src = "source-layer" in layer ? layer["source-layer"] : undefined;
+    const id = layer.id;
+    if (layer.type === "background") {
+      paint(id, "background-color", GROUND.land);
+      continue;
+    }
+    switch (src) {
+      case "water":
+        if (layer.type === "fill") paint(id, "fill-color", GROUND.water);
+        break;
+      case "waterway":
+        if (layer.type === "line") paint(id, "line-color", GROUND.water);
+        break;
+      case "water_name":
+        paint(id, "text-color", GROUND.waterLabel);
+        paint(id, "text-halo-color", GROUND.waterLabelHalo);
+        break;
+      case "landcover":
+      case "landuse":
+      case "park":
+        if (layer.type !== "fill") break;
+        if (/ice|glacier/.test(id)) paint(id, "fill-color", GROUND.ice);
+        else if (/wood|park|grass|forest/.test(id)) paint(id, "fill-color", GROUND.green);
+        else paint(id, "fill-color", GROUND.residential);
+        break;
+      case "building":
+        if (layer.type !== "fill") break;
+        paint(id, "fill-color", GROUND.building);
+        paint(id, "fill-outline-color", GROUND.buildingOutline);
+        break;
+      case "transportation":
+      case "aeroway":
+        if (layer.type !== "line") break;
+        if (/dashline/.test(id)) paint(id, "line-color", GROUND.land);
+        else if (/casing/.test(id)) paint(id, "line-color", GROUND.roadCasing);
+        else if (/rail/.test(id)) paint(id, "line-color", GROUND.rail);
+        else if (/minor|path|pier|taxiway/.test(id)) paint(id, "line-color", GROUND.roadMinor);
+        else paint(id, "line-color", GROUND.road);
+        break;
+      case "boundary":
+        if (layer.type !== "line") break;
+        paint(id, "line-color", /country/.test(id) ? GROUND.countryLine : GROUND.stateLine);
+        break;
+      case "place":
+      case "transportation_name":
+      case "poi":
+      case "mountain_peak":
+        if (layer.type !== "symbol") break;
+        paint(id, "text-color", GROUND.label);
+        paint(id, "text-halo-color", GROUND.labelHalo);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+/** Terrain relief under the water and lines, over the land fills, so basins and ranges read. */
+function addTerrain(map: maplibreImport.Map) {
+  if (!map.getSource("openmaptiles") || map.getSource("terrain-dem")) return;
+  map.addSource("terrain-dem", {
+    type: "raster-dem",
+    tiles: [TERRAIN_DEM],
+    encoding: "terrarium",
+    tileSize: 256,
+    maxzoom: 15,
+    attribution: "Terrain: Mapzen, AWS Open Data",
+  });
+  const before = map.getLayer("water") ? "water" : firstSymbolLayer(map);
+  map.addLayer(
+    {
+      id: "terrain-hillshade",
+      type: "hillshade",
+      source: "terrain-dem",
+      paint: {
+        "hillshade-exaggeration": 0.45,
+        "hillshade-shadow-color": GROUND.hillShadow,
+        "hillshade-highlight-color": GROUND.hillHighlight,
+        "hillshade-accent-color": GROUND.land,
+        "hillshade-illumination-anchor": "map",
+      },
+    },
+    before,
+  );
+}
 
 function rasterFallback(): maplibreImport.StyleSpecification {
   return {
@@ -123,11 +256,15 @@ const OVERLAY_IDS: Partial<Record<LayerKey, string[]>> = {
   radius: ["radius-fill", "radius-line"],
   pin: ["pin-circle"],
   national: ["national-approx", "national-dot", "national-selected"],
+  "base-terrain": ["terrain-hillshade"],
 };
 
+/** GeoJSON sources we create empty and fill from props. */
 const OVERLAY_SOURCES = new Set([
   "aquifers", "huc8", "huc10", "huc12", "radius", "facilities", "stewardship", "candidates", "footprint", "pin", "national",
 ]);
+/** Every source we add ourselves; layers on these are never treated as basemap layers. */
+const OUR_SOURCES = new Set([...OVERLAY_SOURCES, "terrain-dem"]);
 
 function applyVisibility(map: maplibreImport.Map, vis: LayerVisibility) {
   const set = (id: string, on: boolean) => {
@@ -139,7 +276,7 @@ function applyVisibility(map: maplibreImport.Map, vis: LayerVisibility) {
   // Basemap layers, grouped by what the line is. The raster fallback has one layer and no groups.
   for (const layer of map.getStyle()?.layers ?? []) {
     if (layer.type === "background" || layer.type === "raster") continue;
-    if ("source" in layer && OVERLAY_SOURCES.has(String(layer.source))) continue;
+    if ("source" in layer && OUR_SOURCES.has(String(layer.source))) continue;
     const group = basemapGroup("source-layer" in layer ? layer["source-layer"] : undefined);
     if (group) set(layer.id, vis[group]);
   }
@@ -550,6 +687,13 @@ export function MatchMap({
     const onLoad = () => {
       if (cancelled) return;
       readyRef.current = true;
+      // Basemap cosmetics must never stop the overlays (the instrument) from drawing.
+      try {
+        restyleBasemap(map);
+        addTerrain(map);
+      } catch {
+        /* keep the stock style */
+      }
       addOverlayLayers(map);
       applyVisibility(map, visRef.current);
       map.resize();

@@ -26,7 +26,8 @@ export type LayerKey =
   | "base-water"
   | "base-boundaries"
   | "base-roads"
-  | "base-land";
+  | "base-land"
+  | "base-terrain";
 
 export type LayerVisibility = Record<LayerKey, boolean>;
 
@@ -47,6 +48,7 @@ export const ALL_VISIBLE: LayerVisibility = {
   "base-boundaries": true,
   "base-roads": true,
   "base-land": true,
+  "base-terrain": true,
 };
 
 export type Swatch =
@@ -117,10 +119,12 @@ export const LEGEND_ROWS: LegendRow[] = [
     swatch: { kind: "dot", color: WATER, stroke: "#0d1117" },
     scope: "national",
   },
-  { key: "base-water", label: "Rivers and lakes", swatch: { kind: "base", color: "#1f2933" } },
-  { key: "base-boundaries", label: "State and country lines", swatch: { kind: "base", color: "#4b5563" } },
-  { key: "base-roads", label: "Roads and rail", swatch: { kind: "base", color: "#374151" } },
-  { key: "base-land", label: "Land use, buildings, names", swatch: { kind: "base", color: "#262f3a" } },
+  // Swatch colours mirror GROUND in MatchMap.tsx, which repaints the dark style on load.
+  { key: "base-water", label: "Rivers, lakes and ocean", swatch: { kind: "base", color: "#1d4d78" } },
+  { key: "base-boundaries", label: "State and country lines", swatch: { kind: "base", color: "#7a8594" } },
+  { key: "base-roads", label: "Roads and rail", swatch: { kind: "base", color: "#3a4757" } },
+  { key: "base-land", label: "Land use, buildings, names", swatch: { kind: "base", color: "#193029" } },
+  { key: "base-terrain", label: "Terrain shading", swatch: { kind: "base", color: "#5a6e88" } },
 ];
 
 /**

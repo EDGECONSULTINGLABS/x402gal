@@ -227,6 +227,8 @@ export function MatchApp({
   const [placeMsg, setPlaceMsg] = useState<string | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [panelH, setPanelH] = useState(420);
+  /** Minimised = handle, header row and the legal line only, so the map is the whole screen. */
+  const [panelOpen, setPanelOpen] = useState(true);
   const [showAllNeighbors, setShowAllNeighbors] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -255,7 +257,7 @@ export function MatchApp({
   const [dcView, setDcView] = useState<DcView>(DC_DEFAULT_VIEW);
 
   const metro = metroById(metroId);
-  const dragRef = useRef<{ startY: number; startH: number } | null>(null);
+  const dragRef = useRef<{ startY: number; startH: number; moved: boolean } | null>(null);
   const inMetro = step === "resolved" || step === "close";
   const national = step === "national";
 
@@ -353,6 +355,7 @@ export function MatchApp({
     if (step === "close") setPanelH(wide ? max : Math.round(window.innerHeight * 0.56));
     else if (step === "national") setPanelH(wide ? max : Math.round(window.innerHeight * 0.5));
     else setPanelH(wide ? Math.min(560, max) : 480);
+    setPanelOpen(true); // a new screen always shows its content, even if the last one was minimised
     scrollRef.current?.scrollTo(0, 0);
     setShowAllNeighbors(false);
   }, [step]);
@@ -578,18 +581,27 @@ export function MatchApp({
     }
   };
 
+  const PANEL_MIN = 168;
   const onDragStart = (e: React.PointerEvent) => {
-    dragRef.current = { startY: e.clientY, startH: panelH };
+    // When minimised the article is content-sized; measure it so a drag grows from where it is.
+    const startH = panelOpen ? panelH : (e.currentTarget.closest("article")?.getBoundingClientRect().height ?? PANEL_MIN);
+    dragRef.current = { startY: e.clientY, startH, moved: false };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
   const onDrag = (e: React.PointerEvent) => {
-    if (!dragRef.current) return;
-    const dy = dragRef.current.startY - e.clientY;
+    const d = dragRef.current;
+    if (!d) return;
+    const dy = d.startY - e.clientY;
+    if (!d.moved && Math.abs(dy) < 6) return; // still a tap
+    d.moved = true;
+    if (!panelOpen) setPanelOpen(true);
     const max = Math.round(window.innerHeight * 0.72);
-    setPanelH(Math.min(max, Math.max(168, dragRef.current.startH + dy)));
+    setPanelH(Math.min(max, Math.max(PANEL_MIN, d.startH + dy)));
   };
   const onDragEnd = () => {
+    const d = dragRef.current;
     dragRef.current = null;
+    if (d && !d.moved) setPanelOpen((o) => !o); // a tap on the handle opens or minimises
   };
 
   const goPlace = () => {
@@ -679,22 +691,39 @@ export function MatchApp({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-3 lg:inset-auto lg:bottom-auto lg:left-4 lg:top-14 lg:w-96 lg:p-0">
           <article
             className="pointer-events-auto match-panel flex flex-col overflow-hidden"
-            style={{ height: panelH }}
+            style={{ height: panelOpen ? panelH : undefined }}
+            data-open={panelOpen}
           >
-            <button
-              type="button"
-              aria-label="Resize panel"
-              className="flex h-6 shrink-0 cursor-ns-resize items-center justify-center"
-              onPointerDown={onDragStart}
-              onPointerMove={onDrag}
-              onPointerUp={onDragEnd}
-            >
-              <span className="block h-0.5 w-10 bg-[var(--ink)]" />
-            </button>
+            <div className="relative flex h-7 shrink-0 items-stretch">
+              <button
+                type="button"
+                aria-label={panelOpen ? "Drag to resize, tap to minimise" : "Tap to open"}
+                className="flex flex-1 cursor-ns-resize items-center justify-center touch-none"
+                onPointerDown={onDragStart}
+                onPointerMove={onDrag}
+                onPointerUp={onDragEnd}
+                onPointerCancel={onDragEnd}
+              >
+                <span className="block h-0.5 w-10 bg-[var(--ink)]" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPanelOpen((o) => !o)}
+                aria-label={panelOpen ? "Minimise panel" : "Open panel"}
+                className="absolute inset-y-0 right-2 flex items-center gap-1 px-1 text-[12px] text-[var(--quiet)]"
+              >
+                {panelOpen ? "Hide" : "Show"}
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" className={panelOpen ? "" : "rotate-180"}>
+                  <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+              </button>
+            </div>
 
-            {(step !== "place" || typeOpen) && (
-              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--ink)]/15 px-4 py-2">
-                {typeOpen && step === "place" ? (
+            {(step !== "place" || typeOpen || !panelOpen) && (
+              <div className={`flex shrink-0 items-center justify-between gap-3 px-4 py-2 ${panelOpen ? "border-b border-[var(--ink)]/15" : ""}`}>
+                {step === "place" && !typeOpen ? (
+                  <span className="text-[13px] text-[var(--quiet)]">Choose a metro</span>
+                ) : typeOpen && step === "place" ? (
                   <button type="button" onClick={() => setTypeOpen(false)} className="text-[13px] text-[var(--water)]">
                     Back to the metro list
                   </button>
@@ -715,7 +744,7 @@ export function MatchApp({
               </div>
             )}
 
-            <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+            <div ref={scrollRef} className={`min-h-0 flex-1 overflow-y-auto px-4 pb-4 ${panelOpen ? "" : "hidden"}`}>
               {step === "place" && (
                 <>
                   <h1 className="text-[1.35rem] font-medium leading-tight">

@@ -6,6 +6,11 @@ export const PREVIEW_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const PREVIEW_DOMAINS = ["parjanaeng.com", "edgeconsultinglabs.com"] as const;
 
+/** Individual addresses outside those domains. Same shared password; one person, not a domain. */
+export const PREVIEW_EMAILS = [
+  "ty@digitalstormwater.com", // Ty — granted 2026-09-08 (Alula)
+] as const;
+
 /** Gate is for Vercel preview only — never x402gal.com / production. */
 export function isPreviewGateOn(): boolean {
   if (process.env.FORCE_PREVIEW_GATE === "1") return true;
@@ -22,6 +27,7 @@ export function previewPassword(): string | null {
 
 export function isApprovedPreviewEmail(email: string): boolean {
   const normalized = email.toLowerCase().trim();
+  if ((PREVIEW_EMAILS as readonly string[]).includes(normalized)) return true;
   const at = normalized.lastIndexOf("@");
   if (at < 1) return false;
   const domain = normalized.slice(at + 1);
